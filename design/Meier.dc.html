@@ -1,0 +1,166 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,700&family=Karla:wght@400;500;600;700&display=swap">
+  <style>
+  :root {
+    --bg: #0E1512;
+    --panel: #141D18;
+    --panel-2: #1A241E;
+    --raise: #1F2C25;
+    --line: #26332B;
+    --line-2: #364739;
+    --ink: #EDE7DA;
+    --ink-dim: #97A398;
+    --ink-faint: #6B796D;
+    --brass: #C9A227;
+    --brass-lt: #E8CE7E;
+    --amber: #E0A03C;
+    --rust: #B4483F;
+    --sage: #93AE7C;
+    --slate: #88A2C2;
+    --plum: #B084A0;
+    --serif: 'Bodoni Moda', Georgia, 'Times New Roman', serif;
+    --sans: Karla, 'Helvetica Neue', Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+  a { color: var(--brass-lt); text-decoration: none; }
+  a:hover { color: var(--brass); }
+  h1, h2, h3 { margin: 0; font-family: var(--serif); font-weight: 500; letter-spacing: 0.01em; }
+  .eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-faint); }
+  .rule { height: 1px; background: var(--line); }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 3px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 46px; padding: 0 22px;
+         border: 1px solid var(--line-2); border-radius: 2px; background: var(--raise); color: var(--ink);
+         font-family: var(--sans); font-size: 13px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; cursor: pointer; }
+  .btn:hover { border-color: var(--brass); color: var(--brass-lt); }
+  .btn-primary { background: linear-gradient(180deg, #E8CE7E 0%, #C9A227 48%, #A5811A 100%); border-color: #7E6413; color: #14180C; }
+  .btn-primary:hover { color: #14180C; filter: brightness(1.06); }
+  .btn-ghost { background: transparent; }
+  .k69-felt { cursor: pointer; }
+  .k69-felt:hover polygon { stroke: var(--brass); stroke-width: 1.6; }
+  .app { width: 760px; height: 860px; display: flex; flex-direction: column;
+         background: radial-gradient(110% 80% at 50% 0%, #241D24 0%, #0D1310 68%); padding: 34px 40px 36px; gap: 26px; }
+  .hd { display: flex; align-items: baseline; justify-content: space-between; }
+  .h { font-family: var(--serif); font-size: 34px; }
+  .duel { display: flex; align-items: center; gap: 18px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 3px;
+          background: var(--panel); }
+  .brik { width: 40px; height: 40px; flex: 0 0 40px; border-radius: 50%; display: flex; align-items: center;
+          justify-content: center; font-family: var(--serif); font-size: 17px; font-weight: 700; color: #14180C; }
+  .vs { font-family: var(--serif); font-size: 20px; color: var(--ink-faint); padding: 0 6px; }
+  .duel-n { font-size: 15px; font-weight: 600; }
+  .duel-s { font-size: 11px; color: var(--ink-faint); margin-top: 2px; }
+  .baeger { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+            border: 1px solid var(--line); border-radius: 3px; background: rgba(20,29,24,0.7); position: relative; overflow: hidden; }
+  .baeger-bg { position: absolute; inset: 0; background: radial-gradient(60% 60% at 50% 45%, rgba(176,132,160,0.13), transparent 70%); }
+  .terninger { display: flex; gap: 18px; position: relative; }
+  .melding { font-family: var(--serif); font-size: 56px; color: var(--plum); letter-spacing: 0.04em; position: relative; }
+  .hemmelig { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faint); position: relative; }
+  .valg { display: flex; flex-direction: column; gap: 12px; }
+  .knapper { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .stige { display: flex; flex-wrap: wrap; gap: 6px; }
+  .trin { padding: 6px 10px; border: 1px solid var(--line-2); border-radius: 2px; font-size: 11.5px; color: var(--ink-dim); cursor: pointer; }
+  .trin:hover { border-color: var(--plum); color: var(--ink); }
+  .trin-top { border-color: rgba(176,132,160,0.55); color: var(--plum); font-weight: 700; }
+  .note { font-size: 11.5px; line-height: 1.6; color: var(--ink-faint); }
+  </style>
+</helmet>
+<div class="app">
+  <div class="hd">
+    <div>
+      <div class="eyebrow" style="margin-bottom: 8px">Felt 26 · Meier</div>
+      <div class="h">Bægeret er dit</div>
+    </div>
+    <div class="eyebrow" style="color: var(--plum)">Runde 3</div>
+  </div>
+
+  <div class="duel">
+    <div class="brik" style="background: #B189A6">I</div>
+    <div>
+      <div class="duel-n">Ida</div>
+      <div class="duel-s">Meldte {{modstanderMelding}}</div>
+    </div>
+    <div style="flex-grow: 1"></div>
+    <div class="vs">mod</div>
+    <div style="flex-grow: 1"></div>
+    <div style="text-align: right">
+      <div class="duel-n">Dig</div>
+      <div class="duel-s">Skal melde {{modstanderMelding}} eller højere</div>
+    </div>
+    <div class="brik" style="background: #D8A93F">J</div>
+  </div>
+
+  <div class="baeger">
+    <div class="baeger-bg"></div>
+    <div class="hemmelig">Kun du kan se slaget</div>
+    <div class="terninger">
+      <sc-for list="{{terninger}}" as="d" hint-placeholder-count="2">
+        <svg width="104" height="104" viewBox="0 0 100 100">
+          <rect x="4" y="4" width="88" height="88" rx="16" fill="#EFE6D4" stroke="#8E8878" stroke-width="1.5"></rect>
+          <sc-for list="{{d.pips}}" as="pip" hint-placeholder-count="3">
+            <circle cx="{{pip.cx}}" cy="{{pip.cy}}" r="8" fill="#241D24"></circle>
+          </sc-for>
+        </svg>
+      </sc-for>
+    </div>
+    <div class="melding">{{ditSlag}}</div>
+    <div class="hemmelig">Dit rigtige slag · du behøver ikke sige sandheden</div>
+  </div>
+
+  <div class="valg">
+    <div class="eyebrow">Meld videre</div>
+    <div class="stige">
+      <sc-for list="{{stige}}" as="s" hint-placeholder-count="9">
+        <div class="trin {{s.klasse}}">{{s.navn}}</div>
+      </sc-for>
+    </div>
+    <div class="knapper">
+      <button class="btn btn-primary" onClick="{{slaaIgen}}">Slå igen</button>
+      <button class="btn">Meld og send videre</button>
+      <button class="btn btn-ghost">Det samme eller derover</button>
+      <button class="btn btn-ghost" style="color: var(--rust); border-color: rgba(180,72,63,0.5)">Løft bægeret</button>
+    </div>
+    <div class="note">Kun du og Ida kan se terningerne. Resten af bordet ser kun hvad du melder. Taber du på en Meyer (2—1), drikker du dobbelt — det gør Ida også, hvis hun ikke kan slå den.</div>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":760,"height":860}}'>
+const PIPS = {
+  1: [[50,50]], 2: [[30,30],[70,70]], 3: [[30,30],[50,50],[70,70]],
+  4: [[30,30],[70,30],[30,70],[70,70]], 5: [[30,30],[70,30],[50,50],[30,70],[70,70]],
+  6: [[30,28],[70,28],[30,50],[70,50],[30,72],[70,72]]
+};
+const STIGE = ['32', '41', '51', '52', '61', '62', '63', '64', '65', 'Par 1', 'Par 2', 'Par 3', 'Par 4', 'Par 5', 'Par 6', 'Lillemeyer', 'Meyer'];
+
+function navnFor(a, b) {
+  const hi = Math.max(a, b), lo = Math.min(a, b);
+  if (hi === 2 && lo === 1) return 'Meyer';
+  if (hi === 3 && lo === 1) return 'Lillemeyer';
+  if (hi === lo) return 'Par ' + hi;
+  return '' + hi + lo;
+}
+
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { a: 6, b: 3, melding: '53' }; }
+  renderVals() {
+    const mit = navnFor(this.state.a, this.state.b);
+    const idx = STIGE.indexOf(mit);
+    return {
+      terninger: [this.state.a, this.state.b].map((v) => ({ pips: PIPS[v].map((p) => ({ cx: p[0], cy: p[1] })) })),
+      ditSlag: mit,
+      modstanderMelding: this.state.melding,
+      stige: STIGE.slice(Math.max(0, idx - 4), Math.max(9, idx + 3)).map((s) => ({ navn: s, klasse: s === mit ? 'trin-top' : '' })),
+      slaaIgen: () => this.setState({ a: 1 + Math.floor(Math.random() * 6), b: 1 + Math.floor(Math.random() * 6) })
+    };
+  }
+}
+</script>
+</body>
+</html>
