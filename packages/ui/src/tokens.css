@@ -1,0 +1,132 @@
+/* K69 — mørk kro-luksus. Filtgrøn, messing og ravgul øl-glød. */
+
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,700&family=Karla:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg: #0e1512;
+  --panel: #141d18;
+  --panel-2: #1a241e;
+  --raise: #1f2c25;
+  --line: #26332b;
+  --line-2: #364739;
+  --ink: #ede7da;
+  --ink-dim: #97a398;
+  --ink-faint: #6b796d;
+  --brass: #c9a227;
+  --brass-lt: #e8ce7e;
+  --amber: #e0a03c;
+  --rust: #b4483f;
+  --sage: #93ae7c;
+  --slate: #88a2c2;
+  --plum: #b084a0;
+  --serif: 'Bodoni Moda', Georgia, 'Times New Roman', serif;
+  --sans: Karla, 'Helvetica Neue', Arial, sans-serif;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #rod {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+h1, h2, h3 {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+a { color: var(--brass-lt); text-decoration: none; }
+a:hover { color: var(--brass); }
+
+button { font: inherit; color: inherit; }
+
+.eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.mark {
+  font-family: var(--serif);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  background: linear-gradient(180deg, #f0dca0 0%, #c9a227 55%, #9a7a18 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.knap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 0 22px;
+  border: 1px solid var(--line-2);
+  border-radius: 2px;
+  background: var(--raise);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 120ms, color 120ms;
+}
+.knap:hover:not(:disabled) { border-color: var(--brass); color: var(--brass-lt); }
+.knap:disabled { opacity: 0.42; cursor: not-allowed; }
+
+.knap-primaer {
+  background: linear-gradient(180deg, #e8ce7e 0%, #c9a227 48%, #a5811a 100%);
+  border-color: #7e6413;
+  color: #14180c;
+}
+.knap-primaer:hover:not(:disabled) { color: #14180c; filter: brightness(1.06); }
+.knap-tom { background: transparent; }
+.knap-fare { color: #d4877f; border-color: rgba(180, 72, 63, 0.5); }
+
+.kort-flade {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+}
+
+.note {
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--ink-faint);
+}
+
+.felt-klikbart { cursor: pointer; }
+.felt-klikbart:hover polygon { stroke: var(--brass); stroke-width: 1.6; }
+
+input[type='text'] {
+  height: 54px;
+  padding: 0 16px;
+  background: var(--panel);
+  border: 1px solid var(--line-2);
+  border-radius: 2px;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  width: 100%;
+}
+input[type='text']:focus {
+  outline: none;
+  border-color: var(--brass);
+}
