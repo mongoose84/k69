@@ -308,6 +308,48 @@ test('løfter man en sand melding, drikker man selv', () => {
   assert.equal(find(spil, 'p1')!.slurkeIAlt, spil.indstillinger.meierSlurke);
 });
 
+test('løftet bægeret giver hele bordet et resultat at fejre', async () => {
+  const { forSpiller } = await import('../src/engine.js');
+  let spil = opsat(['A', 'B']);
+  placer(spil, 'p0', foersteFeltAf('meier') - 1);
+  spil = gør(spil, 'p0', { type: 'slaa' }, [1]);
+  spil = gør(spil, 'p0', { type: 'meier-vaelg', spillerId: 'p1' });
+  assert.equal(spil.meierResultat, null);
+
+  spil = gør(spil, 'p0', { type: 'meier-slaa' }, [3, 2]); // reelt 32
+  spil = gør(spil, 'p0', { type: 'meier-meld', melding: trin(6, 5) }); // bluffer 65
+  spil = gør(spil, 'p1', { type: 'meier-loeft' });
+
+  const r = spil.meierResultat!;
+  assert.equal(r.vinderId, 'p1');
+  assert.equal(r.taberId, 'p0');
+  assert.deepEqual(r.slag, [3, 2]);
+  assert.equal(r.melding, trin(6, 5));
+  assert.equal(r.loej, true);
+  assert.equal(r.dobbelt, false);
+  assert.equal(r.slurke, spil.indstillinger.meierSlurke);
+  // Terningerne er offentlige nu — det er dét fejringen viser.
+  assert.deepEqual(forSpiller(spil, 'p0').meierResultat?.slag, [3, 2]);
+});
+
+test('en ny Meier rydder den forrige fejring', () => {
+  let spil = opsat(['A', 'B']);
+  placer(spil, 'p0', foersteFeltAf('meier') - 1);
+  spil = gør(spil, 'p0', { type: 'slaa' }, [1]);
+  spil = gør(spil, 'p0', { type: 'meier-vaelg', spillerId: 'p1' });
+  spil = gør(spil, 'p0', { type: 'meier-slaa' }, [6, 5]);
+  spil = gør(spil, 'p0', { type: 'meier-meld', melding: trin(6, 5) });
+  spil = gør(spil, 'p1', { type: 'meier-loeft' });
+  assert.notEqual(spil.meierResultat, null);
+
+  placer(spil, 'p1', foersteFeltAf('meier') - 1);
+  spil.turIdx = spil.spillere.findIndex((s) => s.id === 'p1');
+  spil.afventer = { slags: 'slag', spillerId: 'p1' };
+  spil = gør(spil, 'p1', { type: 'slaa' }, [1]);
+  spil = gør(spil, 'p1', { type: 'meier-vaelg', spillerId: 'p0' });
+  assert.equal(spil.meierResultat, null);
+});
+
 test('taber man på en Meyer, drikker man dobbelt', () => {
   let spil = opsat(['A', 'B']);
   placer(spil, 'p0', foersteFeltAf('meier') - 1);
@@ -319,7 +361,7 @@ test('taber man på en Meyer, drikker man dobbelt', () => {
   assert.equal(find(spil, 'p1')!.slurkeIAlt, spil.indstillinger.meierSlurke * 2);
 });
 
-test('kun holderen af bægeret må se slaget', async () => {
+test('kun den der selv slog, må se slaget', async () => {
   const { forSpiller } = await import('../src/engine.js');
   let spil = opsat(['A', 'B']);
   placer(spil, 'p0', foersteFeltAf('meier') - 1);
@@ -329,6 +371,16 @@ test('kun holderen af bægeret må se slaget', async () => {
   assert.deepEqual(forSpiller(spil, 'p0').meier?.slag, [6, 5]);
   assert.equal(forSpiller(spil, 'p1').meier?.slag, null);
   assert.equal(forSpiller(spil, 'p0').bunke.length, 0);
+
+  // Får man bægeret rakt over bordet, må man ikke kigge under det.
+  spil = gør(spil, 'p0', { type: 'meier-meld', melding: trin(6, 5) });
+  assert.equal(spil.meier?.holderId, 'p1');
+  assert.equal(forSpiller(spil, 'p1').meier?.slag, null);
+
+  // Men man må gerne tro på meldingen og slå videre.
+  spil = gør(spil, 'p1', { type: 'meier-slaa' }, [6, 6]);
+  assert.deepEqual(forSpiller(spil, 'p1').meier?.slag, [6, 6]);
+  assert.equal(forSpiller(spil, 'p0').meier?.slag, null);
 });
 
 /* ------------------------------------------------------------------ kortene */

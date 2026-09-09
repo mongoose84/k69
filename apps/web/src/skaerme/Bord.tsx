@@ -1,6 +1,6 @@
 import type { JSX } from 'react';
 import {
-  Brik, DRIK_NAVN, Glas, Handlingskort, Maerkat, Plade, Slurkemaaler, spillerStatus, taarnFor
+  Brik, DRIK_NAVN, Glas, Handlingskort, Maerkat, MeierKort, Plade, Slurkemaaler, spillerStatus, taarnFor
 } from '@k69/ui';
 import { SLURKE_PR_ENHED, formatCl, formatSlurke, type Handling, type Spil } from '@k69/rules';
 
@@ -136,6 +136,7 @@ export function Bord({
             taarnAndel={spil.taarn.slurke / (kap + 3)}
           />
           <div className="plade-hint">Træk for at flytte pladen · rul for at zoome</div>
+          <MeierKort spil={spil} migId={migId} send={send} />
         </main>
 
         <aside className="rail rail-h">

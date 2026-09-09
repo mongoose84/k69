@@ -46,6 +46,7 @@ export function nytSpil(id: string, kode: string, naa: string): Spil {
     sidsteKort: null,
     husregler: [],
     meier: null,
+    meierResultat: null,
     afventer: null,
     log: [],
     afventerPit: [],
@@ -711,11 +712,14 @@ function meierVaelg(spil: Spil, s: Spiller, modstanderId: string, _ctx: Kontekst
     modstanderId: m.id,
     holderId: s.id,
     slag: null,
+    slagAf: null,
     blindt: false,
     melding: null,
     meldtAf: null,
     historik: [{ tekst: `${navn(s)} udfordrede ${navn(m)}.`, spillerId: s.id }]
   };
+  // Den forrige fejring ryddes når et nyt bæger sættes på bordet.
+  spil.meierResultat = null;
   spil.afventer = { slags: 'meier', spillerId: s.id };
   skriv(spil, 'meier', `${navn(s)} udfordrede ${navn(m)} til en runde Meier.`, s);
   return spil;
@@ -730,8 +734,11 @@ function kraevMeier(spil: Spil, s: Spiller) {
 
 function meierSlaa(spil: Spil, s: Spiller, ctx: Kontekst): Spil {
   const m = kraevMeier(spil, s);
-  if (m.slag && !m.blindt) fejl('Du har allerede slået — meld nu.');
+  // Det er kun ens eget slag der spærrer — får man bægeret rakt over bordet,
+  // må man gerne slå videre på modstanderens melding.
+  if (m.slagAf === s.id && !m.blindt) fejl('Du har allerede slået — meld nu.');
   m.slag = [ctx.terning(), ctx.terning()];
+  m.slagAf = s.id;
   m.blindt = false;
   m.historik.unshift({ tekst: `${navn(s)} slog.`, spillerId: s.id });
   spil.afventer = { slags: 'meier', spillerId: s.id };
@@ -740,7 +747,7 @@ function meierSlaa(spil: Spil, s: Spiller, ctx: Kontekst): Spil {
 
 function meierMeld(spil: Spil, s: Spiller, melding: number, _ctx: Kontekst): Spil {
   const m = kraevMeier(spil, s);
-  if (!m.slag) fejl('Du skal slå først.');
+  if (m.slagAf !== s.id || !m.slag) fejl('Du skal slå først.');
   if (m.melding !== null && melding < m.melding) fejl('Du skal melde det samme eller højere.');
   m.melding = melding;
   m.meldtAf = s.id;
@@ -755,6 +762,7 @@ function meierBlindt(spil: Spil, s: Spiller, ctx: Kontekst): Spil {
   const m = kraevMeier(spil, s);
   if (m.melding === null) fejl('Der er ingen melding at slå op imod endnu.');
   m.slag = [ctx.terning(), ctx.terning()];
+  m.slagAf = s.id;
   m.blindt = true;
   m.meldtAf = s.id;
   m.holderId = m.holderId === m.udfordrerId ? m.modstanderId : m.udfordrerId;
@@ -784,6 +792,21 @@ function meierLoeft(spil: Spil, s: Spiller, ctx: Kontekst): Spil {
     + `${taber ? navn(taber) : 'Ingen'} drikker ${antal} slurke${dobbelt ? ' — dobbelt, det var en Meyer' : ''}.`,
     taber ?? s
   );
+
+  // Nu må hele bordet se hvad der lå under bægeret — og hvem der vandt.
+  const vinder = taber === loefter ? meldende : loefter;
+  if (taber && vinder) {
+    spil.meierResultat = {
+      id: spil.log[0]?.id ?? spil.naesteHaendelseId,
+      vinderId: vinder.id,
+      taberId: taber.id,
+      slag: [m.slag[0], m.slag[1]],
+      melding: meldt,
+      loej,
+      slurke: antal,
+      dobbelt
+    };
+  }
 
   spil.meier = null;
   const udfordrer = find(spil, m.udfordrerId);
@@ -828,7 +851,7 @@ export function forSpiller(spil: Spil, spillerId: string): Spil & { bunkeTilbage
     meier: spil.meier
       ? {
         ...spil.meier,
-        slag: spil.meier.holderId === spillerId && !spil.meier.blindt ? spil.meier.slag : null
+        slag: spil.meier.slagAf === spillerId && !spil.meier.blindt ? spil.meier.slag : null
       }
       : null
   };

@@ -79,8 +79,17 @@ som Bier Meister eller med øl i tårnet (og i hardcore kun fra et blankt felt);
 at ens tur springes over mens man tømmer tårnet; at man ryger i pitten når en
 anden lander på ens felt; at man arbejder sig ned mod plads 1 og først kommer ud
 på felt 1; og at ingen kan handle uden for tur eller springe et åbent punkt over.
-Meier-terningerne sendes kun til den der har bægeret — resten af bordet ser
-meldingerne.
+Meier-terningerne sendes kun til den der selv slog dem — får man bægeret rakt
+over bordet, er meldingen alt hvad man har, og vil man vide mere, må man løfte.
+Når nogen løfter, bliver slaget hele bordets: udfaldet ligger i `meierResultat`
+indtil et nyt bæger sættes på bordet, og det er dét fejringen viser.
+
+**Meier på skærmen:** duellen kører som et stort kort hen over spillepladen med
+et bæger i stedet for en terning — pladen ligger dæmpet udenom, så man kan se
+hvor man er. Terningerne kommer aldrig frem af sig selv: man holder fingeren
+nede for at kigge under sit eget bæger, og bægeret løfter sig af filten når
+runden afgøres. Kortet ligger i `packages/ui/src/Meier.tsx` og deles af web og
+mobil.
 
 ### Husregler vi selv har valgt
 

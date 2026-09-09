@@ -78,10 +78,16 @@ export interface MeierHaendelse {
 export interface MeierSpil {
   udfordrerId: string;
   modstanderId: string;
-  /** Hvem bægeret står hos netop nu. Kun denne spiller må se slaget. */
+  /** Hvem bægeret står hos netop nu. */
   holderId: string;
-  /** Det faktiske slag. Sendes aldrig til andre end holderen. */
+  /** Det faktiske slag. Sendes kun til den der selv slog det. */
   slag: [number, number] | null;
+  /**
+   * Hvem der slog det slag der ligger under bægeret. Får man bægeret rakt over
+   * bordet, må man ikke se hvad der ligger under — man tror på meldingen og
+   * slår videre, eller løfter.
+   */
+  slagAf: string | null;
   /** Sat når holderen har slået uden at kigge ("det samme eller derover"). */
   blindt: boolean;
   /** Seneste melding, som trin i stigen. */
@@ -96,6 +102,26 @@ export interface Taarn {
   fyldtAfId: string | null;
   /** Sat mens en spiller er i gang med at bunde tårnet. */
   toemmesAfId: string | null;
+}
+
+/**
+ * Udfaldet af en Meier-runde. Terningerne er hemmelige lige indtil bægeret
+ * løftes — så bliver de hele bordets, og det er dét der står her. Ligger uden
+ * for `MeierSpil`, fordi selve runden ryddes i samme øjeblik.
+ */
+export interface MeierResultat {
+  /** Hændelses-id'et for løftet, så klienten kan huske hvad den har kvitteret for. */
+  id: number;
+  vinderId: string;
+  taberId: string;
+  /** Det slag der lå under bægeret. */
+  slag: [number, number];
+  /** Meldingen der blev løftet på, som trin i stigen. */
+  melding: number;
+  /** Sandt når den der meldte, meldte højere end han havde. */
+  loej: boolean;
+  slurke: number;
+  dobbelt: boolean;
 }
 
 export interface Haendelse {
@@ -135,6 +161,8 @@ export interface Spil {
   sidsteKort: Kort | null;
   husregler: string[];
   meier: MeierSpil | null;
+  /** Sidste løftede bæger. Bliver stående indtil en ny Meier begynder. */
+  meierResultat: MeierResultat | null;
   afventer: Afventer | null;
   log: Haendelse[];
   /** Spillere der skal i pitten når det aktuelle felt er kvitteret. */

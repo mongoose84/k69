@@ -2,6 +2,7 @@
    selv det oven på, og en malet kopi ser bare dobbelt ud. */
 
 .skaerm {
+  position: relative;
   height: 100%;
   display: flex;
   flex-direction: column;

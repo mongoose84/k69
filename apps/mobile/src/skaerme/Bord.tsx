@@ -1,6 +1,6 @@
 import { useState, type JSX } from 'react';
 import {
-  Brik, DRIK_NAVN, Glas, Handlingskort, Plade, Slurkemaaler, spillerStatus, taarnFor
+  Brik, DRIK_NAVN, Glas, Handlingskort, MeierKort, Plade, Slurkemaaler, spillerStatus, taarnFor
 } from '@k69/ui';
 import { formatSlurke, type Handling, type Spil } from '@k69/rules';
 
@@ -151,6 +151,7 @@ export function Bord({
           </div>
         )}
       </div>
+      <MeierKort spil={spil} migId={migId} send={send} kompakt />
     </div>
   );
 }

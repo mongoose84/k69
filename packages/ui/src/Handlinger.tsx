@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type JSX } from 'react';
 import {
   KULOER_TEGN, RANG_NAVN, STIGE, afventerSpiller, afgangSpaerret, formatCl, formatSlurke,
-  muligeMeldinger, trinNavn, type Handling, type Spil, type Spiller
+  type Handling, type Spil, type Spiller
 } from '@k69/rules';
 import { Brik, HoldKnap, Kortbillede, Terning } from './Dele.js';
 import { erRoedt, kuloerTegn, opgave } from './tekst.js';
@@ -136,126 +136,6 @@ function FyldTaarn({ spil, send, migId }: HandlingProps): JSX.Element {
       <button className="knap knap-primaer" onClick={() => send({ type: 'taarn-faerdig' })}>
         Færdig
       </button>
-    </div>
-  );
-}
-
-function Meier({ spil, migId, send }: HandlingProps): JSX.Element | null {
-  const m = spil.meier;
-  if (!m) return null;
-  const erHolder = m.holderId === migId;
-  const erMed = m.udfordrerId === migId || m.modstanderId === migId;
-  const modstander = spil.spillere.find(
-    (s) => s.id === (m.udfordrerId === migId ? m.modstanderId : m.udfordrerId)
-  );
-  const [valgt, saetValgt] = useState<number | null>(null);
-  const laveste = m.melding === null ? 0 : m.melding;
-
-  if (!erMed) {
-    return (
-      <div style={kolonne}>
-        <div className="note">
-          Terningerne er kun synlige for de to der spiller. Du ser hvad de melder — aldrig hvad der
-          ligger under bægeret.
-        </div>
-        <div style={kolonne}>
-          {m.historik.slice(0, 6).map((h, i) => (
-            <div key={`${h.tekst}-${i}`} style={{ display: 'flex', gap: 10, alignItems: 'baseline' }}>
-              <span style={{ fontSize: 13, color: 'var(--ink-dim)', flexGrow: 1 }}>{h.tekst}</span>
-              {h.melding && (
-                <span style={{ fontFamily: 'var(--serif)', fontSize: 16, color: 'var(--plum)' }}>{h.melding}</span>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div style={kolonne}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <span className="eyebrow">Mod {modstander?.navn ?? '—'}</span>
-        {m.melding !== null && (
-          <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--ink-dim)' }}>
-            Meldingen står på <b style={{ color: 'var(--plum)' }}>{trinNavn(m.melding)}</b>
-          </span>
-        )}
-      </div>
-
-      {erHolder ? (
-        <>
-          <div style={{ display: 'flex', gap: 14, justifyContent: 'center', padding: '6px 0' }}>
-            {m.slag ? (
-              <>
-                <Terning vaerdi={m.slag[0]} str={64} />
-                <Terning vaerdi={m.slag[1]} str={64} />
-              </>
-            ) : (
-              <>
-                <Terning vaerdi={null} str={64} />
-                <Terning vaerdi={null} str={64} />
-              </>
-            )}
-          </div>
-          {m.blindt && <div className="note">Du slog uden at kigge — du ved lige så lidt som de andre.</div>}
-
-          {!m.slag && (
-            <button className="knap knap-primaer" onClick={() => send({ type: 'meier-slaa' })}>
-              {m.melding === null ? 'Slå' : 'Tro på det og slå'}
-            </button>
-          )}
-
-          {m.slag && !m.blindt && (
-            <>
-              <div className="eyebrow">Meld — det samme eller højere</div>
-              <div style={raekke}>
-                {muligeMeldinger(laveste).map((t) => (
-                  <button
-                    key={t}
-                    className="knap"
-                    style={{
-                      minHeight: 34, padding: '0 11px', fontSize: 11,
-                      borderColor: valgt === t ? 'var(--plum)' : undefined,
-                      color: valgt === t ? 'var(--plum)' : undefined
-                    }}
-                    onClick={() => saetValgt(t)}
-                  >
-                    {trinNavn(t)}
-                  </button>
-                ))}
-              </div>
-              <button
-                className="knap knap-primaer"
-                disabled={valgt === null}
-                onClick={() => valgt !== null && send({ type: 'meier-meld', melding: valgt })}
-              >
-                Meld og send videre
-              </button>
-            </>
-          )}
-
-          {m.melding !== null && (
-            <div style={raekke}>
-              <button className="knap" style={{ flexGrow: 1 }} onClick={() => send({ type: 'meier-blindt' })}>
-                Det samme eller derover
-              </button>
-              <button className="knap knap-fare" style={{ flexGrow: 1 }} onClick={() => send({ type: 'meier-loeft' })}>
-                Løft bægeret
-              </button>
-            </div>
-          )}
-        </>
-      ) : (
-        <div className="note">
-          Bægeret står hos {modstander?.navn ?? 'modstanderen'}. Vent på meldingen.
-        </div>
-      )}
-
-      <div className="note">
-        Taber man på en Meyer (2–1), drikker man dobbelt. Ellers koster det{' '}
-        {spil.indstillinger.meierSlurke} slurke.
-      </div>
     </div>
   );
 }
@@ -421,7 +301,8 @@ export function Handlingskort({ spil, migId, send, kompakt }: HandlingProps): JS
   } else if (a.slags === 'meier-modstander' && paaMig) {
     styring = <SpillerValg spil={spil} migId={migId} onVaelg={(id) => send({ type: 'meier-vaelg', spillerId: id })} knaptekst="Udfordr" />;
   } else if (a.slags === 'meier') {
-    styring = <Meier spil={spil} migId={migId} send={send} />;
+    // Meier har sit eget kort hen over pladen — se MeierKort.
+    styring = null;
   }
 
   return (
