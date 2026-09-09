@@ -450,6 +450,12 @@ input[type='text']:focus {
   from { transform: scale(2.1) rotate(-22deg); opacity: 0; }
   to { transform: none; opacity: 1; }
 }
+.meier-flitter {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
 .meier-flek {
   position: absolute;
   top: 100%;

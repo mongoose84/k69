@@ -70,9 +70,14 @@ function Stempel(): JSX.Element {
 
 const FLEK_FARVER = ['#C9A227', '#E8CE7E', '#B084A0', '#93AE7C', '#E0A03C'];
 
+/**
+ * Messingflitteret. Det ligger i sin egen lukkede boks — flyver de frit i
+ * fejringen, tæller de med i dens scrollhøjde, og så blinker en scrollbar ind
+ * og ud hele vejen op.
+ */
 function Flitter(): JSX.Element {
   return (
-    <>
+    <div className="meier-flitter" aria-hidden="true">
       {Array.from({ length: 16 }, (_, i) => (
         <span
           key={i}
@@ -85,7 +90,7 @@ function Flitter(): JSX.Element {
           }}
         />
       ))}
-    </>
+    </div>
   );
 }
 
