@@ -11,10 +11,23 @@ export type FeltType =
   | 'meier'
   | 'krone';
 
-export type DrikId = 'ol' | 'vin' | 'whisky';
+export type DrikId = 'ol' | 'vin' | 'whisky' | 'egen';
 
-/** Hvem man drikker med når Dame- eller Kongekortet bliver trukket. */
-export type KortHold = 'dame' | 'konge' | 'begge' | 'ingen';
+/** Det man drikker. De faste står i drinks.ts; 'egen' er skrevet ind ved bordet. */
+export interface DrikInfo {
+  id: DrikId;
+  navn: string;
+  /** Alkoholprocent — kun til visning, slurken er den samme uanset. */
+  procent: number;
+  /** Mængden i én enhed, i cl. */
+  enhedCl: number;
+}
+
+/** Sådan vælger man sin drik ved tilmelding: en af de faste, eller sin egen. */
+export type DrikValg = DrikId | { navn: string; enhedCl: number; procent: number };
+
+/** Hvem man drikker med når Dame- eller Kongekortet bliver trukket. Man er det ene. */
+export type KortHold = 'dame' | 'konge';
 
 export type Kuloer = 'spar' | 'klor' | 'hjerter' | 'ruder';
 export type Rang = 'A' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | 'B' | 'D' | 'K';
@@ -28,7 +41,7 @@ export interface Spiller {
   id: string;
   navn: string;
   farve: string;
-  drik: DrikId;
+  drik: DrikInfo;
   kortHold: KortHold;
   /** 1–38 på pladen. 0 betyder at man er i pitten. */
   felt: number;
@@ -53,11 +66,14 @@ export interface Spiller {
 export type Afventer =
   | { slags: 'slag'; spillerId: string }
   | { slags: 'pit-slag'; spillerId: string }
-  /** En anden spiller er slået hjem og skal slå sig en plads i pitten. */
+  /**
+   * En spiller er slået hjem (eller skubbet videre i pitten) og skal selv slå
+   * sig en plads. `kaede` er dem der står i kø efter ham — lander han oveni
+   * en anden, kommer den anden bagest i køen.
+   */
   | { slags: 'pit-placering'; spillerId: string; kaede: string[] }
   | { slags: 'giv-slurke'; spillerId: string; antal: number }
   | { slags: 'fyld-taarn'; spillerId: string }
-  | { slags: 'toem-taarn'; spillerId: string }
   | { slags: 'krone-kast'; spillerId: string }
   | { slags: 'krone-udpeg'; spillerId: string }
   | { slags: 'traek-kort'; spillerId: string }
@@ -100,7 +116,10 @@ export interface Taarn {
   /** Indhold målt i slurke — spillets fælles enhed. */
   slurke: number;
   fyldtAfId: string | null;
-  /** Sat mens en spiller er i gang med at bunde tårnet. */
+  /**
+   * Sat mens en spiller er i gang med at bunde tårnet. Spillet kører videre
+   * imens — han siger selv til når det er tomt.
+   */
   toemmesAfId: string | null;
 }
 
@@ -124,6 +143,24 @@ export interface MeierResultat {
   dobbelt: boolean;
 }
 
+/**
+ * Et øjeblik der fortjener at blive stående på skærmen: nogen vandt et kapløb,
+ * nogen gik i stå, tårnet løb over. Klienten viser det hen over pladen i nogle
+ * sekunder — spillet selv venter ikke. Bliver stående til det næste kommer.
+ */
+export interface Fejring {
+  id: number;
+  art: 'kaploeb' | 'emne' | 'overloeb' | 'krone';
+  /** Sat når der er en at fejre — ellers er det taberen der er hovedpersonen. */
+  vinderId: string | null;
+  taberId: string | null;
+  titel: string;
+  tekst: string;
+  slurke: number;
+  /** Kapløbet: dem der nåede det, i rækkefølge. */
+  naaedeIds: string[];
+}
+
 export interface Haendelse {
   id: number;
   tid: string;
@@ -137,8 +174,8 @@ export interface Indstillinger {
   hardcore: boolean;
   /** Slurke til taberen af en Meier-runde. Dobbelt hvis der tabes på en Meyer. */
   meierSlurke: number;
-  /** Tårnet løber over her, målt i slurke (16 = et 0,5 l glas i øl-mål). */
-  taarnKapacitet: number;
+  /** Glasset i midten — reglerne siger mindst en halv liter. Løber over derover. */
+  taarnKapacitetCl: number;
 }
 
 export interface Spil {
@@ -154,6 +191,8 @@ export interface Spil {
   terning: number | null;
   /** Hvem der slog det viste slag. */
   terningAf: string | null;
+  /** Tæller op for hvert slag på pladen, så klienten kan se at der er slået — og lade terningen rulle. */
+  terningNr: number;
   taarn: Taarn;
   bierMeisterId: string | null;
   bunke: Kort[];
@@ -163,6 +202,8 @@ export interface Spil {
   meier: MeierSpil | null;
   /** Sidste løftede bæger. Bliver stående indtil en ny Meier begynder. */
   meierResultat: MeierResultat | null;
+  /** Sidste øjeblik der skal fejres. Bliver stående indtil det næste. */
+  fejring: Fejring | null;
   afventer: Afventer | null;
   log: Haendelse[];
   /** Spillere der skal i pitten når det aktuelle felt er kvitteret. */
@@ -173,8 +214,8 @@ export interface Spil {
 
 /** Handlinger en klient kan sende. Alt andet afvises. */
 export type Handling =
-  | { type: 'join'; navn: string; farve: string; drik: DrikId; kortHold: KortHold }
-  | { type: 'saet-drik'; drik: DrikId }
+  | { type: 'join'; navn: string; farve: string; drik: DrikValg; kortHold: KortHold }
+  | { type: 'saet-drik'; drik: DrikValg }
   | { type: 'saet-indstilling'; hardcore?: boolean; meierSlurke?: number }
   | { type: 'start' }
   | { type: 'slaa' }

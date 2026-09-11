@@ -1,13 +1,12 @@
 import {
   FELT_INFO, KULOER_TEGN, afventerSpiller, feltType, formatCl, formatSlurke, kortTekst,
-  type Afventer, type DrikId, type Kort, type Spil, type Spiller
+  type Afventer, type DrikInfo, type Kort, type Spil, type Spiller
 } from '@k69/rules';
 
-export const DRIK_NAVN: Record<DrikId, string> = {
-  ol: 'Pilsner',
-  vin: 'Vin',
-  whisky: 'Whisky'
-};
+/** "din pilsner", "din Classic" — de faste drikke skrives med lille, ens egen som man skrev den. */
+export function drikNavn(drik: DrikInfo): string {
+  return drik.id === 'egen' ? drik.navn : drik.navn.toLowerCase();
+}
 
 export function erRoedt(k: Kort): boolean {
   return k.kuloer === 'hjerter' || k.kuloer === 'ruder';
@@ -15,6 +14,12 @@ export function erRoedt(k: Kort): boolean {
 
 export function kuloerTegn(k: Kort): string {
   return KULOER_TEGN[k.kuloer];
+}
+
+/** Er der et terningslag på vej, står terningen blank — ellers viser den det sidste. */
+export function venterPaaSlag(spil: Spil): boolean {
+  const a = spil.afventer;
+  return Boolean(a && (a.slags === 'slag' || a.slags === 'pit-slag' || a.slags === 'pit-placering'));
 }
 
 export interface Opgave {
@@ -66,6 +71,18 @@ export function opgave(spil: Spil, migId: string): Opgave | null {
         ? 'Slå dig ned mod plads 1. Slår du nok, er du ude og lander på felt 1.'
         : `${dig} slår for at komme ud af pitten.`);
 
+    case 'pit-placering': {
+      const skubbet = Boolean(spiller && spiller.pitPlads > 0);
+      if (skubbet) {
+        return grund(mig ? 'Du blev skubbet' : `${dig} blev skubbet`, mig
+          ? 'En anden landede på din plads i pitten. Slå om en ny plads — du har allerede drukket for den gamle.'
+          : `${dig} slår om en ny plads i pitten.`);
+      }
+      return grund(mig ? 'Du røg i pitten' : `${dig} røg i pitten`, mig
+        ? 'Slå med terningen. Du får den plads du slår og drikker lige så mange shots.'
+        : `${dig} slår om sin plads i pitten — og drikker det tal der kommer.`);
+    }
+
     case 'giv-slurke':
       return grund('3 til..?'.replace('3', String(a.antal)), mig
         ? `Del ${a.antal} slurke ud. Én kan tage det hele, eller I kan dele.`
@@ -75,11 +92,6 @@ export function opgave(spil: Spil, migId: string): Opgave | null {
       return grund('Øl i tårnet', mig
         ? 'Hold knappen nede og hæld i. Løber det over, bunder du det selv.'
         : `${dig} hælder i tårnet — der står ${formatSlurke(spil.taarn.slurke)}.`);
-
-    case 'toem-taarn':
-      return grund('Bund tårnet', mig
-        ? `Tårnet er dit: ${formatSlurke(spil.taarn.slurke)}. Din tur springes over indtil det er tomt.`
-        : `${dig} er i gang med tårnet — ${formatSlurke(spil.taarn.slurke)}.`);
 
     case 'krone-kast':
       return grund('2-krone', mig

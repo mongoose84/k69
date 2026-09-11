@@ -235,7 +235,11 @@ export const PIT: PitGeometri[] = (() => {
   }));
 })();
 
-export const TAARN_GEO = { cx: CX, cy: CY, r: 58 };
+/**
+ * Bordet midt på pladen: kortene, tårnet og terningen på én bred plade. Den
+ * spænder over begge DRIK!-felter (x 561 og 639), så DRIK! står ud for tårnet.
+ */
+export const BORDET_GEO = { x0: 452, x1: 748, y0: 258, y1: 382 };
 
 function sti(liste: Punkt[]): string {
   return 'M ' + liste.map((p, i) => `${i ? 'L ' : ''}${r2(p[0])} ${r2(p[1])}`).join(' ') + ' Z';

@@ -85,7 +85,10 @@ export function tilslut(sok: WebSocket): void {
     const flok = rum.get(f.spilId);
     flok?.delete(f);
     if (flok && flok.size === 0) rum.delete(f.spilId);
-    void saetForbundet(f, false);
+    // Samme spiller kan have en nyere forbindelse åben (genforbindelse, to
+    // faner, React der monterer to gange). Så er han stadig ved bordet.
+    const stadigInde = flok ? [...flok].some((o) => o.spillerId === f!.spillerId) : false;
+    if (!stadigInde) void saetForbundet(f, false);
   });
 }
 

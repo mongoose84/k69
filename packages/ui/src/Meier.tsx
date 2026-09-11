@@ -181,7 +181,8 @@ export function MeierKort({ spil, migId, send, kompakt = false }: MeierKortProps
   const [kigger, saetKigger] = useState(false);
   const [harKigget, saetHarKigget] = useState(false);
   const [valgt, saetValgt] = useState<number | null>(null);
-  const [kvitteret, saetKvitteret] = useState<number | null>(null);
+  // Det resultat der allerede lå der da man kom ind, er gammelt — det skal ikke fejres igen ved en genindlæsning.
+  const [kvitteret, saetKvitteret] = useState<number | null>(() => spil.meierResultat?.id ?? null);
 
   // Nyt slag i hånden: man skal kigge forfra, og meldingen vælges på ny.
   const slagNoegle = m?.slag ? `${m.holderId}:${m.slag[0]}${m.slag[1]}` : `${m?.holderId ?? ''}:tom`;
@@ -289,7 +290,7 @@ export function MeierKort({ spil, migId, send, kompakt = false }: MeierKortProps
         <div className="meier-mat-ring" />
         <div className={`meier-lys${kigger && slag ? ' meier-lys-paa' : ''}`} />
 
-        <div className={`meier-terninger${viserTerninger ? ' meier-terninger-vis' : ''}`}>
+        <div className={`meier-terninger${viserTerninger ? ' meier-terninger-vis' : ''}${!visFejring && kigger && slag ? ' meier-terninger-kig' : ''}`}>
           <Terning vaerdi={matSlag ? matSlag[0] : null} str={kompakt ? 56 : 62} />
           <Terning vaerdi={matSlag ? matSlag[1] : null} str={kompakt ? 56 : 62} />
         </div>

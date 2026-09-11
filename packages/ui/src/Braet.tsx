@@ -1,5 +1,5 @@
-import { FELTER, FELT_INFO, INDRE_STI, PIT, TAARN_GEO, YDRE_STI, BRAET_STR } from '@k69/rules';
-import type { JSX } from 'react';
+import { FELTER, FELT_INFO, INDRE_STI, PIT, BORDET_GEO, YDRE_STI, BRAET_STR } from '@k69/rules';
+import { useEffect, useState, type JSX } from 'react';
 
 const SANS = "Karla, 'Helvetica Neue', Arial, sans-serif";
 const SERIF = "'Bodoni Moda', Georgia, 'Times New Roman', serif";
@@ -209,35 +209,184 @@ function Pit(): JSX.Element {
   );
 }
 
-function Taarn({ id, andel }: { id: string; andel: number }): JSX.Element {
-  const { cx, cy, r } = TAARN_GEO;
-  const gW = 42;
-  const gH = 62;
-  const gx = cx - gW / 2;
-  const gTop = cy - 33;
+/* ------------------------------------------------------------------ bordet */
+
+const PIPS: Record<number, Array<[number, number]>> = {
+  1: [[50, 50]],
+  2: [[30, 30], [70, 70]],
+  3: [[30, 30], [50, 50], [70, 70]],
+  4: [[30, 30], [70, 30], [30, 70], [70, 70]],
+  5: [[30, 30], [70, 30], [50, 50], [30, 70], [70, 70]],
+  6: [[30, 28], [70, 28], [30, 50], [70, 50], [30, 72], [70, 72]]
+};
+
+/** Terningen på bordet — 100×100 om (0,0), skaleres af kalderen. */
+export interface TerningPaaBordet {
+  vaerdi: number | null;
+  /** Sandt i de to sekunder terningen tumler hen over bordet. */
+  ruller: boolean;
+  /** Farven på den der slog — ringen om terningen når den er landet. */
+  farve: string | null;
+  tekst: string;
+}
+
+function Terningflade({ vaerdi, blank }: { vaerdi: number | null; blank: boolean }): JSX.Element {
+  const pips = vaerdi ? PIPS[vaerdi] : undefined;
+  return (
+    <g>
+      <rect x="6" y="9" width="88" height="88" rx="17" fill="#0B100D" opacity="0.55" />
+      {blank || !pips ? (
+        <>
+          <rect x="4" y="4" width="88" height="88" rx="17" fill="#141D18" stroke="#4C5C50" strokeWidth="1.5" strokeDasharray="5 4" />
+          <text x="50" y="52" textAnchor="middle" dominantBaseline="central" fontSize="34" fill="#4C5C50" style={{ fontFamily: SERIF }}>?</text>
+        </>
+      ) : (
+        <>
+          <rect x="4" y="4" width="88" height="88" rx="17" fill="#EFE6D4" stroke="#8E8878" strokeWidth="1.5" />
+          {pips.map(([cx, cy]) => <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="7.5" fill="#1B241C" />)}
+        </>
+      )}
+    </g>
+  );
+}
+
+/**
+ * Mens terningen ruller, skifter øjnene hver 90 ms — det er dét der får den til
+ * at se ud som om den tumler, sammen med CSS-animationen på gruppen udenom.
+ */
+function RullendeTerning({ t }: { t: TerningPaaBordet }): JSX.Element {
+  const [flade, saetFlade] = useState(1);
+  useEffect(() => {
+    if (!t.ruller) return;
+    const id = setInterval(() => saetFlade((f) => 1 + ((f + 2 + Math.floor(Math.random() * 4)) % 6)), 90);
+    return () => clearInterval(id);
+  }, [t.ruller]);
+
+  if (t.ruller) {
+    return (
+      <g className="terning-ruller">
+        <Terningflade vaerdi={flade} blank={false} />
+      </g>
+    );
+  }
+  return (
+    <g>
+      {t.vaerdi && t.farve && (
+        <>
+          <rect className="terning-landet" x="-4" y="-4" width="108" height="108" rx="21" fill="none" stroke={t.farve} strokeWidth="3" />
+          <rect x="-6" y="-6" width="112" height="112" rx="22" fill="none" stroke={t.farve} strokeWidth="3" opacity="0.9" />
+        </>
+      )}
+      <Terningflade vaerdi={t.vaerdi} blank={!t.vaerdi} />
+    </g>
+  );
+}
+
+export interface KortPaaBordet {
+  sidste: { rang: string; tegn: string; roed: boolean } | null;
+  /** Nøgle der skifter hver gang der trækkes — så kortet vendes op på ny. */
+  traek: number;
+  tilbage: number;
+}
+
+function Kortbag({ x, y, rot }: { x: number; y: number; rot: number }): JSX.Element {
+  return (
+    <g transform={`translate(${x}, ${y}) rotate(${rot})`}>
+      <rect x="0" y="0" width="34" height="48" rx="3" fill="#0B100D" opacity="0.5" transform="translate(1, 2)" />
+      <rect x="0" y="0" width="34" height="48" rx="3" fill="#1F2C25" stroke="#8C6F16" strokeWidth="1" />
+      <rect x="4" y="4" width="26" height="40" rx="2" fill="none" stroke="#C9A227" strokeWidth="0.6" opacity="0.7" />
+      <path d="M17 12 L23 24 L17 36 L11 24 Z" fill="none" stroke="#C9A227" strokeWidth="0.8" opacity="0.7" />
+    </g>
+  );
+}
+
+function Kortforside({ x, y, kort }: { x: number; y: number; kort: NonNullable<KortPaaBordet['sidste']> }): JSX.Element {
+  const farve = kort.roed ? '#9E3B33' : '#1B241C';
+  return (
+    // CSS-animationen sætter sin egen transform, så placeringen ligger på gruppen udenom.
+    <g transform={`translate(${x}, ${y}) rotate(7)`}>
+      <g className="kort-vendes">
+        <rect x="0" y="0" width="34" height="48" rx="3" fill="#0B100D" opacity="0.55" transform="translate(1.5, 3)" />
+        <rect x="0" y="0" width="34" height="48" rx="3" fill="#F3EDDF" stroke="#B9AE93" strokeWidth="0.8" />
+        <text x="4" y="10" fontSize="9" fontWeight="700" fill={farve} style={{ fontFamily: SERIF }}>{kort.rang}</text>
+        <text x="4" y="18" fontSize="7" fill={farve} style={{ fontFamily: SANS }}>{kort.tegn}</text>
+        <text x="17" y="31" textAnchor="middle" dominantBaseline="central" fontSize="16" fill={farve} style={{ fontFamily: SANS }}>{kort.tegn}</text>
+      </g>
+    </g>
+  );
+}
+
+/**
+ * Bordet midt på pladen: én bred plade der spænder over begge DRIK!-felter, med
+ * kortene til venstre, tårnet i midten og terningen til højre. Så står DRIK! ud
+ * for tårnet, og alt der sker på bordet, sker ét sted.
+ */
+function Bordet({
+  id, andel, cl, kapCl, kort, terning
+}: {
+  id: string; andel: number; cl: number | null; kapCl: number;
+  kort: KortPaaBordet | null; terning: TerningPaaBordet | null;
+}): JSX.Element {
+  const { x0, x1, y0, y1 } = BORDET_GEO;
+  const w = x1 - x0, h = y1 - y0;
+  const cx = (x0 + x1) / 2;
+  const zoneL = x0 + 100, zoneR = x1 - 100;
+
+  const gW = 42, gH = 62, gx = cx - gW / 2, gTop = y0 + 14;
   const fyldH = Math.round(gH * Math.max(0, Math.min(1, andel)) * 10) / 10;
   const fy = Math.round((gTop + gH - fyldH) * 10) / 10;
 
+  const kx = x0 + 22, ky = y0 + 22;
+  const tx = (zoneR + x1) / 2 - 27, ty = y0 + 18;
+
   return (
     <g>
-      <circle cx={cx} cy={cy} r={r + 9} fill="#0D1410" opacity="0.8" />
-      <circle cx={cx} cy={cy} r={r} fill="#18231D" stroke={`url(#${id}-brass)`} strokeWidth="2" />
-      <circle cx={cx} cy={cy} r={r - 7} fill="none" stroke="#C9A227" strokeWidth="0.6" opacity="0.4" />
+      <rect x={x0} y={y0 + 8} width={w} height={h} rx="18" fill="#0D1410" opacity="0.8" />
+      <rect x={x0} y={y0} width={w} height={h} rx="18" fill="#18231D" stroke={`url(#${id}-brass)`} strokeWidth="2" />
+      <rect x={x0 + 7} y={y0 + 7} width={w - 14} height={h - 14} rx="12" fill="none" stroke="#C9A227" strokeWidth="0.6" opacity="0.4" />
+      <line x1={zoneL} y1={y0 + 16} x2={zoneL} y2={y1 - 16} stroke="#C9A227" strokeWidth="0.6" opacity="0.35" />
+      <line x1={zoneR} y1={y0 + 16} x2={zoneR} y2={y1 - 16} stroke="#C9A227" strokeWidth="0.6" opacity="0.35" />
+
+      {/* Kortene */}
+      <Kortbag x={kx + 3} y={ky + 3} rot={-3} />
+      <Kortbag x={kx + 1.5} y={ky + 1.5} rot={-1.5} />
+      <Kortbag x={kx} y={ky} rot={0} />
+      {kort?.sidste && <Kortforside key={kort.traek} x={kx + 44} y={ky + 2} kort={kort.sidste} />}
+      <text x={(x0 + zoneL) / 2} y={y1 - 18} textAnchor="middle" fill="#D3B44E" fontSize="9.5" letterSpacing="3" style={{ fontFamily: SANS }}>
+        KORTENE
+      </text>
+      {kort && (
+        <text x={(x0 + zoneL) / 2} y={y1 - 7} textAnchor="middle" fill="#6B796D" fontSize="7.5" letterSpacing="1.4" style={{ fontFamily: SANS }}>
+          {kort.tilbage} TILBAGE
+        </text>
+      )}
+
+      {/* Tårnet */}
       <rect x={gx} y={gTop} width={gW} height={gH} rx="4" fill="#0E1512" />
       <rect x={gx + 2} y={fy} width={gW - 4} height={fyldH} rx="3" fill={`url(#${id}-beer)`} />
       {fyldH > 1 && <rect x={gx + 2} y={fy - 6} width={gW - 4} height="7" rx="3" fill="#F6EBD4" />}
       <rect x={gx} y={gTop} width={gW} height={gH} rx="4" fill="none" stroke="#C4D3C6" strokeWidth="1.4" />
-      <text
-        x={cx}
-        y={cy + 45}
-        textAnchor="middle"
-        fill="#D3B44E"
-        fontSize="10.5"
-        letterSpacing="3.4"
-        style={{ fontFamily: SANS }}
-      >
+      <text x={cx} y={y1 - 18} textAnchor="middle" fill="#D3B44E" fontSize="10.5" letterSpacing="3.4" style={{ fontFamily: SANS }}>
         TÅRNET
       </text>
+      {cl !== null && (
+        <text x={cx} y={y1 - 7} textAnchor="middle" fill="#E0A03C" fontSize="8" letterSpacing="1.4" style={{ fontFamily: SANS }}>
+          {cl} CL · {kapCl} CL GLAS
+        </text>
+      )}
+
+      {/* Terningen */}
+      <g transform={`translate(${tx}, ${ty}) scale(0.54)`}>
+        <RullendeTerning t={terning ?? { vaerdi: null, ruller: false, farve: null, tekst: '' }} />
+      </g>
+      <text x={(zoneR + x1) / 2} y={y1 - 18} textAnchor="middle" fill="#D3B44E" fontSize="9.5" letterSpacing="3" style={{ fontFamily: SANS }}>
+        TERNINGEN
+      </text>
+      {terning && (
+        <text x={(zoneR + x1) / 2} y={y1 - 7} textAnchor="middle" fill={terning.farve ?? '#6B796D'} fontSize="7.5" letterSpacing="1.4" style={{ fontFamily: SANS }}>
+          {terning.tekst}
+        </text>
+      )}
     </g>
   );
 }
@@ -247,6 +396,11 @@ export interface BraetProps {
   brikker: BrikPaaPladen[];
   aktivtFelt?: number | null;
   taarnAndel: number;
+  /** Tårnets indhold i cl — udelades i pynteudgaven (forsiden). */
+  taarnCl?: number | null;
+  taarnKapCl?: number;
+  kort?: KortPaaBordet | null;
+  terning?: TerningPaaBordet | null;
   onFeltKlik?: (nr: number) => void;
   fremhaevFelter?: number[];
 }
@@ -257,6 +411,10 @@ export function BraetPlade({
   brikker,
   aktivtFelt,
   taarnAndel,
+  taarnCl = null,
+  taarnKapCl = 50,
+  kort = null,
+  terning = null,
   onFeltKlik,
   fremhaevFelter
 }: BraetProps): JSX.Element {
@@ -296,7 +454,7 @@ export function BraetPlade({
       </g>
 
       <Pit />
-      <Taarn id={id} andel={taarnAndel} />
+      <Bordet id={id} andel={taarnAndel} cl={taarnCl} kapCl={taarnKapCl} kort={kort} terning={terning} />
 
       {fremhaevFelter?.map((nr) => {
         const f = FELTER[nr - 1];

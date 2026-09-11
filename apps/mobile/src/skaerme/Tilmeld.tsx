@@ -1,12 +1,12 @@
 import { useState, type JSX } from 'react';
-import { BRAET_STR, BraetDefs, BraetPlade, Brik, DRIK_NAVN } from '@k69/ui';
-import { BRIKFARVER, DRIK_LISTE, type DrikId, type Handling, type KortHold, type Spil } from '@k69/rules';
+import { BRAET_STR, BraetDefs, BraetPlade, Brik, EgenDrikFelter, egenDrikKlar, tomEgenDrik, type EgenDrik } from '@k69/ui';
+import {
+  BRIKFARVER, DRIK_LISTE, formatProcent, type DrikId, type DrikValg, type Handling, type KortHold, type Spil
+} from '@k69/rules';
 
-const HOLD: Array<{ id: KortHold; navn: string }> = [
-  { id: 'dame', navn: 'Damerne' },
-  { id: 'konge', navn: 'Herrerne' },
-  { id: 'begge', navn: 'Begge' },
-  { id: 'ingen', navn: 'Ingen' }
+const HOLD: Array<{ id: KortHold; navn: string; forklaring: string }> = [
+  { id: 'dame', navn: 'Damerne', forklaring: 'Drikker på Damen' },
+  { id: 'konge', navn: 'Herrerne', forklaring: 'Drikker på Kongen' }
 ];
 
 export function Tilmeld({
@@ -18,7 +18,13 @@ export function Tilmeld({
   const [navn, saetNavn] = useState('');
   const [farve, saetFarve] = useState(BRIKFARVER.find((f) => !taget.has(f)) ?? BRIKFARVER[0]!);
   const [drik, saetDrik] = useState<DrikId>('ol');
-  const [hold, saetHold] = useState<KortHold>('ingen');
+  const [egen, saetEgen] = useState<EgenDrik>(tomEgenDrik);
+  const [hold, saetHold] = useState<KortHold | null>(null);
+
+  const iGang = spil.fase === 'spiller';
+  const kanJoine = spil.fase !== 'slut';
+  const drikValg: DrikValg | null = drik === 'egen' ? (egenDrikKlar(egen) ? egen : null) : drik;
+  const klar = Boolean(navn.trim()) && hold !== null && drikValg !== null && kanJoine;
 
   return (
     <div className="skaerm">
@@ -32,13 +38,19 @@ export function Tilmeld({
           <div className="mark" style={{ fontSize: 46, lineHeight: 0.9 }}>K69</div>
           <p className="hero-lead" style={{ fontSize: 16 }}>
             {spil.spillere.length > 0
-              ? `${spil.spillere.map((s) => s.navn).join(', ')} venter i ${spil.kode}.`
+              ? `${spil.spillere.map((s) => s.navn).join(', ')} ${iGang ? 'er i gang i' : 'venter i'} ${spil.kode}.`
               : `Du er den første i ${spil.kode}.`}
           </p>
         </div>
       </div>
 
       <div className="rul">
+        {iGang && (
+          <div className="blok note">
+            Spillet kører allerede — men du kan hoppe med. Du får et frifelt og kommer med i turen bagest i rækken.
+          </div>
+        )}
+
         <div className="blok">
           <label className="mærke" htmlFor="navn">Dit navn</label>
           <input id="navn" type="text" value={navn} maxLength={24} placeholder="Fx Sofie"
@@ -65,14 +77,23 @@ export function Tilmeld({
 
         <div className="blok">
           <div className="mærke">Hvad drikker du?</div>
-          <div className="tre">
+          <div className="fire">
             {DRIK_LISTE.map((d) => (
               <button key={d.id} className={drik === d.id ? 'flise flise-paa' : 'flise'} onClick={() => saetDrik(d.id)}>
-                <b>{DRIK_NAVN[d.id]}</b>
-                <span>{d.styrke} · {d.enhedCl} cl</span>
+                <b>{d.navn}</b>
+                <span>{formatProcent(d)} · {d.enhedCl} cl</span>
               </button>
             ))}
+            <button className={drik === 'egen' ? 'flise flise-paa' : 'flise'} onClick={() => saetDrik('egen')}>
+              <b>Andet</b>
+              <span>Skriv selv</span>
+            </button>
           </div>
+          {drik === 'egen' && (
+            <div style={{ marginTop: 10 }}>
+              <EgenDrikFelter vaerdi={egen} onSkift={(v) => { saetEgen(v); ryd(); }} />
+            </div>
+          )}
           <div className="note" style={{ marginTop: 8 }}>
             Én enhed er 11 slurke uanset hvad du drikker.
           </div>
@@ -80,13 +101,15 @@ export function Tilmeld({
 
         <div className="blok">
           <div className="mærke">Dame- og kongekort</div>
-          <div className="fire">
+          <div className="to">
             {HOLD.map((h) => (
               <button key={h.id} className={hold === h.id ? 'flise flise-paa' : 'flise'} onClick={() => saetHold(h.id)}>
                 <b>{h.navn}</b>
+                <span>{h.forklaring}</span>
               </button>
             ))}
           </div>
+          {hold === null && <div className="note" style={{ marginTop: 8 }}>Vælg den ene.</div>}
         </div>
 
         {fejl && <div className="fejltekst">{fejl}</div>}
@@ -96,11 +119,11 @@ export function Tilmeld({
         <button
           className="knap knap-primaer"
           style={{ minHeight: 56 }}
-          disabled={!navn.trim() || spil.fase !== 'lobby'}
-          onClick={() => send({ type: 'join', navn, farve, drik, kortHold: hold })}
+          disabled={!klar}
+          onClick={() => hold && drikValg && send({ type: 'join', navn, farve, drik: drikValg, kortHold: hold })}
         >
           <Brik navn={navn || '?'} farve={farve} str={26} />
-          {spil.fase === 'lobby' ? 'Kom med i spillet' : 'Spillet er gået i gang'}
+          {!kanJoine ? 'Spillet er slut' : iGang ? 'Hop med i spillet' : 'Kom med i spillet'}
         </button>
       </div>
     </div>

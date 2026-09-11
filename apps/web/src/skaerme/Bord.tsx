@@ -1,19 +1,31 @@
 import type { JSX } from 'react';
 import {
-  Brik, DRIK_NAVN, Glas, Handlingskort, Maerkat, MeierKort, Plade, Slurkemaaler, spillerStatus, taarnFor
+  Brik, FejringKort, Glas, Handlingskort, Maerkat, MeierKort, Plade, Slurkemaaler, drikNavn, kortPaaBordet, opgave,
+  spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, type SpilUdsyn
 } from '@k69/ui';
-import { SLURKE_PR_ENHED, formatCl, formatSlurke, type Handling, type Spil } from '@k69/rules';
+import { SLURKE_PR_ENHED, formatCl, formatSlurke, taarnCl, type DrikInfo, type Handling } from '@k69/rules';
+
+/** Ordet under tælleren: "pilsnere tømt", "glas vin tømt", "Classic tømt". */
+function enhederOrd(antal: number, drik: DrikInfo): string {
+  if (drik.id === 'ol') return antal === 1 ? 'pilsner tømt' : 'pilsnere tømt';
+  if (drik.id === 'vin') return 'glas vin tømt';
+  if (drik.id === 'whisky') return antal === 1 ? 'dram tømt' : 'dramme tømt';
+  return `${drik.navn} tømt`;
+}
 
 export function Bord({
-  spil, migId, send
+  spil: live, migId, send
 }: {
-  spil: Spil; migId: string; send: (h: Handling) => void;
+  spil: SpilUdsyn; migId: string; send: (h: Handling) => void;
 }): JSX.Element {
+  // Mens terningen ruller, står alt stille på det gamle spil — se useForsinketSpil.
+  const { vist: spil, ruller } = useForsinketSpil(live);
   const jeg = spil.spillere.find((s) => s.id === migId);
+  const o = opgave(spil, migId);
   const paaTur = spil.spillere[spil.turIdx];
   const bm = spil.spillere.find((s) => s.id === spil.bierMeisterId);
   const toemmer = spil.spillere.find((s) => s.id === spil.taarn.toemmesAfId);
-  const kap = spil.indstillinger.taarnKapacitet;
+  const andel = taarnAndel(spil);
 
   const brikker = spil.spillere
     .filter((s) => s.tilstand === 'aktiv')
@@ -22,8 +34,10 @@ export function Bord({
       erPaaTur: s.id === paaTur?.id
     }));
 
-  // Kun de drikke der faktisk sidder ved bordet skal omregnes.
-  const drikkeVedBordet = [...new Set(spil.spillere.map((s) => s.drik))];
+  // Kun de drikke der faktisk sidder ved bordet skal omregnes — og pilsner er tårnets eget mål.
+  const drikkeVedBordet = [...new Map(
+    spil.spillere.filter((s) => s.drik.id !== 'ol').map((s) => [`${s.drik.navn}|${s.drik.enhedCl}`, s.drik])
+  ).values()];
 
   return (
     <div className="bord">
@@ -55,23 +69,27 @@ export function Bord({
                 <div key={s.id} className={s.id === paaTur?.id ? 'sp sp-paa' : 'sp'}>
                   <Brik navn={s.navn} farve={s.farve} str={34} />
                   <div style={{ flexGrow: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
                       <span style={{ fontSize: 14, fontWeight: 600 }}>{s.navn}</span>
                       {s.id === spil.bierMeisterId && <Maerkat>BM</Maerkat>}
+                      {s.id === spil.taarn.toemmesAfId && <Maerkat farve="var(--amber)">TÅRNET</Maerkat>}
                       {s.pitPlads > 0 && <Maerkat farve="#d98279">PIT {s.pitPlads}</Maerkat>}
                       {s.id === migId && <Maerkat farve="var(--sage)">DIG</Maerkat>}
-                      {!s.tilsluttet && <Maerkat farve="var(--ink-faint)">VÆK</Maerkat>}
+                      {!s.tilsluttet && <Maerkat farve="var(--ink-faint)">OFFLINE</Maerkat>}
                     </div>
                     <div className="note" style={{ fontSize: 11 }}>{spillerStatus(s)}</div>
-                    <div style={{ marginTop: 5 }}>
+                    <div style={{ marginTop: 5, display: 'flex', alignItems: 'center', gap: 8 }}>
                       <Slurkemaaler tilbage={s.slurkeTilbage} bredde={9} />
+                      <span className="note" style={{ fontSize: 10 }}>{s.slurkeTilbage}/{SLURKE_PR_ENHED}</span>
                     </div>
                   </div>
-                  <div style={{ textAlign: 'right', flex: '0 0 54px' }}>
-                    <div style={{ fontFamily: 'var(--serif)', fontSize: 17 }}>
-                      {s.slurkeTilbage}/{SLURKE_PR_ENHED}
+                  <div style={{ textAlign: 'right', flex: '0 0 62px' }} title={`${s.enheder} tømt · ${s.slurkeIAlt} slurke i alt`}>
+                    <div style={{ fontFamily: 'var(--serif)', fontSize: 22, lineHeight: 1, color: s.enheder > 0 ? 'var(--amber)' : 'var(--ink-dim)' }}>
+                      {s.enheder}
                     </div>
-                    <div className="eyebrow" style={{ fontSize: 9 }}>{DRIK_NAVN[s.drik]}</div>
+                    <div className="eyebrow" style={{ fontSize: 9, marginTop: 3 }}>
+                      {enhederOrd(s.enheder, s.drik)}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -79,29 +97,38 @@ export function Bord({
           </section>
 
           <section className="rail-sek" style={{ borderBottom: 'none' }}>
-            <div className="rail-hoved"><span className="eyebrow">Bordet</span></div>
+            <div className="rail-hoved">
+              <span className="eyebrow">Tårnet</span>
+              <span className="eyebrow" style={{ color: 'var(--ink-faint)' }}>{spil.indstillinger.taarnKapacitetCl} cl glas</span>
+            </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <Glas andel={spil.taarn.slurke / (kap + 3)} />
+              <Glas andel={andel} />
               <div>
                 <div style={{ fontFamily: 'var(--serif)', fontSize: 28, color: 'var(--amber)', lineHeight: 1.05 }}>
-                  {formatSlurke(spil.taarn.slurke)}
+                  {taarnCl(spil.taarn.slurke)} cl
                 </div>
                 <div className="note">
-                  {jeg ? <>Det er <b style={{ color: 'var(--amber)' }}>{taarnFor(spil, jeg)}</b> af din {DRIK_NAVN[jeg.drik].toLowerCase()}.</> : null}
+                  {formatSlurke(spil.taarn.slurke)}
+                  {jeg && jeg.drik.id !== 'ol'
+                    ? <> — <b style={{ color: 'var(--amber)' }}>{taarnFor(spil, jeg)}</b> af din {drikNavn(jeg.drik)}</>
+                    : null}
+                  .
                   {toemmer && <> {toemmer.navn} er i gang med at bunde det.</>}
                 </div>
               </div>
             </div>
 
-            <div className="omregn">
-              {drikkeVedBordet.map((d) => (
-                <div key={d} className="om">
-                  <span>{DRIK_NAVN[d]}</span>
-                  <b>{formatCl(spil.taarn.slurke, d)}</b>
-                </div>
-              ))}
-            </div>
+            {drikkeVedBordet.length > 0 && (
+              <div className="omregn">
+                {drikkeVedBordet.map((d) => (
+                  <div key={`${d.navn}|${d.enhedCl}`} className="om">
+                    <span>{d.navn}</span>
+                    <b>{formatCl(spil.taarn.slurke, d)}</b>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 14 }}>
               <div className="krone-boks">
@@ -113,7 +140,11 @@ export function Bord({
                 <div style={{ fontSize: 14, fontWeight: 600 }}>
                   {bm ? `${bm.navn} er Bier Meister` : 'Ingen Bier Meister endnu'}
                 </div>
-                <div className="note">Henter øl og drikker 3 slurke hver gang nogen lander på Go!</div>
+                <div className="note">
+                  {bm
+                    ? 'Henter øl og drikker 3 slurke hver gang nogen lander på Go!'
+                    : 'Lander man på Go! Bier Meister nu, drikker man selv de 3 slurke.'}
+                </div>
               </div>
             </div>
 
@@ -133,15 +164,23 @@ export function Bord({
             id="b"
             brikker={brikker}
             aktivtFelt={paaTur && paaTur.pitPlads === 0 ? paaTur.felt : null}
-            taarnAndel={spil.taarn.slurke / (kap + 3)}
+            taarnAndel={andel}
+            taarnCl={taarnCl(spil.taarn.slurke)}
+            taarnKapCl={spil.indstillinger.taarnKapacitetCl}
+            kort={kortPaaBordet(spil)}
+            terning={terningPaaBordet(spil, live, ruller)}
           />
           <div className="plade-hint">Træk for at flytte pladen · rul for at zoome</div>
           <MeierKort spil={spil} migId={migId} send={send} />
+          <FejringKort spil={spil} />
         </main>
 
         <aside className="rail rail-h">
-          <section className="rail-sek">
-            <Handlingskort spil={spil} migId={migId} send={send} />
+          <section
+            className={o ? 'rail-sek action-farvet' : 'rail-sek'}
+            style={o ? ({ '--sp': o.farve } as React.CSSProperties) : undefined}
+          >
+            <Handlingskort spil={spil} migId={migId} send={send} ruller={ruller} />
           </section>
 
           <section className="rail-sek" style={{ flexGrow: 1, minHeight: 0, overflow: 'auto', borderBottom: 'none' }}>

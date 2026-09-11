@@ -112,6 +112,85 @@ button { font: inherit; color: inherit; }
   color: var(--ink-faint);
 }
 
+/* Egen drik: navn, størrelse og procent på én række — falder til én kolonne når der er smalt. */
+.egen-drik {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+}
+.egen-drik label { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.egen-drik input[type='text'] { width: 100%; height: 46px; }
+.egen-drik-enhed { position: relative; display: block; }
+.egen-drik-enhed input[type='text'] { padding-right: 34px; }
+.egen-drik-enhed b {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: var(--ink-faint);
+  pointer-events: none;
+}
+@media (max-width: 420px) {
+  .egen-drik { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .egen-drik label:first-child { grid-column: 1 / -1; }
+}
+
+/* Terningen på bordet: tumler i to sekunder, lander med spillerens ring der pulser én gang. */
+.terning-ruller {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: terning-tumler 2s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+@keyframes terning-tumler {
+  0%   { transform: rotate(0deg) translate(-70px, -50px) scale(0.85); }
+  35%  { transform: rotate(410deg) translate(50px, 16px) scale(1.05); }
+  70%  { transform: rotate(700deg) translate(-12px, 6px) scale(0.98); }
+  85%  { transform: rotate(716deg) translate(0, 0) scale(1); }
+  100% { transform: rotate(720deg) translate(0, 0) scale(1); }
+}
+.terning-landet {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: terning-puls 1.2s ease-out both;
+}
+@keyframes terning-puls {
+  0% { opacity: 0.9; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.4); }
+}
+
+/* Det trukne kort glider ud af bunken og vender sig med forsiden op. */
+.kort-vendes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: kort-vend 700ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+@keyframes kort-vend {
+  0% { transform: translate(-44px, 0) rotate(-10deg) scale(0.6); opacity: 0; }
+  100% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+}
+
+/* Action-area: hele blokken bærer farven på den der er på, så man ser det på afstand. */
+.action-farvet {
+  border-left: 4px solid var(--sp);
+  background: linear-gradient(180deg, color-mix(in oklab, var(--sp) 22%, transparent) 0%, color-mix(in oklab, var(--sp) 6%, transparent) 100%);
+}
+
+/* Tårnvagten: står øverst i handlingskortet så længe nogen har tårnet. */
+.taarn-vagt {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(224, 160, 60, 0.35);
+  border-radius: 3px;
+  background: rgba(224, 160, 60, 0.07);
+}
+.taarn-vagt-mig {
+  border-color: rgba(224, 160, 60, 0.7);
+  background: linear-gradient(180deg, rgba(224, 160, 60, 0.16), rgba(224, 160, 60, 0.05));
+}
+
 .felt-klikbart { cursor: pointer; }
 .felt-klikbart:hover polygon { stroke: var(--brass); stroke-width: 1.6; }
 
@@ -268,13 +347,15 @@ input[type='text']:focus {
   position: absolute;
   left: 50%;
   top: 166px;
-  margin-left: -146px;
+  transform: translateX(-50%);
   display: flex;
   gap: 10px;
   opacity: 0;
-  transition: opacity 140ms;
+  transition: opacity 140ms, transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .meier-terninger-vis { opacity: 1; }
+/* Mens man kigger, vipper bægeret op mod højre — terningerne ligger til venstre for det. */
+.meier-terninger-kig { transform: translateX(calc(-50% - 80px)); }
 
 .meier-baeger {
   position: absolute;
@@ -476,4 +557,145 @@ input[type='text']:focus {
   .meier-flek { display: none; }
   .meier-stempel,
   .meier-fej-terninger { animation: none; }
+}
+
+/* ------------------------------------------------------------- fejringen */
+/* Et stort kort hen over pladen når nogen vandt eller tabte. Ligger som
+   Meier-kortet i .scene (web) og .skaerm (mobil), og trykkes væk hvor som helst. */
+.fejring {
+  position: absolute;
+  inset: 0;
+  z-index: 21;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(8, 12, 10, 0.45);
+  cursor: pointer;
+}
+.fejring-mobil { padding: 16px; }
+
+.fejring-kort {
+  position: relative;
+  width: 460px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 34px 36px 26px;
+  border-radius: 4px;
+  border: 1px solid rgba(180, 72, 63, 0.6);
+  background: linear-gradient(180deg, #1A241E 0%, #121B16 100%);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(0, 0, 0, 0.5);
+  animation: fejring-ind 600ms cubic-bezier(0.2, 1.1, 0.3, 1) both;
+}
+.fejring-mobil .fejring-kort { padding: 26px 22px 20px; gap: 12px; }
+.fejring-vundet { border-color: rgba(201, 162, 39, 0.7); }
+@keyframes fejring-ind {
+  from { transform: translateY(24px) scale(0.92); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.fejring-band { display: flex; align-items: center; gap: 10px; align-self: stretch; }
+.fejring-prik { width: 8px; height: 8px; border-radius: 50%; background: #B4483F; }
+.fejring-vundet .fejring-prik { background: var(--brass); }
+.fejring-band .eyebrow { color: #D98279; }
+.fejring-vundet .fejring-band .eyebrow { color: var(--brass-lt); }
+.fejring-band-h {
+  margin-left: auto;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.fejring-glorie {
+  position: absolute;
+  left: 50%;
+  top: 116px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(180, 72, 63, 0.3) 0%, transparent 65%);
+  animation: fejring-glorie 1.8s ease-out infinite;
+  pointer-events: none;
+}
+.fejring-vundet .fejring-glorie { background: radial-gradient(circle, rgba(232, 206, 126, 0.35) 0%, transparent 65%); }
+.fejring-mobil .fejring-glorie { top: 96px; }
+@keyframes fejring-glorie {
+  0% { transform: translate(-50%, -50%) scale(0.7); opacity: 0.9; }
+  100% { transform: translate(-50%, -50%) scale(1.4); opacity: 0; }
+}
+
+.fejring-brik { position: relative; }
+.fejring-brik-hopper { animation: fejring-hop 1.6s ease-in-out infinite; }
+@keyframes fejring-hop {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.fejring-titel {
+  position: relative;
+  font-family: var(--serif);
+  font-size: 40px;
+  line-height: 1.05;
+  text-align: center;
+  color: var(--ink);
+}
+.fejring-vundet .fejring-titel { color: var(--brass-lt); }
+.fejring-mobil .fejring-titel { font-size: 30px; }
+.fejring-under {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink-dim);
+  text-align: center;
+  max-width: 360px;
+}
+.fejring-tal {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--serif);
+  font-size: 54px;
+  line-height: 1;
+  color: #D98279;
+}
+.fejring-vundet .fejring-tal { color: var(--brass-lt); }
+.fejring-tal span {
+  font-family: var(--sans);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.fejring-brikker { display: flex; gap: 6px; }
+
+.fejring-bjaelke {
+  align-self: stretch;
+  height: 3px;
+  border-radius: 2px;
+  background: #2B382E;
+  overflow: hidden;
+  margin-top: 6px;
+}
+.fejring-bjaelke i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: #B4483F;
+  transform-origin: left;
+  animation: fejring-ned 5s linear both;
+}
+.fejring-vundet .fejring-bjaelke i { background: var(--brass); }
+@keyframes fejring-ned {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+.fejring-naeste {
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
 }

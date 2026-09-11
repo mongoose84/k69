@@ -2,12 +2,12 @@ import {
   ANTAL_FELTER, FELT_INFO, PIT_PLADSER, feltInfo, feltType, ryk
 } from './board.js';
 import { bland, kortNavn, kortTekst, nyBunke, virkning } from './cards.js';
-import { SLURKE_PR_ENHED, formatSlurke } from './drinks.js';
+import { SLURKE_PR_ENHED, formatSlurke, taarnCl, taarnKapacitetSlurke, tilDrik } from './drinks.js';
 import { erMeyer, trin, trinNavn } from './meier.js';
 import {
   RegelFejl,
-  type Afventer, type DrikId, type Handling, type Haendelse, type Kontekst,
-  type Kort, type KortHold, type Spil, type Spiller
+  type Afventer, type DrikValg, type Handling, type Haendelse, type Kontekst,
+  type Fejring, type Kort, type KortHold, type Spil, type Spiller
 } from './types.js';
 
 export const BRIKFARVER = [
@@ -17,11 +17,13 @@ export const BRIKFARVER = [
 export const STANDARD_INDSTILLINGER = {
   hardcore: false,
   meierSlurke: 3,
-  taarnKapacitet: 16
+  taarnKapacitetCl: 50
 };
 
-/** Startfelter: de frie felter, fordelt så man ikke starter oveni hinanden. */
-const STARTFELTER = [2, 4, 8, 10, 16, 18, 22, 27, 29, 34, 36];
+const KORT_HOLD: KortHold[] = ['dame', 'konge'];
+
+/** Startfelter: frifelterne, fordelt rundt om pladen så man ikke starter oveni hinanden. */
+const STARTFELTER = Array.from({ length: ANTAL_FELTER }, (_, i) => i + 1).filter((nr) => feltType(nr) === 'fri');
 
 function fejl(besked: string): never {
   throw new RegelFejl(besked);
@@ -39,6 +41,7 @@ export function nytSpil(id: string, kode: string, naa: string): Spil {
     runde: 1,
     terning: null,
     terningAf: null,
+    terningNr: 0,
     taarn: { slurke: 0, fyldtAfId: null, toemmesAfId: null },
     bierMeisterId: null,
     bunke: [],
@@ -47,6 +50,7 @@ export function nytSpil(id: string, kode: string, naa: string): Spil {
     husregler: [],
     meier: null,
     meierResultat: null,
+    fejring: null,
     afventer: null,
     log: [],
     afventerPit: [],
@@ -117,46 +121,66 @@ function navn(s: Spiller): string {
   return s.navn;
 }
 
+/** Ét terningkast på pladen. Tælleren er dét klienten bruger til at lade terningen rulle. */
+function slaaTerning(spil: Spil, s: Spiller, ctx: Kontekst): number {
+  const v = ctx.terning();
+  spil.terning = v;
+  spil.terningAf = s.id;
+  spil.terningNr += 1;
+  return v;
+}
+
+function fejr(spil: Spil, f: Omit<Fejring, 'id'>): void {
+  spil.fejring = { id: spil.log[0]?.id ?? spil.naesteHaendelseId, ...f };
+}
+
 /* --------------------------------------------------------------- pit-logik */
 
 /**
- * Send en spiller i pitten. Pladsen findes med et terningkast, og man drikker
- * lige så mange shots som pladsens nummer. Stod der en i forvejen, slår han om
- * — indtil der højst står én pr. plads, eller pitten er overfyldt (7+ spillere).
+ * Giv terningen til den næste i køen der skal slå sig en plads i pitten. Er
+ * køen tom, går turen videre. Pladsen findes med spillerens eget slag — se
+ * `pitPlacer` — og man drikker lige så mange shots som pladsens nummer. Stod
+ * der en i forvejen, kommer han bagest i køen og slår om, indtil der højst
+ * står én pr. plads, eller pitten er overfyldt (7+ spillere).
  */
-function iPit(spil: Spil, foerste: Spiller, ctx: Kontekst): void {
-  const kaede: Array<{ spiller: Spiller; drikker: boolean }> = [{ spiller: foerste, drikker: true }];
-  let vagt = 0;
-
-  while (kaede.length > 0 && vagt++ < 40) {
-    const { spiller, drikker } = kaede.shift()!;
-    const v = ctx.terning();
-    spiller.felt = 0;
-    spiller.pitPlads = v;
-
-    if (drikker) {
-      drik(spiller, v);
-      skriv(spil, 'pit', `${navn(spiller)} ryger i pitten på plads ${v} og drikker ${v} ${v === 1 ? 'shot' : 'shots'}.`, spiller);
-    } else {
-      skriv(spil, 'pit', `${navn(spiller)} blev skubbet videre i pitten og slog sig til plads ${v}.`, spiller);
-    }
-
-    const iPitten = spil.spillere.filter((o) => o.pitPlads > 0 && o.tilstand === 'aktiv');
-    if (iPitten.length > PIT_PLADSER) continue; // overfyldt: flere må dele plads
-
-    const iForvejen = spil.spillere.filter(
-      (o) => o.id !== spiller.id && o.tilstand === 'aktiv' && o.pitPlads === v
-    );
-    for (const o of iForvejen) kaede.push({ spiller: o, drikker: false });
+function naestePitPlacering(spil: Spil, kaede: string[]): void {
+  while (kaede.length > 0) {
+    const id = kaede.shift()!;
+    const o = find(spil, id);
+    if (!o || o.tilstand !== 'aktiv') continue;
+    spil.afventer = { slags: 'pit-placering', spillerId: id, kaede };
+    return;
   }
+  afslutTur(spil);
+}
+
+function pitPlacer(spil: Spil, s: Spiller, kaede: string[], ctx: Kontekst): void {
+  const v = slaaTerning(spil, s, ctx);
+
+  // Blev man skubbet videre inde i pitten, har man allerede drukket for sin plads.
+  const skubbet = s.pitPlads > 0;
+  s.felt = 0;
+  s.pitPlads = v;
+
+  if (skubbet) {
+    skriv(spil, 'pit', `${navn(s)} blev skubbet videre i pitten og slog sig til plads ${v}.`, s);
+  } else {
+    drik(s, v);
+    skriv(spil, 'pit', `${navn(s)} slog ${v}: plads ${v} i pitten og ${v} ${v === 1 ? 'shot' : 'shots'}.`, s);
+  }
+
+  const koe = kaede.slice();
+  const iPitten = spil.spillere.filter((o) => o.pitPlads > 0 && o.tilstand === 'aktiv');
+  if (iPitten.length <= PIT_PLADSER) {
+    const iForvejen = spil.spillere.filter(
+      (o) => o.id !== s.id && o.tilstand === 'aktiv' && o.pitPlads === v && !koe.includes(o.id)
+    );
+    for (const o of iForvejen) koe.push(o.id);
+  }
+  naestePitPlacering(spil, koe);
 }
 
 /* ------------------------------------------------------------- turskiftning */
-
-function erSprungetOver(spil: Spil, s: Spiller): boolean {
-  // Den der er i gang med at tømme tårnet springes over indtil det er tomt.
-  return spil.taarn.toemmesAfId === s.id;
-}
 
 function saetTur(spil: Spil, idx: number): void {
   spil.turIdx = idx;
@@ -184,20 +208,16 @@ function afslutTur(spil: Spil): void {
   }
 
 
+  // Den der bunder tårnet, spiller med imens — han siger selv til når det er tomt.
   for (let i = 1; i <= n; i++) {
     const idx = (spil.turIdx + i) % n;
     const s = spil.spillere[idx]!;
     if (s.tilstand !== 'aktiv') continue;
-    if (erSprungetOver(spil, s)) {
-      skriv(spil, 'spring', `${navn(s)} springes over — tårnet skal tømmes først.`, s);
-      continue;
-    }
     if (idx <= spil.turIdx) spil.runde += 1;
     saetTur(spil, idx);
     return;
   }
 
-  // Alle tilbageværende er optaget af tårnet: lad turen blive stående.
   saetTur(spil, spil.turIdx);
 }
 
@@ -205,15 +225,15 @@ function afslutTur(spil: Spil): void {
  * Hjemsendelser venter til feltets egen virkning er kvitteret — reglerne siger
  * udtrykkeligt at feltets funktion udføres først, og special events derefter.
  * Listen ligger i state, fordi virkningen kan strække sig over flere handlinger.
+ * De ramte slår selv om deres plads, så turen går først videre når køen er tom.
  */
-function afslutFelt(spil: Spil, ctx: Kontekst): void {
-  const ids = spil.afventerPit;
-  spil.afventerPit = [];
-  for (const id of ids) {
+function afslutFelt(spil: Spil, _ctx: Kontekst): void {
+  const ids = spil.afventerPit.filter((id) => {
     const o = find(spil, id);
-    if (o && o.tilstand === 'aktiv' && o.pitPlads === 0) iPit(spil, o, ctx);
-  }
-  afslutTur(spil);
+    return o && o.tilstand === 'aktiv' && o.pitPlads === 0;
+  });
+  spil.afventerPit = [];
+  naestePitPlacering(spil, ids);
 }
 
 /* -------------------------------------------------------- felternes virkning */
@@ -269,9 +289,15 @@ function landPaa(spil: Spil, s: Spiller, ctx: Kontekst): void {
       spil.afventer = { slags: 'giv-slurke', spillerId: s.id, antal: 3 };
       return;
 
-    case 'taarn':
+    case 'taarn': {
+      // Er en anden i gang med at tømme tårnet, skal det stilles fra sig med det samme.
+      const t = spil.taarn.toemmesAfId ? find(spil, spil.taarn.toemmesAfId) : undefined;
+      if (t && t.id !== s.id) {
+        skriv(spil, 'raab', `ØL I TÅRNET! ${navn(t)} må stille tårnet fra sig med det samme.`, s);
+      }
       spil.afventer = { slags: 'fyld-taarn', spillerId: s.id };
       return;
+    }
 
     case 'kort':
       spil.afventer = { slags: 'traek-kort', spillerId: s.id };
@@ -291,11 +317,24 @@ function landPaa(spil: Spil, s: Spiller, ctx: Kontekst): void {
       return;
 
     case 'drik':
-      spil.taarn.toemmesAfId = s.id;
-      spil.afventer = { slags: 'toem-taarn', spillerId: s.id };
-      skriv(spil, 'drik', `DRIK! ${navn(s)} skal bunde tårnet — ${formatSlurke(spil.taarn.slurke)}.`, s);
+      givTaarnet(spil, s, `DRIK! ${navn(s)} skal bunde tårnet — ${formatSlurke(spil.taarn.slurke)}.`);
+      afslutFelt(spil, ctx);
       return;
   }
+}
+
+/**
+ * Sæt tårnet hos en spiller. Spillet kører videre imens — han får en knap til
+ * at sige når det er tomt, og lander en anden på "Øl i tårnet" inden da, må
+ * der hældes mere i. Er tårnet tomt, er der ikke noget at bunde.
+ */
+function givTaarnet(spil: Spil, s: Spiller, tekst: string): void {
+  if (spil.taarn.slurke === 0) {
+    skriv(spil, 'drik', `${tekst} Men tårnet er tomt — der er ikke noget at drikke.`, s);
+    return;
+  }
+  spil.taarn.toemmesAfId = s.id;
+  skriv(spil, 'drik', tekst, s);
 }
 
 /* ------------------------------------------------------------------- kortene */
@@ -346,7 +385,7 @@ function traekKort(spil: Spil, s: Spiller, ctx: Kontekst): void {
       return;
     }
     case 'hold': {
-      const ramt = aktive(spil).filter((o) => o.kortHold === v.hold || o.kortHold === 'begge');
+      const ramt = aktive(spil).filter((o) => o.kortHold === v.hold);
       for (const o of ramt) drik(o, 2);
       skriv(
         spil, 'hold',
@@ -424,20 +463,28 @@ export function anvend(spil: Spil, handling: Handling, ctx: Kontekst): Spil {
 
 /* ------------------------------------------------------------------ lobbyen */
 
+/** Et frifelt ingen står på — eller det første, hvis alle er optaget. */
+function ledigtStartfelt(spil: Spil): number {
+  const optaget = new Set(spil.spillere.filter((o) => o.tilstand === 'aktiv').map((o) => o.felt));
+  return STARTFELTER.find((nr) => !optaget.has(nr)) ?? STARTFELTER[0]!;
+}
+
 function join(spil: Spil, h: Extract<Handling, { type: 'join' }>, ctx: Kontekst): Spil {
   const findes = find(spil, ctx.spillerId);
   const navnet = h.navn.trim().slice(0, 24);
   if (!navnet) fejl('Skriv et navn.');
+  if (!KORT_HOLD.includes(h.kortHold)) fejl('Vælg om du drikker med damerne eller herrerne.');
+  const drikken = tilDrik(h.drik);
 
   if (findes) {
     findes.navn = navnet;
-    findes.drik = h.drik;
+    findes.drik = drikken;
     findes.kortHold = h.kortHold;
     findes.tilsluttet = true;
     return spil;
   }
 
-  if (spil.fase !== 'lobby') fejl('Spillet er allerede gået i gang.');
+  if (spil.fase === 'slut') fejl('Spillet er slut.');
   if (spil.spillere.length >= 8) fejl('Der er otte ved bordet — der er ikke plads til flere.');
   if (spil.spillere.some((o) => o.navn.toLowerCase() === navnet.toLowerCase())) {
     fejl('Der er allerede en med det navn ved bordet.');
@@ -450,7 +497,7 @@ function join(spil: Spil, h: Extract<Handling, { type: 'join' }>, ctx: Kontekst)
     id: ctx.spillerId,
     navn: navnet,
     farve,
-    drik: h.drik,
+    drik: drikken,
     kortHold: h.kortHold,
     felt: 0,
     pitPlads: 0,
@@ -463,13 +510,22 @@ function join(spil: Spil, h: Extract<Handling, { type: 'join' }>, ctx: Kontekst)
   };
   spil.spillere.push(spiller);
   if (!spil.vaertId) spil.vaertId = spiller.id;
+
+  // Har man linket, kan man altid hoppe med: man stiller sig på et ledigt
+  // frifelt og kommer med i turen bagest i rækken.
+  if (spil.fase === 'spiller') {
+    spiller.felt = ledigtStartfelt(spil);
+    skriv(spil, 'join', `${navnet} kom med til bordet midt i spillet og står på felt ${spiller.felt}.`, spiller);
+    return spil;
+  }
+
   skriv(spil, 'join', `${navnet} kom med til bordet.`, spiller);
   return spil;
 }
 
-function saetDrik(spil: Spil, drikId: DrikId, ctx: Kontekst): Spil {
+function saetDrik(spil: Spil, valg: DrikValg, ctx: Kontekst): Spil {
   const s = kraev(spil, ctx.spillerId);
-  s.drik = drikId;
+  s.drik = tilDrik(valg);
   return spil;
 }
 
@@ -514,12 +570,18 @@ function kraevAfventer<T extends Afventer['slags']>(
 
 function slaa(spil: Spil, s: Spiller, ctx: Kontekst): Spil {
   const a = spil.afventer;
-  if (!a || (a.slags !== 'slag' && a.slags !== 'pit-slag')) fejl('Det er ikke tid til at slå.');
+  if (!a || (a.slags !== 'slag' && a.slags !== 'pit-slag' && a.slags !== 'pit-placering')) {
+    fejl('Det er ikke tid til at slå.');
+  }
   if (a.spillerId !== s.id) fejl('Det er ikke din tur.');
 
-  const v = ctx.terning();
-  spil.terning = v;
-  spil.terningAf = s.id;
+  // Slået hjem: samme terning, men den afgør hvor i pitten man skal stå.
+  if (a.slags === 'pit-placering') {
+    pitPlacer(spil, s, a.kaede, ctx);
+    return spil;
+  }
+
+  const v = slaaTerning(spil, s, ctx);
 
   if (s.pitPlads > 0) {
     if (v >= s.pitPlads) {
@@ -572,33 +634,45 @@ function fyldTaarn(spil: Spil, s: Spiller, slurke: number, _ctx: Kontekst): Spil
   const tilfoej = Math.max(0, Math.min(4, slurke));
   if (tilfoej === 0) return spil;
 
-  const varTom = spil.taarn.slurke === 0;
   spil.taarn.slurke = Math.round((spil.taarn.slurke + tilfoej) * 100) / 100;
   spil.taarn.fyldtAfId = s.id;
-
-  // Er en anden i gang med at tømme tårnet, skal det stilles fra sig med det samme.
-  if (spil.taarn.toemmesAfId && spil.taarn.toemmesAfId !== s.id && varTom) {
-    const t = find(spil, spil.taarn.toemmesAfId);
-    if (t) skriv(spil, 'raab', `ØL I TÅRNET! ${navn(t)} må stille tårnet fra sig med det samme.`, s);
-  }
   return spil;
+}
+
+/** Løber tårnet over? Glasset er en halv liter, målt i øl. */
+export function taarnLoeberOver(spil: Spil): boolean {
+  return spil.taarn.slurke > taarnKapacitetSlurke(spil.indstillinger.taarnKapacitetCl);
 }
 
 function taarnFaerdig(spil: Spil, s: Spiller, ctx: Kontekst): Spil {
   kraevAfventer(spil, 'fyld-taarn', s);
-  skriv(spil, 'taarn', `${navn(s)} hældte i tårnet — der står nu ${formatSlurke(spil.taarn.slurke)}.`, s);
+  skriv(
+    spil, 'taarn',
+    `${navn(s)} hældte i tårnet — der står nu ${formatSlurke(spil.taarn.slurke)} (${taarnCl(spil.taarn.slurke)} cl).`,
+    s
+  );
 
-  if (spil.taarn.slurke > spil.indstillinger.taarnKapacitet) {
-    spil.taarn.toemmesAfId = s.id;
-    spil.afventer = { slags: 'toem-taarn', spillerId: s.id };
-    skriv(spil, 'overloeb', `Tårnet løb over — ${navn(s)} bunder det selv.`, s);
-    return spil;
+  if (taarnLoeberOver(spil)) {
+    givTaarnet(spil, s, `Tårnet løb over ${spil.indstillinger.taarnKapacitetCl} cl — ${navn(s)} bunder det selv.`);
+    fejr(spil, {
+      art: 'overloeb',
+      vinderId: null,
+      taberId: s.id,
+      titel: 'Tårnet løb over',
+      tekst: `${navn(s)} hældte ${taarnCl(spil.taarn.slurke)} cl i et glas på ${spil.indstillinger.taarnKapacitetCl}. Det bunder man selv.`,
+      slurke: Math.round(spil.taarn.slurke),
+      naaedeIds: []
+    });
   }
   afslutFelt(spil, ctx);
   return spil;
 }
 
-function toemTaarnFaerdig(spil: Spil, s: Spiller, ctx: Kontekst): Spil {
+/**
+ * Den der har tårnet, siger selv til når det er tomt. Det kan ske når som
+ * helst — også midt i en andens tur — for spillet venter ikke på ham.
+ */
+function toemTaarnFaerdig(spil: Spil, s: Spiller, _ctx: Kontekst): Spil {
   if (spil.taarn.toemmesAfId !== s.id) fejl('Det er ikke dig der har tårnet.');
   const maengde = spil.taarn.slurke;
   drik(s, Math.round(maengde));
@@ -606,11 +680,6 @@ function toemTaarnFaerdig(spil: Spil, s: Spiller, ctx: Kontekst): Spil {
   spil.taarn.toemmesAfId = null;
   spil.taarn.fyldtAfId = null;
   skriv(spil, 'taarn', `${navn(s)} bundede tårnet — ${formatSlurke(maengde)}.`, s);
-
-  const a = spil.afventer;
-  if (a && a.slags === 'toem-taarn' && a.spillerId === s.id) {
-    afslutFelt(spil, ctx);
-  }
   return spil;
 }
 
@@ -635,8 +704,16 @@ function kroneUdpeg(spil: Spil, s: Spiller, maalId: string, ctx: Kontekst): Spil
   kraevAfventer(spil, 'krone-udpeg', s);
   const maal = find(spil, maalId);
   if (!maal || maal.tilstand !== 'aktiv') fejl('Vælg en der er med i spillet.');
-  spil.taarn.toemmesAfId = maal.id;
-  skriv(spil, 'krone', `${navn(s)} udpegede ${navn(maal)} til at bunde tårnet — ${formatSlurke(spil.taarn.slurke)}.`, maal);
+  givTaarnet(spil, maal, `${navn(s)} udpegede ${navn(maal)} til at bunde tårnet — ${formatSlurke(spil.taarn.slurke)}.`);
+  fejr(spil, {
+    art: 'krone',
+    vinderId: s.id,
+    taberId: maal.id,
+    titel: `${navn(s)} fik 2-kronen i`,
+    tekst: `Ét forsøg, og den røg i. ${maal.id === s.id ? navn(s) + ' tager tårnet selv' : navn(maal) + ' blev udpeget og bunder tårnet'} — ${taarnCl(spil.taarn.slurke)} cl.`,
+    slurke: Math.round(spil.taarn.slurke),
+    naaedeIds: []
+  });
   afslutFelt(spil, ctx);
   return spil;
 }
@@ -662,9 +739,23 @@ function kaploebTryk(spil: Spil, s: Spiller, ctx: Kontekst): Spil {
   const med = aktive(spil);
   if (a.ramte.length >= med.length - 1 && med.length > 1) {
     const sidste = med.find((o) => !a.ramte.includes(o.id));
+    const foerste = find(spil, a.ramte[0]!);
     if (sidste) {
       drik(sidste, 1);
       skriv(spil, 'kaploeb', `${navn(sidste)} var sidste mand og drikker en slurk.`, sidste);
+      const hvor = virkning(a.kort).slags === 'kaploeb' && (virkning(a.kort) as { hvor: string }).hvor === 'naese'
+        ? 'fingeren på næsen' : 'fingeren på bordkanten';
+      fejr(spil, {
+        art: 'kaploeb',
+        vinderId: foerste?.id ?? null,
+        taberId: sidste.id,
+        titel: foerste ? `${navn(foerste)} var først` : `${navn(sidste)} var sidst`,
+        tekst: foerste
+          ? `${navn(foerste)} havde ${hvor} inden nogen så det. ${navn(sidste)} nåede det aldrig — sidste mand drikker.`
+          : `${navn(sidste)} nåede det aldrig — sidste mand drikker.`,
+        slurke: 1,
+        naaedeIds: a.ramte.slice()
+      });
     }
     afslutFelt(spil, ctx);
   }
@@ -696,6 +787,15 @@ function vaelgTaber(spil: Spil, s: Spiller, taberId: string, ctx: Kontekst): Spi
   if (!taber || taber.tilstand !== 'aktiv') fejl('Vælg en der er med i spillet.');
   drik(taber, 1);
   skriv(spil, 'kort', `${navn(taber)} gik i stå og drikker en slurk.`, taber);
+  fejr(spil, {
+    art: 'emne',
+    vinderId: null,
+    taberId: taber.id,
+    titel: taber.id === s.id ? `${navn(taber)} gik selv i stå` : `${navn(taber)} gik i stå`,
+    tekst: `${navn(s)} udpegede ${taber.id === s.id ? 'sig selv' : navn(taber)} som den der ikke kunne sige noget nyt.`,
+    slurke: 1,
+    naaedeIds: []
+  });
   afslutFelt(spil, ctx);
   return spil;
 }

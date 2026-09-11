@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState, type JSX, type PointerEvent as RPointerEvent } from 'react';
 import { FELTER } from '@k69/rules';
-import { BRAET_STR, BraetBaggrund, BraetDefs, BraetPlade, type BrikPaaPladen } from './Braet.js';
+import {
+  BRAET_STR, BraetBaggrund, BraetDefs, BraetPlade, type BrikPaaPladen, type KortPaaBordet, type TerningPaaBordet
+} from './Braet.js';
 
 interface Kamera {
   x: number;
@@ -13,6 +15,10 @@ export interface PladeProps {
   brikker: BrikPaaPladen[];
   aktivtFelt?: number | null;
   taarnAndel: number;
+  taarnCl?: number | null;
+  taarnKapCl?: number;
+  kort?: KortPaaBordet | null;
+  terning?: TerningPaaBordet | null;
   /** Zoom når man følger sin egen brik. Sæt til null for altid at vise hele pladen. */
   foelgZoom?: number | null;
   /** Feltet kameraet holder på når man følger. */
@@ -36,8 +42,8 @@ function passer(bredde: number, hoejde: number): Kamera {
  * flytter præcis lige så meget som fingeren — også når der er zoomet ind.
  */
 export function Plade({
-  id, brikker, aktivtFelt, taarnAndel, foelgZoom = null, foelgFelt = null,
-  foelger = false, visMinimap = false, onFeltKlik
+  id, brikker, aktivtFelt, taarnAndel, taarnCl = null, taarnKapCl = 50, kort = null, terning = null,
+  foelgZoom = null, foelgFelt = null, foelger = false, visMinimap = false, onFeltKlik
 }: PladeProps): JSX.Element {
   const boks = useRef<HTMLDivElement | null>(null);
   const [maal, saetMaal] = useState({ b: 800, h: 600 });
@@ -121,6 +127,10 @@ export function Plade({
             brikker={brikker}
             aktivtFelt={aktivtFelt ?? null}
             taarnAndel={taarnAndel}
+            taarnCl={taarnCl}
+            taarnKapCl={taarnKapCl}
+            kort={kort}
+            terning={terning}
             onFeltKlik={onFeltKlik}
           />
         </g>

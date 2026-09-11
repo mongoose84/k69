@@ -1,6 +1,7 @@
 Observationer:
 
 Når du logger ind skal du kunne tilføje en custom drink som du drikker. Det skal være 3 frifelter, en med navn, en med størrelse og en med alkoholprocent.
+
 Når du vælger dame/konge ved oprettelsen, så skal du kun kunne vælge mellem en af de to, du kan ikke vælge begge eller ingen.
 
 Derudover kan man altid joine et spil der er i gang hvis man har linket

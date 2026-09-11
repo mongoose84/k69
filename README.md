@@ -4,7 +4,8 @@ Online-udgave af drukspillet K69 — brættet fra Tinglev. 38 felter, én pit me
 seks pladser, ét tårn, en kortbunke og Meier.
 
 Ingen konto og ingen adgangskode: man opretter et spil, deler linket, skriver et
-navn og er med. Reglerne håndhæves af serveren, ikke af god vilje.
+navn og er med — også når spillet allerede er i gang. Reglerne håndhæves af
+serveren, ikke af god vilje.
 
 ```
 docker compose up --build     # hele stakken på http://localhost:8080
@@ -29,8 +30,8 @@ bag en anden proxy.
 
 | Mappe | Hvad |
 | --- | --- |
-| `packages/rules` | Regelmotoren. Brættets geometri, felterne, kortene, Meier-stigen og hele spillogikken. Ingen afhængigheder, 30 tests. |
-| `packages/ui` | Delte React-dele: brættet som SVG, terning, glas, hold-knap, handlingskortet og websocket-klienten. |
+| `packages/rules` | Regelmotoren. Brættets geometri, felterne, kortene, Meier-stigen og hele spillogikken. Ingen afhængigheder, 40 tests. |
+| `packages/ui` | Delte React-dele: brættet som SVG med bordet i midten, terning, glas, hold-knap, handlingskortet, fejringen og websocket-klienten. |
 | `apps/api` | Fastify + WebSocket + Postgres. Ejer tilstanden og afviser alt der ikke følger reglerne. |
 | `apps/web` | Desktop-frontend (Vite + React). |
 | `apps/mobile` | Mobil-frontend (Vite + React). |
@@ -70,19 +71,34 @@ kun mængden bag en slurk skifter:
 | Pilsner 4,6% | 3 cl | 33 cl (11 shots à 3 cl, som reglerne selv regner) |
 | Vin 12% | 1,4 cl | 15 cl (5 glas pr. flaske) |
 | Whisky 40% | 0,4 cl | 4 cl |
+| Egen drik | enhed ÷ 11 | det man selv skriver ind: navn, cl og procent |
 
 Tårnet måles derfor også i slurke og vises omregnet til hver spillers egen drik.
-Det løber over ved 16 slurke — et 0,5 l glas i øl-mål.
+Glasset er en halv liter, som reglerne siger — det løber over ved 50 cl i øl-mål
+(`taarnKapacitetCl`).
 
 **Det serveren håndhæver hårdt:** turen og rækkefølgen; at man ikke kan hoppe ud
 som Bier Meister eller med øl i tårnet (og i hardcore kun fra et blankt felt);
-at ens tur springes over mens man tømmer tårnet; at man ryger i pitten når en
-anden lander på ens felt; at man arbejder sig ned mod plads 1 og først kommer ud
-på felt 1; og at ingen kan handle uden for tur eller springe et åbent punkt over.
+at man ryger i pitten når en anden lander på ens felt, og selv slår om sin plads
+— også når en ny rammer den plads man står på; at man arbejder sig ned mod
+plads 1 og først kommer ud på felt 1; og at ingen kan handle uden for tur eller
+springe et åbent punkt over. Den der har tårnet, spiller med imens og siger selv
+til når det er bundet — knappen ligger fast i handlingskortet, uanset hvis tur
+det er.
 Meier-terningerne sendes kun til den der selv slog dem — får man bægeret rakt
 over bordet, er meldingen alt hvad man har, og vil man vide mere, må man løfte.
 Når nogen løfter, bliver slaget hele bordets: udfaldet ligger i `meierResultat`
 indtil et nyt bæger sættes på bordet, og det er dét fejringen viser.
+
+**Bordet midt på pladen:** kortbunken, tårnet og terningen ligger på én bred
+plade der spænder over begge DRIK!-felter. Terningen er blank til der slås, tumler
+i to sekunder (`useForsinketSpil` holder hele skærmen på det gamle spil imens,
+så brikken først rykker når den er landet) og lander med spillerens farve som
+ring. Det trukne kort vendes op ved siden af bunken og bliver liggende til
+næste træk. Handlingskortet øverst til højre tager farve efter den der er på.
+Kapløb, Emne, overløb og 2-kronen ender i `spil.fejring` — et kort hen over
+pladen i fem sekunder (`FejringKort`), messing når nogen vandt, rust når nogen
+tabte.
 
 **Meier på skærmen:** duellen kører som et stort kort hen over spillepladen med
 et bæger i stedet for en terning — pladen ligger dæmpet udenom, så man kan se
@@ -100,13 +116,19 @@ er nemt at ændre.
 - **Meier koster 3 slurke** at tabe, dobbelt på en Meyer. Kan sættes i lobbyen.
 - **Maraton** (10'eren): den der trak, drikker 1 slurk, næste til venstre 2, og
   så videre rundt. Reglerne siger bare at man drikker til man må stoppe.
-- **Dame og Konge**: man vælger selv ved tilmelding om man drikker med damerne,
-  herrerne, begge eller ingen af delene. Rammer 2 slurke.
+- **Dame og Konge**: man vælger ved tilmelding om man er med damerne eller
+  herrerne — det ene, ikke begge, ikke ingen. Rammer 2 slurke.
+- **3 til..?** må man også bruge på sig selv, hvis man vil være solidarisk.
 - **7'eren og 8'eren** køres som et kapløb i appen: alle trykker, sidste mand
   drikker.
-- **Pit-placeringen** slår serveren automatisk, så turen ikke går i stå. Bliver
-  man skubbet videre i pitten af en ny, drikker man ikke igen.
+- **Pitten**: den der ryger i, slår selv om sin plads. Bliver man skubbet
+  videre af en ny, slår man om igen men drikker ikke igen.
+- **Tårnet spærrer ikke turen.** Reglerne siger at man springes over mens man
+  bunder det; her spiller man med og trykker "Tårnet er bundet" når det er tomt.
+  Det var dét der gjorde at den 2-kronen udpegede aldrig kom med igen.
 - **2-kronen** kan appen ikke se — man siger selv om den røg i.
+- **Kommer man for sent**, får man et ledigt frifelt og kommer med i turen
+  bagest i rækken.
 
 ## Det appen ikke kan
 
@@ -126,3 +148,6 @@ Kopiér `.env.example` til `.env` og skift adgangskoden til databasen. Variabler
 
 Designet ligger i `design/` — artboards og geometri-generatoren der blev brugt
 til at tegne brættet efter fotoet.
+`design/meier/` er Meier-bægeret, og `design/bordet/` er bordet i midten med
+terning og kortbunke — begge bygget i koden (`node design/bordet/build.mjs`
+bygger artboardsene om).

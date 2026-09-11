@@ -1,6 +1,6 @@
 import { useState, type JSX } from 'react';
-import { Brik, DRIK_NAVN, Maerkat } from '@k69/ui';
-import type { Handling, Spil } from '@k69/rules';
+import { Brik, Maerkat } from '@k69/ui';
+import { formatProcent, type Handling, type Spil } from '@k69/rules';
 import { spilUrl } from '../api.js';
 
 export function Lobby({
@@ -66,11 +66,11 @@ export function Lobby({
                   <Brik navn={s.navn} farve={s.farve} str={36} />
                   <div style={{ flexGrow: 1 }}>
                     <div style={{ fontSize: 14.5, fontWeight: 600 }}>{s.navn}</div>
-                    <div className="note">{DRIK_NAVN[s.drik]}</div>
+                    <div className="note">{s.drik.navn} · {s.drik.enhedCl} cl · {formatProcent(s.drik)}</div>
                   </div>
                   {s.id === spil.vaertId && <Maerkat>VÆRT</Maerkat>}
                   {s.id === migId && <Maerkat farve="var(--sage)">DIG</Maerkat>}
-                  {!s.tilsluttet && <Maerkat farve="var(--ink-faint)">VÆK</Maerkat>}
+                  {!s.tilsluttet && <Maerkat farve="var(--ink-faint)">OFFLINE</Maerkat>}
                 </div>
               ))}
               {spil.spillere.length < 8 && (
@@ -143,7 +143,7 @@ export function Lobby({
                 <div className="valg-t">Reglerne håndhæves</div>
                 <div className="valg-d">
                   Serveren holder styr på turen: du kan ikke hoppe ud som Bier Meister eller med øl i
-                  tårnet, og din tur springes over mens du tømmer det.
+                  tårnet, og de ramte slår selv om deres plads i pitten. Har du tårnet, spiller du med imens.
                 </div>
               </div>
               <Maerkat farve="var(--sage)">ALTID</Maerkat>

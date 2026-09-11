@@ -1,4 +1,71 @@
 import { useCallback, useEffect, useRef, useState, type JSX, type ReactNode } from 'react';
+import { EGEN_DRIK } from '@k69/rules';
+
+/** Det man skriver ind når man drikker noget andet end de faste. Tal som tekst, indtil de sendes. */
+export interface EgenDrik {
+  navn: string;
+  enhedCl: number;
+  procent: number;
+}
+
+export const tomEgenDrik: EgenDrik = { navn: '', enhedCl: 0, procent: 0 };
+
+export function egenDrikKlar(d: EgenDrik): boolean {
+  return d.navn.trim().length > 0
+    && d.enhedCl >= EGEN_DRIK.clMin && d.enhedCl <= EGEN_DRIK.clMax
+    && d.procent >= EGEN_DRIK.procentMin && d.procent <= EGEN_DRIK.procentMax;
+}
+
+function tilTal(tekst: string): number {
+  const v = Number(tekst.replace(',', '.'));
+  return Number.isFinite(v) ? v : 0;
+}
+
+/** Tre frie felter: navn, størrelse i cl og alkoholprocent. */
+export function EgenDrikFelter({
+  vaerdi, onSkift
+}: { vaerdi: EgenDrik; onSkift: (v: EgenDrik) => void }): JSX.Element {
+  return (
+    <div className="egen-drik">
+      <label>
+        <span className="eyebrow">Navn</span>
+        <input
+          type="text"
+          value={vaerdi.navn}
+          maxLength={EGEN_DRIK.navnMax}
+          placeholder="Fx Classic"
+          onChange={(e) => onSkift({ ...vaerdi, navn: e.target.value })}
+        />
+      </label>
+      <label>
+        <span className="eyebrow">Størrelse</span>
+        <span className="egen-drik-enhed">
+          <input
+            type="text"
+            inputMode="decimal"
+            placeholder="33"
+            defaultValue={vaerdi.enhedCl || ''}
+            onChange={(e) => onSkift({ ...vaerdi, enhedCl: tilTal(e.target.value) })}
+          />
+          <b>cl</b>
+        </span>
+      </label>
+      <label>
+        <span className="eyebrow">Procent</span>
+        <span className="egen-drik-enhed">
+          <input
+            type="text"
+            inputMode="decimal"
+            placeholder="4,6"
+            defaultValue={vaerdi.procent || ''}
+            onChange={(e) => onSkift({ ...vaerdi, procent: tilTal(e.target.value) })}
+          />
+          <b>%</b>
+        </span>
+      </label>
+    </div>
+  );
+}
 
 const PIPS: Record<number, Array<[number, number]>> = {
   1: [[50, 50]],
