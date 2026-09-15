@@ -7,6 +7,7 @@ export const FEJRING_MS = 5000;
 
 const ART_TEKST: Record<Fejring['art'], string> = {
   kaploeb: 'Kapløb',
+  finger: 'Fingeren på bordkanten',
   emne: 'Emne',
   overloeb: 'Øl i tårnet',
   krone: '2-krone'
@@ -36,7 +37,8 @@ export function FejringKort({ spil, kompakt = false }: { spil: Spil; kompakt?: b
   const vundet = Boolean(vinder);
   const hoved = vinder ?? taber;
   const naaede = f.naaedeIds.map((id) => spil.spillere.find((s) => s.id === id)).filter(Boolean);
-  const ikkeNaaede = f.art === 'kaploeb'
+  const medRaekke = f.art === 'kaploeb' || f.art === 'finger';
+  const ikkeNaaede = medRaekke
     ? spil.spillere.filter((s) => s.tilstand === 'aktiv' && !f.naaedeIds.includes(s.id))
     : [];
 
@@ -60,7 +62,7 @@ export function FejringKort({ spil, kompakt = false }: { spil: Spil; kompakt?: b
         )}
         <div className="fejring-titel">{f.titel}</div>
         <div className="fejring-under">{f.tekst}</div>
-        {f.art === 'kaploeb' ? (
+        {medRaekke ? (
           <div className="fejring-brikker">
             {naaede.map((s) => <Brik key={s!.id} navn={s!.navn} farve={s!.farve} str={28} />)}
             {ikkeNaaede.map((s) => (

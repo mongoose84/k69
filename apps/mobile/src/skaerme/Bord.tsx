@@ -1,7 +1,7 @@
 import { useState, type JSX } from 'react';
 import {
-  Brik, FejringKort, Glas, Handlingskort, Maerkat, MeierKort, Plade, Slurkemaaler, drikNavn, kortPaaBordet, opgave,
-  spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, type SpilUdsyn
+  Brik, FejringKort, Glas, Handlingskort, Maerkat, MeierKort, Plade, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet,
+  kortPaaBordet, opgave, spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, type SpilUdsyn
 } from '@k69/ui';
 import { formatSlurke, taarnCl, type Handling } from '@k69/rules';
 
@@ -40,6 +40,7 @@ export function Bord({
       <header className="mobilbar">
         <div className="mark" style={{ fontSize: 24 }}>K69</div>
         <div className="kode-lille">{spil.kode}</div>
+        <SyverKort spil={spil} migId={migId} send={send} kompakt />
         <div style={{ flexGrow: 1 }} />
         <div className="avatarer">
           {spil.spillere.filter((s) => s.tilstand === 'aktiv').map((s, i) => (
@@ -64,6 +65,8 @@ export function Bord({
           taarnKapCl={spil.indstillinger.taarnKapacitetCl}
           kort={kortPaaBordet(spil)}
           terning={terningPaaBordet(spil, live, ruller)}
+          finger={fingerPaaBordet(spil, migId, send)}
+          kortHosId={spil.syver?.holderId ?? null}
           foelger={foelger}
           foelgZoom={0.82}
           foelgFelt={foelgFelt}
@@ -122,6 +125,7 @@ export function Bord({
                         <span style={{ fontSize: 14, fontWeight: 600 }}>{s.navn}</span>
                         {s.id === spil.bierMeisterId && <Maerkat>BM</Maerkat>}
                         {s.id === spil.taarn.toemmesAfId && <Maerkat farve="var(--amber)">TÅRNET</Maerkat>}
+                        {s.id === spil.syver?.holderId && <Maerkat>7'ER</Maerkat>}
                         {!s.tilsluttet && <Maerkat farve="var(--ink-faint)">OFFLINE</Maerkat>}
                       </div>
                       <div className="note" style={{ fontSize: 11 }}>{spillerStatus(s)}</div>

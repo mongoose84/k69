@@ -1,7 +1,7 @@
 import type { JSX } from 'react';
 import {
-  Brik, FejringKort, Glas, Handlingskort, Maerkat, MeierKort, Plade, Slurkemaaler, drikNavn, kortPaaBordet, opgave,
-  spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, type SpilUdsyn
+  Brik, FejringKort, Glas, Handlingskort, Maerkat, MeierKort, Plade, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet,
+  kortPaaBordet, opgave, spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, type SpilUdsyn
 } from '@k69/ui';
 import { SLURKE_PR_ENHED, formatCl, formatSlurke, taarnCl, type DrikInfo, type Handling } from '@k69/rules';
 
@@ -53,6 +53,7 @@ export function Bord({
             </div>
           </div>
         )}
+        <SyverKort spil={spil} migId={migId} send={send} />
         <div style={{ flexGrow: 1 }} />
         <div className="note">Runde {spil.runde} · turen går med uret</div>
       </header>
@@ -73,6 +74,7 @@ export function Bord({
                       <span style={{ fontSize: 14, fontWeight: 600 }}>{s.navn}</span>
                       {s.id === spil.bierMeisterId && <Maerkat>BM</Maerkat>}
                       {s.id === spil.taarn.toemmesAfId && <Maerkat farve="var(--amber)">TÅRNET</Maerkat>}
+                      {s.id === spil.syver?.holderId && <Maerkat>7'ER</Maerkat>}
                       {s.pitPlads > 0 && <Maerkat farve="#d98279">PIT {s.pitPlads}</Maerkat>}
                       {s.id === migId && <Maerkat farve="var(--sage)">DIG</Maerkat>}
                       {!s.tilsluttet && <Maerkat farve="var(--ink-faint)">OFFLINE</Maerkat>}
@@ -169,6 +171,8 @@ export function Bord({
             taarnKapCl={spil.indstillinger.taarnKapacitetCl}
             kort={kortPaaBordet(spil)}
             terning={terningPaaBordet(spil, live, ruller)}
+            finger={fingerPaaBordet(spil, migId, send)}
+            kortHosId={spil.syver?.holderId ?? null}
           />
           <div className="plade-hint">Træk for at flytte pladen · rul for at zoome</div>
           <MeierKort spil={spil} migId={migId} send={send} />

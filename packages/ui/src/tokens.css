@@ -699,3 +699,60 @@ input[type='text']:focus {
   text-transform: uppercase;
   color: var(--ink-faint);
 }
+
+/* -------------------------------------------------------------- 7'eren */
+/* Fingeren på bordkanten: ringen pulser stille, så den kan opdages uden at råbe. */
+.finger-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: finger-puls 1.8s ease-out infinite;
+}
+@keyframes finger-puls {
+  0% { transform: scale(0.85); opacity: 0.9; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+.finger-klikbar { cursor: pointer; }
+.finger-klikbar:hover circle:nth-of-type(4) { stroke: var(--brass-lt); }
+
+/* 7'eren i baren: et lille kort man holder nede. Ringen fyldes mens man holder. */
+.syver {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 44px;
+  padding: 0 4px 0 0;
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+  -webkit-touch-callout: none;
+}
+.syver-ring {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: conic-gradient(var(--brass-lt) var(--fyld, 0%), rgba(232, 206, 126, 0.14) 0);
+}
+.syver-ring::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: #121a16;
+}
+.syver svg { margin-left: 12px; }
+.syver-tekst {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  color: var(--ink-faint);
+}
+.syver-tekst b { display: block; color: var(--brass-lt); font-weight: 700; }
+
+@media (prefers-reduced-motion: reduce) {
+  .finger-ring { animation: none; opacity: 0.6; }
+}

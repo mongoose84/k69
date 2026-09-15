@@ -1,0 +1,85 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Web — Jeppe har en 7'er"
+    },
+    {
+      "file": "Fingeren.dc.html",
+      "x": 0,
+      "y": 1040,
+      "w": 1440,
+      "h": 900,
+      "title": "Web — fingeren ligger på bordet"
+    },
+    {
+      "file": "Trukket.dc.html",
+      "x": 0,
+      "y": 2080,
+      "w": 390,
+      "h": 844,
+      "title": "Mobil — du trak 7'eren"
+    },
+    {
+      "file": "Holder.dc.html",
+      "x": 480,
+      "y": 2080,
+      "w": 390,
+      "h": 844,
+      "title": "Mobil — du holder kortet nede"
+    },
+    {
+      "file": "Finger.dc.html",
+      "x": 960,
+      "y": 2080,
+      "w": 390,
+      "h": 844,
+      "title": "Mobil — de andre ser fingeren"
+    },
+    {
+      "file": "Sidste.dc.html",
+      "x": 1440,
+      "y": 2080,
+      "w": 760,
+      "h": 560,
+      "title": "Fejring — sidste mand"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note-hvem",
+      "x": -360,
+      "y": 0,
+      "w": 300,
+      "text": "Hvem har 7'eren: alle kan se det. Et lille 7-kort ligger ved brikken på pladen, og spilleren får mærkatet 7'ER i listen. På bordet ligger der ikke noget kort vendt — Jeppe tog det.\n\nDen diskrete knap: kun Jeppe har det lille kort oppe i baren. Man HOLDER det nede (ca. 1 s) for at lægge fingeren, så et tilfældigt tryk ikke afslører noget. Ingen andre får besked."
+    },
+    {
+      "id": "note-finger",
+      "x": -360,
+      "y": 1040,
+      "w": 300,
+      "text": "Fingeren lander nede i spillepladens højre hjørne, uden for banen — der er den fri af felter, pit og bordplade, og den sidder samme sted hver gang. Den pulser stille, og brikkerne ved siden af viser hvem der har nået det, i rækkefølge (Jeppe tæller som først).\n\nFingeren ER knappen: man trykker på den på pladen. Der kommer ingen linje i loggen og ingen besked — man skal opdage den, ligesom ved bordet.\n\nKapløbet spærrer IKKE turen. Mette kan slå imens, og fingeren bliver liggende til alle har trykket."
+    },
+    {
+      "id": "note-mobil",
+      "x": 0,
+      "y": 3010,
+      "w": 420,
+      "text": "Mobil: 1) Man trækker 7'eren og tager den — teksten fortæller at kortet lægger sig i baren. 2) To ture senere holder Jeppe det nede; ringen fyldes og fingeren lander når den er fuld. 3) Sofie ser fingeren på bordet i sit udsnit. Kameraet flytter sig IKKE (det ville afsløre den), men fingeren tegnes også som en prik i minimappen, så man kan finde den hvis man følger sin egen brik.\n\nÅbent: skal fingeren OGSÅ kunne trykkes fra Turen-fanen (en lille knap under handlingen), så man ikke skal panorere på en lille skærm? Mit forslag: nej i første omgang — det er en del af spillet at opdage den."
+    },
+    {
+      "id": "note-sidste",
+      "x": 1440,
+      "y": 2720,
+      "w": 300,
+      "text": "Når alle har trykket: samme fejringskort som ved Meier og kapløb, i rust fordi nogen tabte. Rækkefølgen står nederst, sidste mand er dæmpet. 7'eren ryger tilbage i bunken.\n\nIkke tegnet: trækker nogen en ny 7'er før Jeppe har lagt fingeren, drikker Jeppe selv 1 slurk, hans kort ryger i bunken og den nye tager over. Det kan bruge Tabt-kortet fra bordet-canvasset."
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}

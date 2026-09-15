@@ -241,6 +241,9 @@ export const PIT: PitGeometri[] = (() => {
  */
 export const BORDET_GEO = { x0: 452, x1: 748, y0: 258, y1: 382 };
 
+/** Fingeren på bordkanten ligger nede i pladens højre hjørne, uden for banen. */
+export const FINGER_POS = { x: 1120, y: 592 };
+
 function sti(liste: Punkt[]): string {
   return 'M ' + liste.map((p, i) => `${i ? 'L ' : ''}${r2(p[0])} ${r2(p[1])}`).join(' ') + ' Z';
 }

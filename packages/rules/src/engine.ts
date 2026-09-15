@@ -1,7 +1,7 @@
 import {
   ANTAL_FELTER, FELT_INFO, PIT_PLADSER, feltInfo, feltType, ryk
 } from './board.js';
-import { bland, kortNavn, kortTekst, nyBunke, virkning } from './cards.js';
+import { HOLD_SLURKE, bland, kortNavn, kortTekst, nyBunke, virkning } from './cards.js';
 import { SLURKE_PR_ENHED, formatSlurke, taarnCl, taarnKapacitetSlurke, tilDrik } from './drinks.js';
 import { erMeyer, trin, trinNavn } from './meier.js';
 import {
@@ -51,6 +51,8 @@ export function nytSpil(id: string, kode: string, naa: string): Spil {
     meier: null,
     meierResultat: null,
     fejring: null,
+    syver: null,
+    finger: null,
     afventer: null,
     log: [],
     afventerPit: [],
@@ -197,6 +199,8 @@ function afslutTur(spil: Spil): void {
     nuvaerende.varslerAfgang = false;
     nuvaerende.pitPlads = 0;
     skriv(spil, 'afgang', `${navn(nuvaerende)} er hoppet ud af spillet.`, nuvaerende);
+    if (spil.syver?.holderId === nuvaerende.id) spil.syver = null;
+    afgoerFinger(spil);
   }
 
   const n = spil.spillere.length;
@@ -366,31 +370,36 @@ function traekKort(spil: Spil, s: Spiller, ctx: Kontekst): void {
     case 'kaploeb':
       spil.afventer = { slags: 'kaploeb', kort, startetAf: s.id, ramte: [] };
       return;
+    case 'behold': {
+      // Nåede den forrige ikke at lægge fingeren, drikker han selv — og den nye tager over.
+      const forrige = spil.syver ? find(spil, spil.syver.holderId) : undefined;
+      if (forrige && forrige.tilstand === 'aktiv') {
+        drik(forrige, 1);
+        skriv(spil, 'syver', `${navn(forrige)} nåede ikke at lægge fingeren før næste 7'er — han drikker en slurk, og ${navn(s)} tager over.`, forrige);
+      }
+      spil.syver = { holderId: s.id, kort };
+      // Kortet er på hånden, ikke på bordet.
+      spil.sidsteKort = null;
+      spil.afventer = { slags: 'kort-udfald', spillerId: s.id, kort };
+      return;
+    }
     case 'vaelg-taber':
       spil.afventer = { slags: 'vaelg-taber', spillerId: s.id, grund: v.grund };
       return;
     case 'regel':
       spil.afventer = { slags: 'ny-regel', spillerId: s.id };
       return;
-    case 'maraton': {
-      // Trækkeren stopper først, så naboen til venstre, og så videre rundt.
-      const raekke = aktive(spil);
-      const start = raekke.findIndex((o) => o.id === s.id);
-      raekke.forEach((_, i) => {
-        const o = raekke[(start + i) % raekke.length]!;
-        drik(o, i + 1);
-      });
-      skriv(spil, 'maraton', `Maraton! ${navn(s)} slap med 1 slurk — den sidste rundt betalte ${raekke.length}.`, s);
+    case 'maraton':
+      // Ingen tælling — bordet styrer selv hvor meget der ryger ned.
       spil.afventer = { slags: 'kort-udfald', spillerId: s.id, kort };
       return;
-    }
     case 'hold': {
       const ramt = aktive(spil).filter((o) => o.kortHold === v.hold);
-      for (const o of ramt) drik(o, 2);
+      for (const o of ramt) drik(o, HOLD_SLURKE);
       skriv(
         spil, 'hold',
         ramt.length
-          ? `${v.hold === 'dame' ? 'Damerne' : 'Herrerne'} drikker 2 slurke: ${ramt.map(navn).join(', ')}.`
+          ? `${v.hold === 'dame' ? 'Damerne' : 'Herrerne'} drikker ${HOLD_SLURKE} slurke: ${ramt.map(navn).join(', ')}.`
           : `${v.hold === 'dame' ? 'Damerne' : 'Herrerne'} drikker — men ingen ved bordet er med på det hold.`,
         s
       );
@@ -446,6 +455,8 @@ export function anvend(spil: Spil, handling: Handling, ctx: Kontekst): Spil {
     case 'traek-kort': return traekHandling(spil, s, ctx);
     case 'kort-kvitter': return kortKvitter(spil, s, ctx);
     case 'kaploeb-tryk': return kaploebTryk(spil, s, ctx);
+    case 'laeg-finger': return laegFinger(spil, s, ctx);
+    case 'finger-tryk': return fingerTryk(spil, s, ctx);
     case 'ny-regel': return nyRegel(spil, s, handling.regel, ctx);
     case 'fjern-regel': return fjernRegel(spil, s, handling.index, ctx);
     case 'vaelg-taber': return vaelgTaber(spil, s, handling.spillerId, ctx);
@@ -760,6 +771,55 @@ function kaploebTryk(spil: Spil, s: Spiller, ctx: Kontekst): Spil {
     afslutFelt(spil, ctx);
   }
   return spil;
+}
+
+/* ------------------------------------------------------------------ 7'eren */
+
+function laegFinger(spil: Spil, s: Spiller, _ctx: Kontekst): Spil {
+  if (!spil.syver || spil.syver.holderId !== s.id) fejl("Du har ikke 7'eren.");
+  if (spil.finger) fejl('Der ligger allerede en finger på bordet.');
+  spil.finger = { lagtAf: s.id, kort: spil.syver.kort, ramte: [s.id] };
+  spil.syver = null;
+  // Ingen log og ingen besked — den skal opdages, ligesom ved bordet.
+  afgoerFinger(spil);
+  return spil;
+}
+
+function fingerTryk(spil: Spil, s: Spiller, _ctx: Kontekst): Spil {
+  const f = spil.finger;
+  if (!f) fejl('Der ligger ingen finger på bordet.');
+  if (f.ramte.includes(s.id)) return spil;
+  f.ramte.push(s.id);
+  afgoerFinger(spil);
+  return spil;
+}
+
+/** Når kun én mangler, er han sidste mand og drikker. Alle nåede det: ingen drikker. */
+function afgoerFinger(spil: Spil): void {
+  const f = spil.finger;
+  if (!f) return;
+  const mangler = aktive(spil).filter((o) => !f.ramte.includes(o.id));
+  if (mangler.length > 1) return;
+  const lagde = find(spil, f.lagtAf);
+  const hvem = lagde ? navn(lagde) : 'Nogen';
+  const sidste = mangler[0];
+  if (sidste) {
+    drik(sidste, 1);
+    skriv(spil, 'finger', `${hvem} lagde fingeren på bordkanten. ${navn(sidste)} så den aldrig — sidste mand drikker en slurk.`, sidste);
+    const naaede = f.ramte.filter((id) => id !== f.lagtAf).map((id) => find(spil, id)).filter(Boolean).map((o) => navn(o!));
+    fejr(spil, {
+      art: 'finger',
+      vinderId: null,
+      taberId: sidste.id,
+      titel: `${navn(sidste)} så den aldrig`,
+      tekst: `${hvem} lagde fingeren på bordkanten. ${naaede.length ? naaede.join(', ') + ' nåede det — ' : ''}${navn(sidste)} var sidste mand og drikker.`,
+      slurke: 1,
+      naaedeIds: f.ramte.slice()
+    });
+  } else {
+    skriv(spil, 'finger', `${hvem} lagde fingeren på bordkanten — og alle nåede det.`, lagde);
+  }
+  spil.finger = null;
 }
 
 function nyRegel(spil: Spil, s: Spiller, regel: string, ctx: Kontekst): Spil {

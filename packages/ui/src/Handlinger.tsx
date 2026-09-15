@@ -309,8 +309,11 @@ export function Handlingskort({ spil, migId, send, kompakt, ruller = false }: Ha
           <div className="note">{RANG_NAVN[a.kort.rang]} {KULOER_TEGN[a.kort.kuloer]}</div>
           {paaMig && (
             <button className="knap knap-primaer" onClick={() => send({ type: 'kort-kvitter' })}>
-              Videre
+              {a.kort.rang === '7' ? 'Tag kortet' : 'Videre'}
             </button>
+          )}
+          {paaMig && a.kort.rang === '7' && (
+            <div className="note">Kortet lægger sig oppe i baren. Hold det nede når du vil lægge fingeren — ingen andre får besked.</div>
           )}
         </div>
       </div>

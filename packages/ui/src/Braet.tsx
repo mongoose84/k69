@@ -1,4 +1,4 @@
-import { FELTER, FELT_INFO, INDRE_STI, PIT, BORDET_GEO, YDRE_STI, BRAET_STR } from '@k69/rules';
+import { FELTER, FELT_INFO, FINGER_POS, INDRE_STI, PIT, BORDET_GEO, YDRE_STI, BRAET_STR } from '@k69/rules';
 import { useEffect, useState, type JSX } from 'react';
 
 const SANS = "Karla, 'Helvetica Neue', Arial, sans-serif";
@@ -391,6 +391,77 @@ function Bordet({
   );
 }
 
+/**
+ * Fingeren på bordkanten, som alle skal nå at trykke på. Ligger nede i pladens
+ * højre hjørne så den er fri af felter, pit og bordplade — og samme sted hver gang.
+ */
+export interface FingerPaaBordet {
+  /** Dem der har nået det, i rækkefølge. */
+  ramte: Array<{ id: string; navn: string; farve: string }>;
+  /** Dem der mangler. */
+  mangler: Array<{ id: string; navn: string; farve: string }>;
+  /** Sat når man selv kan trykke — ellers tegnes den bare. */
+  onTryk?: () => void;
+}
+
+/** Stregtegnet hånd med pegefingeren mod kanten, 24-grid. Tegnes direkte i SVG'et. */
+function FingerIkon({ farve = '#E8CE7E' }: { farve?: string }): JSX.Element {
+  return (
+    <g transform="translate(-13, -13) scale(1.0833)" fill="none" stroke={farve} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10 3.2v9.3" />
+      <path d="M10 3.2a1.6 1.6 0 0 1 3.2 0V11" />
+      <path d="M13.2 8.6a1.6 1.6 0 0 1 3.2 0v3" />
+      <path d="M16.4 10.2a1.6 1.6 0 0 1 3.2 0v4.6c0 3.4-2.5 6.2-6 6.2h-2.4c-1.7 0-3.2-.7-4.3-1.9L3.6 15a1.5 1.5 0 0 1 2.1-2.1L8 15" />
+    </g>
+  );
+}
+
+function Finger({ f }: { f: FingerPaaBordet }): JSX.Element {
+  const alle = [...f.ramte.map((s) => ({ ...s, med: true })), ...f.mangler.map((s) => ({ ...s, med: false }))];
+  const bx = -((alle.length - 1) * 24) / 2;
+  return (
+    <g transform={`translate(${FINGER_POS.x}, ${FINGER_POS.y})`}>
+      <g
+        className={f.onTryk ? 'finger finger-klikbar' : 'finger'}
+        onClick={f.onTryk}
+        role={f.onTryk ? 'button' : undefined}
+        aria-label={f.onTryk ? 'Fingeren på bordkanten — tryk når du ser den' : undefined}
+      >
+        {/* Ringen pulser stille, så den kan opdages — uden at råbe. */}
+        <circle className="finger-ring" cx="0" cy="0" r="26" fill="none" stroke="#E8CE7E" strokeWidth="2" />
+        {/* Trykfladen er større end det man ser. */}
+        <circle cx="0" cy="0" r="34" fill="transparent" />
+        <circle cx="0" cy="3" r="22" fill="#0B100D" opacity="0.6" />
+        <circle cx="0" cy="0" r="21" fill="#1F2C25" stroke="#C9A227" strokeWidth="1.4" />
+        <FingerIkon />
+      </g>
+      <g transform={`translate(${bx}, -46)`} style={{ pointerEvents: 'none' }}>
+        {alle.map((s, i) => (
+          <g key={s.id} transform={`translate(${i * 24}, 0)`} opacity={s.med ? 1 : 0.3}>
+            <circle cx="0" cy="0" r="10" fill={s.farve} stroke="#0E1512" strokeWidth="1.5" />
+            <text x="0" y="0.5" textAnchor="middle" dominantBaseline="central" fontSize="9" fontWeight="700" fill="#14180C" style={{ fontFamily: SERIF }}>
+              {s.navn.slice(0, 1).toUpperCase()}
+            </text>
+          </g>
+        ))}
+      </g>
+    </g>
+  );
+}
+
+/** Det lille 7-kort ved brikken, så hele bordet kan se hvem der har den på hånden. */
+function SyverVedBrik(): JSX.Element {
+  return (
+    <g transform="translate(9, -30) rotate(12) scale(0.5)" style={{ pointerEvents: 'none' }}>
+      <rect x="0" y="0" width="34" height="48" rx="3" fill="#0B100D" opacity="0.55" transform="translate(1.5, 3)" />
+      <rect x="0" y="0" width="34" height="48" rx="3" fill="#F3EDDF" stroke="#B9AE93" strokeWidth="0.8" />
+      <text x="4" y="10" fontSize="9" fontWeight="700" fill="#1B241C" style={{ fontFamily: SERIF }}>7</text>
+      <text x="4" y="18" fontSize="7" fill="#1B241C" style={{ fontFamily: SANS }}>♣</text>
+      <text x="17" y="31" textAnchor="middle" dominantBaseline="central" fontSize="16" fill="#1B241C" style={{ fontFamily: SANS }}>♣</text>
+    </g>
+  );
+}
+
 export interface BraetProps {
   id: string;
   brikker: BrikPaaPladen[];
@@ -403,6 +474,10 @@ export interface BraetProps {
   terning?: TerningPaaBordet | null;
   onFeltKlik?: (nr: number) => void;
   fremhaevFelter?: number[];
+  /** Fingeren på bordkanten, når den ligger der. */
+  finger?: FingerPaaBordet | null;
+  /** Brikken der har 7'eren på hånden. */
+  kortHosId?: string | null;
 }
 
 /** Selve pladen — uden svg-ramme, så hver klient selv styrer træk og zoom. */
@@ -416,7 +491,9 @@ export function BraetPlade({
   kort = null,
   terning = null,
   onFeltKlik,
-  fremhaevFelter
+  fremhaevFelter,
+  finger = null,
+  kortHosId = null
 }: BraetProps): JSX.Element {
   const aktiv = aktivtFelt ? FELTER[aktivtFelt - 1] : null;
 
@@ -504,8 +581,11 @@ export function BraetPlade({
           >
             {b.navn.slice(0, 1).toUpperCase()}
           </text>
+          {b.id === kortHosId && <SyverVedBrik />}
         </g>
       ))}
+
+      {finger && <Finger f={finger} />}
     </g>
   );
 }

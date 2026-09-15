@@ -7,3 +7,4 @@ export * from './Meier.js';
 export * from './Plade.js';
 export * from './useBordet.js';
 export * from './Fejring.js';
+export * from './Syver.js';

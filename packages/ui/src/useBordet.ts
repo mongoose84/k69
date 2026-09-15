@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { KULOER_TEGN, type Spil } from '@k69/rules';
-import type { KortPaaBordet, TerningPaaBordet } from './Braet.js';
+import { KULOER_TEGN, type Handling, type Spil } from '@k69/rules';
+import type { FingerPaaBordet, KortPaaBordet, TerningPaaBordet } from './Braet.js';
 import { erRoedt, venterPaaSlag } from './tekst.js';
 
 /** Så længe tumler terningen hen over bordet før man ser hvad der blev slået. */
@@ -71,4 +71,16 @@ export function kortPaaBordet(spil: Spil & { bunkeTilbage?: number }): KortPaaBo
     traek: spil.brugte.length,
     tilbage: spil.bunkeTilbage ?? spil.bunke.length
   };
+}
+
+/** Fingeren på bordkanten som pladen skal tegne den — med trykket, hvis man ikke selv har nået det. */
+export function fingerPaaBordet(spil: Spil, migId: string, send: (h: Handling) => void): FingerPaaBordet | null {
+  const f = spil.finger;
+  if (!f) return null;
+  const aktive = spil.spillere.filter((s) => s.tilstand === 'aktiv');
+  const kort = (s: { id: string; navn: string; farve: string }) => ({ id: s.id, navn: s.navn, farve: s.farve });
+  const ramte = f.ramte.map((id) => aktive.find((s) => s.id === id)).filter((s) => s !== undefined).map(kort);
+  const mangler = aktive.filter((s) => !f.ramte.includes(s.id)).map(kort);
+  const kanTrykke = aktive.some((s) => s.id === migId) && !f.ramte.includes(migId);
+  return { ramte, mangler, onTryk: kanTrykke ? () => send({ type: 'finger-tryk' }) : undefined };
 }

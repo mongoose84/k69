@@ -521,8 +521,18 @@ test('Dame-kortet rammer damerne, Konge-kortet herrerne', () => {
   spil = gør(spil, 'p0', { type: 'slaa' }, [1]);
   spil.bunke.unshift({ rang: 'D', kuloer: 'hjerter' });
   spil = gør(spil, 'p0', { type: 'traek-kort' });
-  assert.equal(find(spil, 'p1')!.slurkeIAlt, 2);
+  assert.equal(find(spil, 'p1')!.slurkeIAlt, 3);
   assert.equal(find(spil, 'p0')!.slurkeIAlt, 0);
+});
+
+test('Maraton tæller ikke slurke — kortet vises bare', () => {
+  let spil = opsat(['A', 'B', 'C']);
+  placer(spil, 'p0', foersteFeltAf('kort') - 1);
+  spil = gør(spil, 'p0', { type: 'slaa' }, [1]);
+  spil.bunke.unshift({ rang: '10', kuloer: 'hjerter' });
+  spil = gør(spil, 'p0', { type: 'traek-kort' });
+  assert.equal(spil.afventer?.slags, 'kort-udfald');
+  for (const s of spil.spillere) assert.equal(s.slurkeIAlt, 0);
 });
 
 test('har man linket, kan man hoppe med mens spillet kører', () => {
@@ -581,7 +591,7 @@ test('kapløbet ender i en fejring af den første — og sidste mand drikker', (
   let spil = opsat(['A', 'B', 'C']);
   placer(spil, 'p0', foersteFeltAf('kort') - 1);
   spil = gør(spil, 'p0', { type: 'slaa' }, [1]);
-  spil.bunke.unshift({ rang: '7', kuloer: 'klor' });
+  spil.bunke.unshift({ rang: '8', kuloer: 'klor' });
   spil = gør(spil, 'p0', { type: 'traek-kort' });
   assert.equal(spil.afventer?.slags, 'kaploeb');
   spil = gør(spil, 'p2', { type: 'kaploeb-tryk' });
@@ -592,4 +602,77 @@ test('kapløbet ender i en fejring af den første — og sidste mand drikker', (
   assert.equal(spil.fejring?.taberId, 'p1');
   assert.deepEqual(spil.fejring?.naaedeIds, ['p2', 'p0']);
   assert.equal(find(spil, 'p1')!.slurkeIAlt, 1);
+});
+
+/* ------------------------------------------------------------------ 7'eren */
+
+/** Lad p0 trække 7'eren og tage den. */
+function traekSyver(spil: Spil, id = 'p0'): Spil {
+  placer(spil, id, foersteFeltAf('kort') - 1);
+  spil = gør(spil, id, { type: 'slaa' }, [1]);
+  spil.bunke.unshift({ rang: '7', kuloer: 'klor' });
+  spil = gør(spil, id, { type: 'traek-kort' });
+  assert.equal(spil.afventer?.slags, 'kort-udfald');
+  assert.equal(spil.syver?.holderId, id);
+  assert.equal(spil.sidsteKort, null, 'kortet ligger på hånden, ikke på bordet');
+  return gør(spil, id, { type: 'kort-kvitter' });
+}
+
+test("7'eren beholder man — turen går videre uden kapløb", () => {
+  let spil = opsat(['A', 'B', 'C']);
+  spil = traekSyver(spil);
+  assert.equal(spil.afventer?.slags, 'slag');
+  assert.equal(spil.afventer && 'spillerId' in spil.afventer ? spil.afventer.spillerId : null, 'p1');
+  assert.equal(spil.syver?.holderId, 'p0');
+  assert.equal(spil.finger, null);
+});
+
+test('kun holderen kan lægge fingeren, og den spærrer ikke turen', () => {
+  let spil = opsat(['A', 'B', 'C']);
+  spil = traekSyver(spil);
+  assert.throws(() => gør(spil, 'p1', { type: 'laeg-finger' }), /7'eren/);
+  spil = gør(spil, 'p0', { type: 'laeg-finger' });
+  assert.deepEqual(spil.finger, { lagtAf: 'p0', kort: { rang: '7', kuloer: 'klor' }, ramte: ['p0'] });
+  assert.equal(spil.syver, null);
+  assert.equal(spil.afventer?.slags, 'slag', 'p1 kan stadig slå imens');
+  assert.equal(spil.log[0]?.slags, 'kort', 'ingen log-linje om fingeren');
+  spil = gør(spil, 'p1', { type: 'slaa' }, [2]);
+  assert.ok(spil.finger, 'fingeren ligger der stadig efter slaget');
+});
+
+test('sidste mand på fingeren drikker en slurk og bliver fejret i rust', () => {
+  let spil = opsat(['A', 'B', 'C', 'D']);
+  spil = traekSyver(spil);
+  spil = gør(spil, 'p0', { type: 'laeg-finger' });
+  spil = gør(spil, 'p2', { type: 'finger-tryk' });
+  spil = gør(spil, 'p2', { type: 'finger-tryk' });
+  assert.deepEqual(spil.finger?.ramte, ['p0', 'p2'], 'et tryk tæller kun én gang');
+  assert.equal(spil.fejring, null);
+  spil = gør(spil, 'p1', { type: 'finger-tryk' });
+  assert.equal(spil.finger, null);
+  assert.equal(spil.fejring?.art, 'finger');
+  assert.equal(spil.fejring?.vinderId, null);
+  assert.equal(spil.fejring?.taberId, 'p3');
+  assert.deepEqual(spil.fejring?.naaedeIds, ['p0', 'p2', 'p1']);
+  assert.equal(find(spil, 'p3')!.slurkeIAlt, 1);
+  assert.equal(find(spil, 'p1')!.slurkeIAlt, 0);
+  assert.throws(() => gør(spil, 'p3', { type: 'finger-tryk' }), /ingen finger/);
+});
+
+test("kommer der en ny 7'er før fingeren er lagt, drikker den gamle holder — og den nye tager over", () => {
+  let spil = opsat(['A', 'B', 'C']);
+  spil = traekSyver(spil);
+  spil = traekSyver(spil, 'p1');
+  assert.equal(spil.syver?.holderId, 'p1');
+  assert.equal(find(spil, 'p0')!.slurkeIAlt, 1);
+  assert.equal(find(spil, 'p1')!.slurkeIAlt, 0);
+  assert.throws(() => gør(spil, 'p0', { type: 'laeg-finger' }), /7'eren/);
+});
+
+test('ligger fingeren allerede, kan den ikke lægges igen', () => {
+  let spil = opsat(['A', 'B', 'C']);
+  spil = traekSyver(spil);
+  spil = gør(spil, 'p0', { type: 'laeg-finger' });
+  spil = traekSyver(spil, 'p1');
+  assert.throws(() => gør(spil, 'p1', { type: 'laeg-finger' }), /allerede/);
 });

@@ -150,7 +150,7 @@ export interface MeierResultat {
  */
 export interface Fejring {
   id: number;
-  art: 'kaploeb' | 'emne' | 'overloeb' | 'krone';
+  art: 'kaploeb' | 'finger' | 'emne' | 'overloeb' | 'krone';
   /** Sat når der er en at fejre — ellers er det taberen der er hovedpersonen. */
   vinderId: string | null;
   taberId: string | null;
@@ -159,6 +159,27 @@ export interface Fejring {
   slurke: number;
   /** Kapløbet: dem der nåede det, i rækkefølge. */
   naaedeIds: string[];
+}
+
+/**
+ * 7'eren på hånden: den der trak den beholder kortet, indtil han lægger
+ * fingeren — eller til der kommer en 7'er mere, så drikker han selv.
+ */
+export interface Syver {
+  holderId: string;
+  kort: Kort;
+}
+
+/**
+ * Fingeren på bordkanten. Lagt af holderen af 7'eren; alle andre skal nå at
+ * trykke på den, og sidste mand drikker. Kører ved siden af turen — spillet
+ * venter ikke, og der står ingenting i loggen før det er afgjort.
+ */
+export interface Finger {
+  lagtAf: string;
+  kort: Kort;
+  /** Dem der har nået det, i rækkefølge. Den der lagde den står først. */
+  ramte: string[];
 }
 
 export interface Haendelse {
@@ -204,6 +225,10 @@ export interface Spil {
   meierResultat: MeierResultat | null;
   /** Sidste øjeblik der skal fejres. Bliver stående indtil det næste. */
   fejring: Fejring | null;
+  /** 7'eren nogen har på hånden. */
+  syver: Syver | null;
+  /** Fingeren der ligger på bordkanten lige nu. */
+  finger: Finger | null;
   afventer: Afventer | null;
   log: Haendelse[];
   /** Spillere der skal i pitten når det aktuelle felt er kvitteret. */
@@ -228,6 +253,8 @@ export type Handling =
   | { type: 'traek-kort' }
   | { type: 'kort-kvitter' }
   | { type: 'kaploeb-tryk' }
+  | { type: 'laeg-finger' }
+  | { type: 'finger-tryk' }
   | { type: 'ny-regel'; regel: string }
   | { type: 'fjern-regel'; index: number }
   | { type: 'vaelg-taber'; spillerId: string }

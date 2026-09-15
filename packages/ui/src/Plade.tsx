@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState, type JSX, type PointerEvent as RPointerEvent } from 'react';
 import { FELTER } from '@k69/rules';
 import {
-  BRAET_STR, BraetBaggrund, BraetDefs, BraetPlade, type BrikPaaPladen, type KortPaaBordet, type TerningPaaBordet
+  BRAET_STR, BraetBaggrund, BraetDefs, BraetPlade,
+  type BrikPaaPladen, type FingerPaaBordet, type KortPaaBordet, type TerningPaaBordet
 } from './Braet.js';
 
 interface Kamera {
@@ -26,6 +27,8 @@ export interface PladeProps {
   foelger?: boolean;
   visMinimap?: boolean;
   onFeltKlik?: (nr: number) => void;
+  finger?: FingerPaaBordet | null;
+  kortHosId?: string | null;
 }
 
 function passer(bredde: number, hoejde: number): Kamera {
@@ -43,7 +46,7 @@ function passer(bredde: number, hoejde: number): Kamera {
  */
 export function Plade({
   id, brikker, aktivtFelt, taarnAndel, taarnCl = null, taarnKapCl = 50, kort = null, terning = null,
-  foelgZoom = null, foelgFelt = null, foelger = false, visMinimap = false, onFeltKlik
+  foelgZoom = null, foelgFelt = null, foelger = false, visMinimap = false, onFeltKlik, finger = null, kortHosId = null
 }: PladeProps): JSX.Element {
   const boks = useRef<HTMLDivElement | null>(null);
   const [maal, saetMaal] = useState({ b: 800, h: 600 });
@@ -132,6 +135,8 @@ export function Plade({
             kort={kort}
             terning={terning}
             onFeltKlik={onFeltKlik}
+            finger={finger}
+            kortHosId={kortHosId}
           />
         </g>
       </svg>
@@ -146,7 +151,13 @@ export function Plade({
         <div className="minimap" aria-hidden="true">
           <svg viewBox={`0 0 ${BRAET_STR.w} ${BRAET_STR.h}`} width="100%" height="100%">
             <BraetDefs id={`${id}-mm`} />
-            <BraetPlade id={`${id}-mm`} brikker={brikker} taarnAndel={taarnAndel} />
+            {/* Fingeren tegnes også her, så man kan finde den selvom man følger sin egen brik. */}
+            <BraetPlade
+              id={`${id}-mm`}
+              brikker={brikker}
+              taarnAndel={taarnAndel}
+              finger={finger ? { ramte: [], mangler: [] } : null}
+            />
             <rect
               x={-k.x / k.z}
               y={-k.y / k.z}

@@ -43,23 +43,28 @@ export function bland<T>(liste: T[], tilfaeldig: () => number): T[] {
  *   'selv'       — trækkeren drikker `antal`
  *   'giv'        — trækkeren fordeler `antal`
  *   'ingenting'  — frikort
- *   'kaploeb'    — sidste mand drikker (finger på bordkant / næse)
+ *   'kaploeb'    — sidste mand drikker (fingeren på næsen)
+ *   'behold'     — 7'eren: man beholder kortet og lægger fingeren på bordkanten når man vil
  *   'vaelg-taber'— trækkeren udpeger den der gik i stå
- *   'maraton'    — alle drikker, trækkeren mindst
+ *   'maraton'    — alle drikker samtidig; appen tæller ikke
  *   'regel'      — trækkeren laver eller ophæver en husregel
- *   'hold'       — alle på et hold drikker
+ *   'hold'       — alle på et hold drikker HOLD_SLURKE
  */
 export type KortVirkning =
   | { slags: 'selv'; antal: number }
   | { slags: 'giv'; antal: number }
   | { slags: 'ingenting' }
   | { slags: 'kaploeb'; hvor: 'bordkant' | 'naese' }
+  | { slags: 'behold' }
   | { slags: 'vaelg-taber'; grund: string }
   | { slags: 'maraton' }
   | { slags: 'regel' }
   | { slags: 'hold'; hold: 'dame' | 'konge' };
 
 const TAL: Partial<Record<Rang, number>> = { A: 1, '2': 2, '3': 3, '4': 4, '5': 5 };
+
+/** Dame og Konge: så meget drikker holdet. Husregel, Jeppe 2026-09-15. */
+export const HOLD_SLURKE = 3;
 
 export function virkning(k: Kort): KortVirkning {
   const n = TAL[k.rang];
@@ -68,7 +73,7 @@ export function virkning(k: Kort): KortVirkning {
   }
   switch (k.rang) {
     case '6': return { slags: 'ingenting' };
-    case '7': return { slags: 'kaploeb', hvor: 'bordkant' };
+    case '7': return { slags: 'behold' };
     case '8': return { slags: 'kaploeb', hvor: 'naese' };
     case '9': return { slags: 'vaelg-taber', grund: 'Emne — den der gik i stå eller gentog sig selv' };
     case '10': return { slags: 'maraton' };
@@ -108,6 +113,11 @@ export function kortTekst(k: Kort): KortTekst {
           titel: 'Fingeren på næsen',
           tekst: 'Hurtigt op på næsen. Sidste mand drikker.'
         };
+    case 'behold':
+      return {
+        titel: 'Fingeren på bordkanten',
+        tekst: 'Du beholder 7’eren. Læg diskret en finger på bordkanten når du vil — de andre skal nå at gøre det samme. Sidste mand drikker.'
+      };
     case 'vaelg-taber':
       return {
         titel: 'Emne',
@@ -125,8 +135,8 @@ export function kortTekst(k: Kort): KortTekst {
       };
     case 'hold':
       return v.hold === 'dame'
-        ? { titel: 'Damerne drikker', tekst: 'Alle kvinder ved bordet drikker.' }
-        : { titel: 'Herrerne drikker', tekst: 'Alle mænd ved bordet drikker.' };
+        ? { titel: 'Damerne drikker', tekst: `Alle kvinder ved bordet drikker ${HOLD_SLURKE} slurke.` }
+        : { titel: 'Herrerne drikker', tekst: `Alle mænd ved bordet drikker ${HOLD_SLURKE} slurke.` };
   }
 }
 
