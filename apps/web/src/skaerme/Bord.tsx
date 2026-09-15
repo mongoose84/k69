@@ -1,6 +1,6 @@
 import type { JSX } from 'react';
 import {
-  Brik, FejringKort, Glas, Handlingskort, Maerkat, MeierKort, Plade, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet,
+  Brik, FejringKort, Glas, Handlingskort, Maerkat, MeierKort, Plade, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
   kortPaaBordet, opgave, spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, type SpilUdsyn
 } from '@k69/ui';
 import { SLURKE_PR_ENHED, formatCl, formatSlurke, taarnCl, type DrikInfo, type Handling } from '@k69/rules';
@@ -172,7 +172,7 @@ export function Bord({
             kort={kortPaaBordet(spil)}
             terning={terningPaaBordet(spil, live, ruller)}
             finger={fingerPaaBordet(spil, migId, send)}
-            kortHosId={spil.syver?.holderId ?? null}
+            kortHos={kortHos(spil)}
           />
           <div className="plade-hint">Træk for at flytte pladen · rul for at zoome</div>
           <MeierKort spil={spil} migId={migId} send={send} />

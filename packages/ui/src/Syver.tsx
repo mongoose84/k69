@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type JSX } from 'react';
-import type { Handling, Spil } from '@k69/rules';
+import { KULOER_TEGN, type Handling, type Spil } from '@k69/rules';
+import { erRoedt } from './tekst.js';
 
 /** Så længe skal kortet holdes nede før fingeren lander. */
 export const SYVER_HOLD_MS = 900;
@@ -14,7 +15,8 @@ export function SyverKort({
 }: {
   spil: Spil; migId: string; send: (h: Handling) => void; kompakt?: boolean;
 }): JSX.Element | null {
-  const min = spil.syver?.holderId === migId && !spil.finger;
+  const syver = spil.syver;
+  const min = syver?.holderId === migId && !spil.finger;
   const [andel, saetAndel] = useState(0);
   const start = useRef<number | null>(null);
   const ramme = useRef<number | null>(null);
@@ -53,9 +55,11 @@ export function SyverKort({
     if (ramme.current) cancelAnimationFrame(ramme.current);
   }, []);
 
-  if (!min) return null;
+  if (!min || !syver) return null;
 
   const str = 44;
+  const tegn = KULOER_TEGN[syver.kort.kuloer];
+  const farve = erRoedt(syver.kort) ? '#9E3B33' : '#1B241C';
   return (
     <div
       className="syver"
@@ -75,9 +79,9 @@ export function SyverKort({
       <svg width={str * 0.45} height={str * 0.64} viewBox="0 0 34 48" style={{ position: 'relative' }}>
         <rect x="0" y="0" width="34" height="48" rx="3" fill="#0B100D" opacity="0.55" transform="translate(1.5, 3)" />
         <rect x="0" y="0" width="34" height="48" rx="3" fill="#F3EDDF" stroke="#B9AE93" strokeWidth="0.8" />
-        <text x="4" y="10" fontSize="9" fontWeight="700" fill="#1B241C" style={{ fontFamily: 'var(--serif)' }}>7</text>
-        <text x="4" y="18" fontSize="7" fill="#1B241C" style={{ fontFamily: 'var(--sans)' }}>♣</text>
-        <text x="17" y="31" textAnchor="middle" dominantBaseline="central" fontSize="16" fill="#1B241C" style={{ fontFamily: 'var(--sans)' }}>♣</text>
+        <text x="4" y="10" fontSize="9" fontWeight="700" fill={farve} style={{ fontFamily: 'var(--serif)' }}>7</text>
+        <text x="4" y="18" fontSize="7" fill={farve} style={{ fontFamily: 'var(--sans)' }}>{tegn}</text>
+        <text x="17" y="31" textAnchor="middle" dominantBaseline="central" fontSize="16" fill={farve} style={{ fontFamily: 'var(--sans)' }}>{tegn}</text>
       </svg>
       {!kompakt && (
         <span className="syver-tekst">

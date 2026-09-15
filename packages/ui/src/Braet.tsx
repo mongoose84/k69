@@ -449,15 +449,23 @@ function Finger({ f }: { f: FingerPaaBordet }): JSX.Element {
   );
 }
 
+/** 7'eren på hånden: hvem har den, og hvilken kulør. */
+export interface KortHos {
+  spillerId: string;
+  tegn: string;
+  roed: boolean;
+}
+
 /** Det lille 7-kort ved brikken, så hele bordet kan se hvem der har den på hånden. */
-function SyverVedBrik(): JSX.Element {
+function SyverVedBrik({ kort }: { kort: KortHos }): JSX.Element {
+  const farve = kort.roed ? '#9E3B33' : '#1B241C';
   return (
     <g transform="translate(9, -30) rotate(12) scale(0.5)" style={{ pointerEvents: 'none' }}>
       <rect x="0" y="0" width="34" height="48" rx="3" fill="#0B100D" opacity="0.55" transform="translate(1.5, 3)" />
       <rect x="0" y="0" width="34" height="48" rx="3" fill="#F3EDDF" stroke="#B9AE93" strokeWidth="0.8" />
-      <text x="4" y="10" fontSize="9" fontWeight="700" fill="#1B241C" style={{ fontFamily: SERIF }}>7</text>
-      <text x="4" y="18" fontSize="7" fill="#1B241C" style={{ fontFamily: SANS }}>♣</text>
-      <text x="17" y="31" textAnchor="middle" dominantBaseline="central" fontSize="16" fill="#1B241C" style={{ fontFamily: SANS }}>♣</text>
+      <text x="4" y="10" fontSize="9" fontWeight="700" fill={farve} style={{ fontFamily: SERIF }}>7</text>
+      <text x="4" y="18" fontSize="7" fill={farve} style={{ fontFamily: SANS }}>{kort.tegn}</text>
+      <text x="17" y="31" textAnchor="middle" dominantBaseline="central" fontSize="16" fill={farve} style={{ fontFamily: SANS }}>{kort.tegn}</text>
     </g>
   );
 }
@@ -476,8 +484,8 @@ export interface BraetProps {
   fremhaevFelter?: number[];
   /** Fingeren på bordkanten, når den ligger der. */
   finger?: FingerPaaBordet | null;
-  /** Brikken der har 7'eren på hånden. */
-  kortHosId?: string | null;
+  /** 7'eren på hånden, hvis nogen har den. */
+  kortHos?: KortHos | null;
 }
 
 /** Selve pladen — uden svg-ramme, så hver klient selv styrer træk og zoom. */
@@ -493,7 +501,7 @@ export function BraetPlade({
   onFeltKlik,
   fremhaevFelter,
   finger = null,
-  kortHosId = null
+  kortHos = null
 }: BraetProps): JSX.Element {
   const aktiv = aktivtFelt ? FELTER[aktivtFelt - 1] : null;
 
@@ -581,7 +589,7 @@ export function BraetPlade({
           >
             {b.navn.slice(0, 1).toUpperCase()}
           </text>
-          {b.id === kortHosId && <SyverVedBrik />}
+          {kortHos && b.id === kortHos.spillerId && <SyverVedBrik kort={kortHos} />}
         </g>
       ))}
 

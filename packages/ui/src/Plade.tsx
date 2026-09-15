@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, type JSX, type PointerEvent a
 import { FELTER } from '@k69/rules';
 import {
   BRAET_STR, BraetBaggrund, BraetDefs, BraetPlade,
-  type BrikPaaPladen, type FingerPaaBordet, type KortPaaBordet, type TerningPaaBordet
+  type BrikPaaPladen, type FingerPaaBordet, type KortHos, type KortPaaBordet, type TerningPaaBordet
 } from './Braet.js';
 
 interface Kamera {
@@ -28,7 +28,7 @@ export interface PladeProps {
   visMinimap?: boolean;
   onFeltKlik?: (nr: number) => void;
   finger?: FingerPaaBordet | null;
-  kortHosId?: string | null;
+  kortHos?: KortHos | null;
 }
 
 function passer(bredde: number, hoejde: number): Kamera {
@@ -46,7 +46,7 @@ function passer(bredde: number, hoejde: number): Kamera {
  */
 export function Plade({
   id, brikker, aktivtFelt, taarnAndel, taarnCl = null, taarnKapCl = 50, kort = null, terning = null,
-  foelgZoom = null, foelgFelt = null, foelger = false, visMinimap = false, onFeltKlik, finger = null, kortHosId = null
+  foelgZoom = null, foelgFelt = null, foelger = false, visMinimap = false, onFeltKlik, finger = null, kortHos = null
 }: PladeProps): JSX.Element {
   const boks = useRef<HTMLDivElement | null>(null);
   const [maal, saetMaal] = useState({ b: 800, h: 600 });
@@ -136,7 +136,7 @@ export function Plade({
             terning={terning}
             onFeltKlik={onFeltKlik}
             finger={finger}
-            kortHosId={kortHosId}
+            kortHos={kortHos}
           />
         </g>
       </svg>

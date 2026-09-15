@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { KULOER_TEGN, type Handling, type Spil } from '@k69/rules';
-import type { FingerPaaBordet, KortPaaBordet, TerningPaaBordet } from './Braet.js';
+import type { FingerPaaBordet, KortHos, KortPaaBordet, TerningPaaBordet } from './Braet.js';
 import { erRoedt, venterPaaSlag } from './tekst.js';
 
 /** Så længe tumler terningen hen over bordet før man ser hvad der blev slået. */
@@ -83,4 +83,11 @@ export function fingerPaaBordet(spil: Spil, migId: string, send: (h: Handling) =
   const mangler = aktive.filter((s) => !f.ramte.includes(s.id)).map(kort);
   const kanTrykke = aktive.some((s) => s.id === migId) && !f.ramte.includes(migId);
   return { ramte, mangler, onTryk: kanTrykke ? () => send({ type: 'finger-tryk' }) : undefined };
+}
+
+/** 7'eren på hånden, som pladen skal tegne den ved brikken. */
+export function kortHos(spil: Spil): KortHos | null {
+  const s = spil.syver;
+  if (!s) return null;
+  return { spillerId: s.holderId, tegn: KULOER_TEGN[s.kort.kuloer], roed: erRoedt(s.kort) };
 }

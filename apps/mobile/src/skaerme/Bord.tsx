@@ -1,6 +1,6 @@
 import { useState, type JSX } from 'react';
 import {
-  Brik, FejringKort, Glas, Handlingskort, Maerkat, MeierKort, Plade, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet,
+  Brik, FejringKort, Glas, Handlingskort, Maerkat, MeierKort, Plade, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
   kortPaaBordet, opgave, spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, type SpilUdsyn
 } from '@k69/ui';
 import { formatSlurke, taarnCl, type Handling } from '@k69/rules';
@@ -66,7 +66,7 @@ export function Bord({
           kort={kortPaaBordet(spil)}
           terning={terningPaaBordet(spil, live, ruller)}
           finger={fingerPaaBordet(spil, migId, send)}
-          kortHosId={spil.syver?.holderId ?? null}
+          kortHos={kortHos(spil)}
           foelger={foelger}
           foelgZoom={0.82}
           foelgFelt={foelgFelt}
