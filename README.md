@@ -55,6 +55,18 @@ tjekker typerne på tværs.
 
 Databasen migreres automatisk når api'en starter (`apps/api/src/migrations/`).
 
+## Udgivelse
+
+Push til `main` kører `.github/workflows/docker-publish.yml`: først tests og
+typecheck, så bygges `api`, `web` og `mobil` og skubbes til GitHub Container
+Registry som `ghcr.io/<ejer>/k69/<image>:latest` (og `:main-<sha>`). `kant` og
+`db` er stock-images og bygges ikke.
+
+Vil man have serveren til at trække de nye images selv, sætter man to secrets
+på repoet: `DEPLOY_WEBHOOK_URL` og `DEPLOY_WEBHOOK_SECRET`. Så kaldes hooket
+med en `X-Hub-Signature-256`-signeret payload når alle tre images er ude.
+Uden dem udgives images stadig — der sker bare ikke noget deploy.
+
 ## Sådan er reglerne læst
 
 Feltrækkefølgen er aflæst felt for felt på fotoet af det originale bræt.
