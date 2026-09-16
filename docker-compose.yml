@@ -35,6 +35,8 @@ services:
       args:
         APP: web
     restart: unless-stopped
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-}
     depends_on:
       - api
 
@@ -45,6 +47,8 @@ services:
       args:
         APP: mobile
     restart: unless-stopped
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-}
     depends_on:
       - api
 

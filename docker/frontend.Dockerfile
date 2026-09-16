@@ -20,6 +20,10 @@ FROM nginx:1.27-alpine AS koer
 ARG APP=web
 COPY docker/nginx-frontend.conf /etc/nginx/conf.d/default.conf
 COPY --from=byg /app/apps/${APP}/dist /usr/share/nginx/html
+COPY docker/frontend-entrypoint.sh /frontend-entrypoint.sh
+RUN chmod +x /frontend-entrypoint.sh
+ENTRYPOINT ["/frontend-entrypoint.sh"]
+CMD ["nginx", "-g", "daemon off;"]
 EXPOSE 80
 
 HEALTHCHECK --interval=20s --timeout=4s --start-period=8s --retries=5 \

@@ -158,6 +158,14 @@ er det dér LISTEN/NOTIFY eller en delt cache skal ind.
 Kopiér `.env.example` til `.env` og skift adgangskoden til databasen. Variabler:
 `PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `LOG_LEVEL`.
 
+Frontendene henter data fra samme domæne som sig selv — nginx sender `/api` og
+`/ws` videre. Ligger api'et et andet sted, sættes `VITE_API_URL` som
+miljøvariabel på web- og mobil-containerne: et entrypoint-script skriver den
+ind i `/config.js` ved start, og frontend læser den derfra. Ændringer i
+variablen træder i kraft ved en genstart, uden at imaget skal bygges igen.
+Kører api'et på et andet domæne, kan `CORS_ORIGIN` sættes på api-containeren
+(kommasepareret liste af domæner); uden den reflekteres alle origins.
+
 Designet ligger i `design/` — artboards og geometri-generatoren der blev brugt
 til at tegne brættet efter fotoet.
 `design/meier/` er Meier-bægeret, og `design/bordet/` er bordet i midten med
