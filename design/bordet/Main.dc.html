@@ -1,0 +1,502 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,700&family=Karla:wght@400;500;600;700&display=swap">
+  <style>
+  :root {
+    --bg: #0E1512;
+    --panel: #141D18;
+    --panel-2: #1A241E;
+    --raise: #1F2C25;
+    --line: #26332B;
+    --line-2: #364739;
+    --ink: #EDE7DA;
+    --ink-dim: #97A398;
+    --ink-faint: #6B796D;
+    --brass: #C9A227;
+    --brass-lt: #E8CE7E;
+    --amber: #E0A03C;
+    --rust: #B4483F;
+    --sage: #93AE7C;
+    --slate: #88A2C2;
+    --plum: #B084A0;
+    --serif: 'Bodoni Moda', Georgia, 'Times New Roman', serif;
+    --sans: Karla, 'Helvetica Neue', Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+  a { color: var(--brass-lt); text-decoration: none; }
+  a:hover { color: var(--brass); }
+  h1, h2, h3 { margin: 0; font-family: var(--serif); font-weight: 500; letter-spacing: 0.01em; }
+  .eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-faint); }
+  .rule { height: 1px; background: var(--line); }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 3px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 46px; padding: 0 22px;
+         border: 1px solid var(--line-2); border-radius: 2px; background: var(--raise); color: var(--ink);
+         font-family: var(--sans); font-size: 13px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; cursor: pointer; }
+  .btn:hover { border-color: var(--brass); color: var(--brass-lt); }
+  .btn-primary { background: linear-gradient(180deg, #E8CE7E 0%, #C9A227 48%, #A5811A 100%); border-color: #7E6413; color: #14180C; }
+  .btn-primary:hover { color: #14180C; filter: brightness(1.06); }
+  .btn-ghost { background: transparent; }
+  .k69-felt { cursor: pointer; }
+  .k69-felt:hover polygon { stroke: var(--brass); stroke-width: 1.6; }
+  .app { width: 1440px; height: 900px; display: flex; flex-direction: column;
+         background: radial-gradient(120% 90% at 50% -10%, #1A2620 0%, #0E1512 62%); }
+  .topbar { height: 74px; flex: 0 0 74px; display: flex; align-items: center; gap: 24px; padding: 0 26px;
+            border-bottom: 1px solid var(--line); background: rgba(12,18,15,0.72); }
+  .mark { font-family: var(--serif); font-size: 30px; font-weight: 700; letter-spacing: 0.02em;
+          background: linear-gradient(180deg, #F0DCA0 0%, #C9A227 55%, #9A7A18 100%);
+          -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .kode-chip { display: flex; align-items: center; gap: 9px; height: 30px; padding: 0 12px; border: 1px solid var(--line-2);
+               border-radius: 2px; font-size: 11.5px; font-weight: 600; letter-spacing: 0.16em; color: var(--ink-dim); }
+  .kode-chip b { color: var(--brass-lt); }
+  .tur-pille { display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 18px 0 6px; border: 1px solid var(--line-2);
+               border-radius: 999px; background: var(--panel-2); }
+  .bord-krop { flex-grow: 1; display: flex; min-height: 0; }
+  .rail { width: 340px; flex: 0 0 340px; display: flex; flex-direction: column; background: rgba(16,23,19,0.6); min-height: 0; overflow: hidden; }
+  .rail-v { border-right: 1px solid var(--line); }
+  .rail-h { border-left: 1px solid var(--line); }
+  .rail-sek { padding: 18px 20px 20px; border-bottom: 1px solid var(--line); }
+  .rail-hoved { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
+  .brik { width: 34px; height: 34px; flex: 0 0 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+          font-family: var(--serif); font-size: 15px; font-weight: 700; color: #14180C;
+          box-shadow: inset 0 -2px 5px rgba(0,0,0,0.35), 0 1px 2px rgba(0,0,0,0.5); }
+  .spillere { display: flex; flex-direction: column; gap: 4px; }
+  .sp { display: flex; align-items: center; gap: 12px; padding: 9px 10px; border-radius: 2px; border: 1px solid transparent; }
+  .sp-paa { background: linear-gradient(90deg, rgba(201,162,39,0.14), rgba(201,162,39,0.02)); border-color: rgba(201,162,39,0.4); }
+  .sp-navn { font-size: 14px; font-weight: 600; }
+  .maerkat { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 2px; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; }
+  .maaler { display: flex; gap: 3px; }
+  .maaler i { display: block; width: 9px; height: 7px; border-radius: 1px; background: #2B382E; }
+  .maaler i.fuld { background: linear-gradient(180deg, #F2C060, #C4761A); }
+  .taeller { text-align: right; flex: 0 0 62px; }
+  .taeller b { display: block; font-family: var(--serif); font-size: 22px; font-weight: 500; line-height: 1; color: var(--amber); }
+  .taeller span { display: block; font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-faint); margin-top: 3px; }
+  .glasbar { width: 46px; height: 74px; flex: 0 0 46px; border: 1.5px solid #9FB0A2; border-radius: 4px; background: #0E1512; position: relative; overflow: hidden; }
+  .glas-fyld { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, #F2C060, #C4761A); }
+  .glas-skum { position: absolute; left: 0; right: 0; height: 7px; background: #F6EBD4; }
+  .taarn-maal { font-family: var(--serif); font-size: 28px; color: var(--amber); line-height: 1.05; }
+  .note { font-size: 11.5px; line-height: 1.55; color: var(--ink-faint); }
+  .scene { flex-grow: 1; min-width: 0; position: relative; display: flex; }
+  .plade { flex-grow: 1; position: relative; overflow: hidden;
+           background: radial-gradient(70% 60% at 50% 42%, #223129 0%, #131C17 70%, #0C120F 100%); }
+  .plade svg { display: block; width: 100%; height: 100%; }
+  .plade-hint { position: absolute; left: 18px; bottom: 18px; font-size: 10.5px; letter-spacing: 0.14em; color: var(--ink-faint); text-transform: uppercase; }
+  .zoom { position: absolute; right: 18px; bottom: 16px; display: flex; gap: 6px; }
+  .zknap { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--line-2);
+           border-radius: 2px; background: rgba(14,21,18,0.82); color: var(--ink-dim); font-size: 15px; }
+
+  /* Action-area: hele blokken bærer spillerens farve, så man ser på afstand hvem der er på. */
+  .action { display: flex; flex-direction: column; gap: 14px; padding: 18px 20px 20px; border-bottom: 1px solid var(--line); position: relative; }
+  .action-farvet { border-left: 4px solid var(--sp); background: linear-gradient(180deg, color-mix(in oklab, var(--sp) 22%, transparent) 0%, color-mix(in oklab, var(--sp) 6%, transparent) 100%); }
+  .action-hat { display: flex; align-items: center; gap: 10px; }
+  .action-hat .eyebrow { color: var(--sp); }
+  .action-titel { font-family: var(--serif); font-size: 30px; line-height: 1.08; color: var(--sp); }
+  .action-txt { margin: 0; font-size: 13px; line-height: 1.6; color: var(--ink-dim); }
+  .knap { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 46px; padding: 0 22px;
+          border: 1px solid var(--line-2); border-radius: 2px; background: var(--raise); color: var(--ink);
+          font-family: var(--sans); font-size: 13px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; }
+  .knap-primaer { background: linear-gradient(180deg, #E8CE7E 0%, #C9A227 48%, #A5811A 100%); border-color: #7E6413; color: #14180C; }
+  .knap-tom { background: transparent; font-size: 11px; min-height: 38px; }
+  .taarn-vagt { display: flex; flex-direction: column; gap: 10px; padding: 10px 12px; border: 1px solid rgba(224,160,60,0.35); border-radius: 3px; background: rgba(224,160,60,0.07); }
+  .log { display: flex; flex-direction: column; }
+  .log-linje { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line); font-size: 12.5px; line-height: 1.5; color: var(--ink-dim); }
+  .log-prik { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; margin-top: 5px; }
+  </style>
+</helmet>
+<div class="app">
+  <header class="topbar">
+    <div class="mark">K69</div>
+    <div class="kode-chip"><span>SPIL</span><b>K7M2Q</b></div>
+    <div class="tur-pille">
+      <div class="brik" style="background: #D8A93F;">M</div>
+      <div><div class="eyebrow">Tur</div><div style="font-size: 14px; font-weight: 600;">Mette</div></div>
+    </div>
+    <div style="flex-grow: 1;"></div>
+    <div class="note">Runde 3 · turen går med uret</div>
+  </header>
+  <div class="bord-krop">
+    <aside class="rail rail-v">
+    <section class="rail-sek" style="flex-grow: 1; min-height: 0;">
+      <div class="rail-hoved"><span class="eyebrow">Ved bordet</span><span class="eyebrow" style="color: var(--brass);">4</span></div>
+      <div class="spillere"><div class="sp sp-paa">
+    <div class="brik" style="background: #D8A93F;">M</div>
+    <div style="display: flex; flex-direction: column; gap: 3px; flex-grow: 1; min-width: 0;">
+      <div style="display: flex; align-items: center; gap: 7px;">
+        <span class="sp-navn">Mette</span>
+        
+        
+        
+        
+      </div>
+      <div class="note" style="font-size: 11px;">Felt 24 · DRIK!</div>
+      <div style="display: flex; align-items: center; gap: 8px; margin-top: 2px;"><span class="maaler"><i class="fuld"></i><i class="fuld"></i><i class="fuld"></i><i class="fuld"></i><i class="fuld"></i><i class="fuld"></i><i class="fuld"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span><span class="note" style="font-size: 10px;">7/11</span></div>
+    </div>
+    <div class="taeller"><b style="">2</b><span>pilsnere tømt</span></div>
+  </div><div class="sp">
+    <div class="brik" style="background: #8FAF74;">J</div>
+    <div style="display: flex; flex-direction: column; gap: 3px; flex-grow: 1; min-width: 0;">
+      <div style="display: flex; align-items: center; gap: 7px;">
+        <span class="sp-navn">Jeppe</span>
+        
+        <span class="maerkat" style="color: #E0A03C; border: 1px solid #E0A03C55; background: #E0A03C1a;">TÅRNET</span>
+        
+        <span class="maerkat" style="color: #93AE7C; border: 1px solid #93AE7C55; background: #93AE7C1a;">DIG</span>
+      </div>
+      <div class="note" style="font-size: 11px;">Felt 11 · Bier Meister</div>
+      <div style="display: flex; align-items: center; gap: 8px; margin-top: 2px;"><span class="maaler"><i class="fuld"></i><i class="fuld"></i><i class="fuld"></i><i class="fuld"></i><i class="fuld"></i><i class="fuld"></i><i class="fuld"></i><i class="fuld"></i><i class="fuld"></i><i class="fuld"></i><i class="fuld"></i></span><span class="note" style="font-size: 10px;">11/11</span></div>
+    </div>
+    <div class="taeller"><b style="">1</b><span>Classic tømt</span></div>
+  </div><div class="sp">
+    <div class="brik" style="background: #87A4C6;">S</div>
+    <div style="display: flex; flex-direction: column; gap: 3px; flex-grow: 1; min-width: 0;">
+      <div style="display: flex; align-items: center; gap: 7px;">
+        <span class="sp-navn">Sofie</span>
+        
+        
+        <span class="maerkat" style="color: #d98279; border: 1px solid #d9827955; background: #d982791a;">PIT 3</span>
+        
+      </div>
+      <div class="note" style="font-size: 11px;">Pitten · plads 3</div>
+      <div style="display: flex; align-items: center; gap: 8px; margin-top: 2px;"><span class="maaler"><i class="fuld"></i><i class="fuld"></i><i class="fuld"></i><i class="fuld"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span><span class="note" style="font-size: 10px;">4/11</span></div>
+    </div>
+    <div class="taeller"><b style="color: #97A398;">0</b><span>glas vin tømt</span></div>
+  </div><div class="sp">
+    <div class="brik" style="background: #C4776B;">R</div>
+    <div style="display: flex; flex-direction: column; gap: 3px; flex-grow: 1; min-width: 0;">
+      <div style="display: flex; align-items: center; gap: 7px;">
+        <span class="sp-navn">Rasmus</span>
+        <span class="maerkat" style="color: #E8CE7E; border: 1px solid #E8CE7E55; background: #E8CE7E1a;">BM</span>
+        
+        
+        
+      </div>
+      <div class="note" style="font-size: 11px;">Felt 32 · Øl i tårnet</div>
+      <div style="display: flex; align-items: center; gap: 8px; margin-top: 2px;"><span class="maaler"><i class="fuld"></i><i class="fuld"></i><i class="fuld"></i><i class="fuld"></i><i class="fuld"></i><i class="fuld"></i><i class="fuld"></i><i class="fuld"></i><i class="fuld"></i><i class=""></i><i class=""></i></span><span class="note" style="font-size: 10px;">9/11</span></div>
+    </div>
+    <div class="taeller"><b style="">3</b><span>pilsnere tømt</span></div>
+  </div></div>
+    </section>
+    <section class="rail-sek" style="border-bottom: none;">
+      <div class="rail-hoved"><span class="eyebrow">Tårnet</span><span class="eyebrow">50 cl glas</span></div>
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <div class="glasbar"><div class="glas-fyld" style="height: 55%;"></div><div class="glas-skum" style="bottom: 55%;"></div></div>
+        <div>
+          <div class="taarn-maal">31 cl</div>
+          <div class="note">10,3 slurke. Jeppe er i gang med at bunde det.</div>
+        </div>
+      </div>
+    </section>
+  </aside>
+    <main class="scene">
+      <div class="plade">
+        <svg viewBox="0 0 1200 650" preserveAspectRatio="xMidYMid meet">
+    <defs>
+<radialGradient id="m-felt" cx="50%" cy="42%" r="72%"><stop offset="0%" stop-color="#25352B"/><stop offset="60%" stop-color="#1A2620"/><stop offset="100%" stop-color="#111A15"/></radialGradient>
+<linearGradient id="m-brass" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E8CE7E"/><stop offset="45%" stop-color="#C9A227"/><stop offset="100%" stop-color="#8C6F16"/></linearGradient>
+<linearGradient id="m-beer" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F2C060"/><stop offset="100%" stop-color="#C4761A"/></linearGradient>
+<filter id="m-grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope="0.06"/></feComponentTransfer></filter>
+<filter id="m-glow" x="-70%" y="-70%" width="240%" height="240%"><feGaussianBlur stdDeviation="7" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+    <rect x="0" y="0" width="1200" height="650" fill="url(#m-felt)"/>
+<rect x="0" y="0" width="1200" height="650" fill="#ffffff" filter="url(#m-grain)" opacity="0.55"/>
+<path d="M 260 562 L 274.2 561.3 L 288.1 559.2 L 301.3 556.1 L 313.7 552.1 L 325.2 547.6 L 335.9 542.8 L 346 538 L 346 538 L 355.6 533.1 L 364.8 528.2 L 373.7 523.5 L 382.4 519 L 391 514.6 L 399.5 510.3 L 407.9 506.3 L 407.9 506.3 L 416.4 502.5 L 424.8 498.8 L 433.3 495.4 L 441.8 492.2 L 450.4 489.2 L 459.1 486.4 L 467.8 483.8 L 467.8 483.8 L 476.6 481.4 L 485.4 479.2 L 494.4 477.2 L 503.4 475.4 L 512.4 473.8 L 521.6 472.4 L 530.8 471.1 L 530.8 471.1 L 540 470 L 549.3 469.1 L 558.6 468.4 L 568 467.8 L 577.4 467.4 L 586.8 467.1 L 596.3 467 L 596.3 467 L 605.7 467 L 615.2 467.2 L 624.7 467.5 L 634 467.9 L 643.4 468.5 L 652.7 469.3 L 662 470.2 L 662 470.2 L 671.2 471.4 L 680.4 472.6 L 689.5 474.1 L 698.5 475.8 L 707.5 477.6 L 716.4 479.6 L 725.3 481.9 L 725.3 481.9 L 734.1 484.3 L 742.8 487 L 751.4 489.8 L 760 492.9 L 768.5 496.1 L 777 499.6 L 785.4 503.3 L 785.4 503.3 L 793.9 507.2 L 802.3 511.2 L 810.8 515.5 L 819.4 519.9 L 828.2 524.5 L 837.2 529.3 L 846.4 534.1 L 846.4 534.1 L 856.1 539 L 866.3 543.9 L 877.2 548.6 L 888.9 553 L 901.4 556.8 L 914.8 559.8 L 928.8 561.6 L 928.8 561.6 L 942.6 562 L 954.8 561.5 L 967 560.5 L 979.1 558.8 L 991.1 556.5 L 1003 553.7 L 1014.7 550.2 L 1014.7 550.2 L 1026.2 546.1 L 1037.5 541.5 L 1048.6 536.3 L 1059.4 530.5 L 1069.8 524.2 L 1080 517.4 L 1089.7 510.1 L 1089.7 510.1 L 1099.1 502.3 L 1108.2 494 L 1116.7 485.3 L 1124.9 476.2 L 1132.5 466.7 L 1139.6 456.8 L 1146.3 446.5 L 1146.3 446.5 L 1152.4 435.9 L 1158 425 L 1163 413.9 L 1167.5 402.6 L 1171.3 391 L 1174.7 379.2 L 1177.3 367.2 L 1177.3 367.2 L 1179.4 355.2 L 1180.9 343.1 L 1181.7 330.9 L 1182 318.7 L 1181.6 306.4 L 1180.6 294.3 L 1179 282.2 L 1179 282.2 L 1176.8 270.2 L 1174 258.3 L 1170.6 246.5 L 1166.6 235 L 1162 223.7 L 1156.9 212.6 L 1151.2 201.8 L 1151.2 201.8 L 1144.9 191.3 L 1138.1 181.1 L 1130.9 171.3 L 1123.1 161.8 L 1114.9 152.8 L 1106.3 144.2 L 1097.2 136 L 1097.2 136 L 1087.7 128.3 L 1077.8 121.1 L 1067.6 114.4 L 1057.1 108.2 L 1046.3 102.6 L 1035.1 97.5 L 1023.7 93 L 1023.7 93 L 1012.2 89 L 1000.5 85.7 L 988.6 82.9 L 976.5 80.8 L 964.4 79.2 L 952.2 78.3 L 940 78 L 940 78 L 925.8 78.7 L 911.9 80.8 L 898.7 83.9 L 886.3 87.9 L 874.8 92.4 L 864.1 97.2 L 854 102 L 854 102 L 844.4 106.9 L 835.2 111.8 L 826.3 116.5 L 817.6 121 L 809 125.4 L 800.5 129.7 L 792.1 133.7 L 792.1 133.7 L 783.6 137.5 L 775.2 141.2 L 766.7 144.6 L 758.2 147.8 L 749.6 150.8 L 740.9 153.6 L 732.2 156.2 L 732.2 156.2 L 723.4 158.6 L 714.6 160.8 L 705.6 162.8 L 696.6 164.6 L 687.6 166.2 L 678.4 167.6 L 669.2 168.9 L 669.2 168.9 L 660 170 L 650.7 170.9 L 641.4 171.6 L 632 172.2 L 622.6 172.6 L 613.2 172.9 L 603.7 173 L 603.7 173 L 594.3 173 L 584.8 172.8 L 575.3 172.5 L 566 172.1 L 556.6 171.5 L 547.3 170.7 L 538 169.8 L 538 169.8 L 528.8 168.6 L 519.6 167.4 L 510.5 165.9 L 501.5 164.2 L 492.5 162.4 L 483.6 160.4 L 474.7 158.1 L 474.7 158.1 L 465.9 155.7 L 457.2 153 L 448.6 150.2 L 440 147.1 L 431.5 143.9 L 423 140.4 L 414.6 136.7 L 414.6 136.7 L 406.1 132.8 L 397.7 128.8 L 389.2 124.5 L 380.6 120.1 L 371.8 115.5 L 362.8 110.7 L 353.6 105.9 L 353.6 105.9 L 343.9 101 L 333.7 96.1 L 322.8 91.4 L 311.1 87 L 298.6 83.2 L 285.2 80.2 L 271.2 78.4 L 271.2 78.4 L 257.4 78 L 245.2 78.5 L 233 79.5 L 220.9 81.2 L 208.9 83.5 L 197 86.3 L 185.3 89.8 L 185.3 89.8 L 173.8 93.9 L 162.5 98.5 L 151.4 103.7 L 140.6 109.5 L 130.2 115.8 L 120 122.6 L 110.3 129.9 L 110.3 129.9 L 100.9 137.7 L 91.8 146 L 83.3 154.7 L 75.1 163.8 L 67.5 173.3 L 60.4 183.2 L 53.7 193.5 L 53.7 193.5 L 47.6 204.1 L 42 215 L 37 226.1 L 32.5 237.4 L 28.7 249 L 25.3 260.8 L 22.7 272.8 L 22.7 272.8 L 20.6 284.8 L 19.1 296.9 L 18.3 309.1 L 18 321.3 L 18.4 333.6 L 19.4 345.7 L 21 357.8 L 21 357.8 L 23.2 369.8 L 26 381.7 L 29.4 393.5 L 33.4 405 L 38 416.3 L 43.1 427.4 L 48.8 438.2 L 48.8 438.2 L 55.1 448.7 L 61.9 458.9 L 69.1 468.7 L 76.9 478.2 L 85.1 487.2 L 93.7 495.8 L 102.8 504 L 102.8 504 L 112.3 511.7 L 122.2 518.9 L 132.4 525.6 L 142.9 531.8 L 153.7 537.4 L 164.9 542.5 L 176.3 547 L 176.3 547 L 187.8 551 L 199.5 554.3 L 211.4 557.1 L 223.5 559.2 L 235.6 560.8 L 247.8 561.7 L 260 562 Z" fill="#0C120E" opacity="0.6" transform="translate(0, 8)"/>
+<path d="M 260 562 L 274.2 561.3 L 288.1 559.2 L 301.3 556.1 L 313.7 552.1 L 325.2 547.6 L 335.9 542.8 L 346 538 L 346 538 L 355.6 533.1 L 364.8 528.2 L 373.7 523.5 L 382.4 519 L 391 514.6 L 399.5 510.3 L 407.9 506.3 L 407.9 506.3 L 416.4 502.5 L 424.8 498.8 L 433.3 495.4 L 441.8 492.2 L 450.4 489.2 L 459.1 486.4 L 467.8 483.8 L 467.8 483.8 L 476.6 481.4 L 485.4 479.2 L 494.4 477.2 L 503.4 475.4 L 512.4 473.8 L 521.6 472.4 L 530.8 471.1 L 530.8 471.1 L 540 470 L 549.3 469.1 L 558.6 468.4 L 568 467.8 L 577.4 467.4 L 586.8 467.1 L 596.3 467 L 596.3 467 L 605.7 467 L 615.2 467.2 L 624.7 467.5 L 634 467.9 L 643.4 468.5 L 652.7 469.3 L 662 470.2 L 662 470.2 L 671.2 471.4 L 680.4 472.6 L 689.5 474.1 L 698.5 475.8 L 707.5 477.6 L 716.4 479.6 L 725.3 481.9 L 725.3 481.9 L 734.1 484.3 L 742.8 487 L 751.4 489.8 L 760 492.9 L 768.5 496.1 L 777 499.6 L 785.4 503.3 L 785.4 503.3 L 793.9 507.2 L 802.3 511.2 L 810.8 515.5 L 819.4 519.9 L 828.2 524.5 L 837.2 529.3 L 846.4 534.1 L 846.4 534.1 L 856.1 539 L 866.3 543.9 L 877.2 548.6 L 888.9 553 L 901.4 556.8 L 914.8 559.8 L 928.8 561.6 L 928.8 561.6 L 942.6 562 L 954.8 561.5 L 967 560.5 L 979.1 558.8 L 991.1 556.5 L 1003 553.7 L 1014.7 550.2 L 1014.7 550.2 L 1026.2 546.1 L 1037.5 541.5 L 1048.6 536.3 L 1059.4 530.5 L 1069.8 524.2 L 1080 517.4 L 1089.7 510.1 L 1089.7 510.1 L 1099.1 502.3 L 1108.2 494 L 1116.7 485.3 L 1124.9 476.2 L 1132.5 466.7 L 1139.6 456.8 L 1146.3 446.5 L 1146.3 446.5 L 1152.4 435.9 L 1158 425 L 1163 413.9 L 1167.5 402.6 L 1171.3 391 L 1174.7 379.2 L 1177.3 367.2 L 1177.3 367.2 L 1179.4 355.2 L 1180.9 343.1 L 1181.7 330.9 L 1182 318.7 L 1181.6 306.4 L 1180.6 294.3 L 1179 282.2 L 1179 282.2 L 1176.8 270.2 L 1174 258.3 L 1170.6 246.5 L 1166.6 235 L 1162 223.7 L 1156.9 212.6 L 1151.2 201.8 L 1151.2 201.8 L 1144.9 191.3 L 1138.1 181.1 L 1130.9 171.3 L 1123.1 161.8 L 1114.9 152.8 L 1106.3 144.2 L 1097.2 136 L 1097.2 136 L 1087.7 128.3 L 1077.8 121.1 L 1067.6 114.4 L 1057.1 108.2 L 1046.3 102.6 L 1035.1 97.5 L 1023.7 93 L 1023.7 93 L 1012.2 89 L 1000.5 85.7 L 988.6 82.9 L 976.5 80.8 L 964.4 79.2 L 952.2 78.3 L 940 78 L 940 78 L 925.8 78.7 L 911.9 80.8 L 898.7 83.9 L 886.3 87.9 L 874.8 92.4 L 864.1 97.2 L 854 102 L 854 102 L 844.4 106.9 L 835.2 111.8 L 826.3 116.5 L 817.6 121 L 809 125.4 L 800.5 129.7 L 792.1 133.7 L 792.1 133.7 L 783.6 137.5 L 775.2 141.2 L 766.7 144.6 L 758.2 147.8 L 749.6 150.8 L 740.9 153.6 L 732.2 156.2 L 732.2 156.2 L 723.4 158.6 L 714.6 160.8 L 705.6 162.8 L 696.6 164.6 L 687.6 166.2 L 678.4 167.6 L 669.2 168.9 L 669.2 168.9 L 660 170 L 650.7 170.9 L 641.4 171.6 L 632 172.2 L 622.6 172.6 L 613.2 172.9 L 603.7 173 L 603.7 173 L 594.3 173 L 584.8 172.8 L 575.3 172.5 L 566 172.1 L 556.6 171.5 L 547.3 170.7 L 538 169.8 L 538 169.8 L 528.8 168.6 L 519.6 167.4 L 510.5 165.9 L 501.5 164.2 L 492.5 162.4 L 483.6 160.4 L 474.7 158.1 L 474.7 158.1 L 465.9 155.7 L 457.2 153 L 448.6 150.2 L 440 147.1 L 431.5 143.9 L 423 140.4 L 414.6 136.7 L 414.6 136.7 L 406.1 132.8 L 397.7 128.8 L 389.2 124.5 L 380.6 120.1 L 371.8 115.5 L 362.8 110.7 L 353.6 105.9 L 353.6 105.9 L 343.9 101 L 333.7 96.1 L 322.8 91.4 L 311.1 87 L 298.6 83.2 L 285.2 80.2 L 271.2 78.4 L 271.2 78.4 L 257.4 78 L 245.2 78.5 L 233 79.5 L 220.9 81.2 L 208.9 83.5 L 197 86.3 L 185.3 89.8 L 185.3 89.8 L 173.8 93.9 L 162.5 98.5 L 151.4 103.7 L 140.6 109.5 L 130.2 115.8 L 120 122.6 L 110.3 129.9 L 110.3 129.9 L 100.9 137.7 L 91.8 146 L 83.3 154.7 L 75.1 163.8 L 67.5 173.3 L 60.4 183.2 L 53.7 193.5 L 53.7 193.5 L 47.6 204.1 L 42 215 L 37 226.1 L 32.5 237.4 L 28.7 249 L 25.3 260.8 L 22.7 272.8 L 22.7 272.8 L 20.6 284.8 L 19.1 296.9 L 18.3 309.1 L 18 321.3 L 18.4 333.6 L 19.4 345.7 L 21 357.8 L 21 357.8 L 23.2 369.8 L 26 381.7 L 29.4 393.5 L 33.4 405 L 38 416.3 L 43.1 427.4 L 48.8 438.2 L 48.8 438.2 L 55.1 448.7 L 61.9 458.9 L 69.1 468.7 L 76.9 478.2 L 85.1 487.2 L 93.7 495.8 L 102.8 504 L 102.8 504 L 112.3 511.7 L 122.2 518.9 L 132.4 525.6 L 142.9 531.8 L 153.7 537.4 L 164.9 542.5 L 176.3 547 L 176.3 547 L 187.8 551 L 199.5 554.3 L 211.4 557.1 L 223.5 559.2 L 235.6 560.8 L 247.8 561.7 L 260 562 Z" fill="#16211B" stroke="#3E4E42" stroke-width="1.5"/>
+<path d="M 260 478 L 265.9 477.7 L 272 476.8 L 278.4 475.2 L 285.3 473 L 292.6 470.2 L 300.4 466.7 L 308.5 462.8 L 308.5 462.8 L 316.9 458.5 L 325.5 454 L 334.5 449.2 L 343.7 444.4 L 353.1 439.6 L 362.7 434.8 L 372.4 430.2 L 372.4 430.2 L 382.4 425.7 L 392.5 421.3 L 402.7 417.2 L 413.1 413.3 L 423.6 409.6 L 434.1 406.2 L 444.8 403 L 444.8 403 L 455.5 400.1 L 466.2 397.4 L 477 395 L 487.8 392.9 L 498.6 390.9 L 509.4 389.2 L 520.3 387.8 L 520.3 387.8 L 531.1 386.5 L 541.9 385.5 L 552.7 384.6 L 563.5 383.9 L 574.3 383.5 L 585.1 383.2 L 595.8 383 L 595.8 383 L 606.5 383 L 617.2 383.2 L 628 383.5 L 638.8 384.1 L 649.6 384.8 L 660.4 385.7 L 671.2 386.8 L 671.2 386.8 L 682 388.1 L 692.9 389.6 L 703.7 391.3 L 714.5 393.3 L 725.3 395.5 L 736.1 398 L 746.8 400.7 L 746.8 400.7 L 757.5 403.7 L 768.1 406.9 L 778.7 410.4 L 789.1 414.1 L 799.5 418 L 809.7 422.2 L 819.8 426.6 L 819.8 426.6 L 829.7 431.2 L 839.4 435.9 L 849 440.6 L 858.3 445.5 L 867.4 450.3 L 876.3 455 L 885 459.5 L 885 459.5 L 893.3 463.7 L 901.3 467.5 L 909 470.8 L 916.2 473.6 L 923 475.6 L 929.3 477 L 935.4 477.8 L 935.4 477.8 L 941.7 478 L 949.7 477.7 L 957.6 477 L 965.5 475.9 L 973.3 474.4 L 981.1 472.6 L 988.8 470.3 L 988.8 470.3 L 996.3 467.6 L 1003.7 464.6 L 1010.9 461.2 L 1017.9 457.5 L 1024.8 453.3 L 1031.4 448.9 L 1037.8 444.1 L 1037.8 444.1 L 1043.9 439 L 1049.8 433.6 L 1055.4 428 L 1060.7 422 L 1065.7 415.7 L 1070.4 409.3 L 1074.7 402.6 L 1074.7 402.6 L 1078.7 395.7 L 1082.3 388.6 L 1085.6 381.3 L 1088.5 373.9 L 1091.1 366.3 L 1093.2 358.7 L 1094.9 350.9 L 1094.9 350.9 L 1096.3 343 L 1097.3 335.1 L 1097.8 327.1 L 1098 319.1 L 1097.8 311.2 L 1097.1 303.2 L 1096.1 295.3 L 1096.1 295.3 L 1094.6 287.5 L 1092.8 279.7 L 1090.5 272.1 L 1087.9 264.5 L 1084.9 257.1 L 1081.6 249.9 L 1077.9 242.8 L 1077.9 242.8 L 1073.8 235.9 L 1069.4 229.3 L 1064.7 222.9 L 1059.6 216.7 L 1054.2 210.8 L 1048.5 205.2 L 1042.6 199.9 L 1042.6 199.9 L 1036.5 194.9 L 1030 190.1 L 1023.3 185.8 L 1016.4 181.7 L 1009.3 178 L 1002.1 174.7 L 994.7 171.8 L 994.7 171.8 L 987.1 169.2 L 979.5 167 L 971.7 165.2 L 963.8 163.8 L 956 162.8 L 948 162.2 L 940 162 L 940 162 L 934.1 162.3 L 928 163.2 L 921.6 164.8 L 914.7 167 L 907.4 169.8 L 899.6 173.3 L 891.5 177.2 L 891.5 177.2 L 883.1 181.5 L 874.5 186 L 865.5 190.8 L 856.3 195.6 L 846.9 200.4 L 837.3 205.2 L 827.6 209.8 L 827.6 209.8 L 817.6 214.3 L 807.5 218.7 L 797.3 222.8 L 786.9 226.7 L 776.4 230.4 L 765.9 233.8 L 755.2 237 L 755.2 237 L 744.5 239.9 L 733.8 242.6 L 723 245 L 712.2 247.1 L 701.4 249.1 L 690.6 250.8 L 679.7 252.2 L 679.7 252.2 L 668.9 253.5 L 658.1 254.5 L 647.3 255.4 L 636.5 256.1 L 625.7 256.5 L 614.9 256.8 L 604.2 257 L 604.2 257 L 593.5 257 L 582.8 256.8 L 572 256.5 L 561.2 255.9 L 550.4 255.2 L 539.6 254.3 L 528.8 253.2 L 528.8 253.2 L 518 251.9 L 507.1 250.4 L 496.3 248.7 L 485.5 246.7 L 474.7 244.5 L 463.9 242 L 453.2 239.3 L 453.2 239.3 L 442.5 236.3 L 431.9 233.1 L 421.3 229.6 L 410.9 225.9 L 400.5 222 L 390.3 217.8 L 380.2 213.4 L 380.2 213.4 L 370.3 208.8 L 360.6 204.1 L 351 199.4 L 341.7 194.5 L 332.6 189.7 L 323.7 185 L 315 180.5 L 315 180.5 L 306.7 176.3 L 298.7 172.5 L 291 169.2 L 283.8 166.4 L 277 164.4 L 270.7 163 L 264.6 162.2 L 264.6 162.2 L 258.3 162 L 250.3 162.3 L 242.4 163 L 234.5 164.1 L 226.7 165.6 L 218.9 167.4 L 211.2 169.7 L 211.2 169.7 L 203.7 172.4 L 196.3 175.4 L 189.1 178.8 L 182.1 182.5 L 175.2 186.7 L 168.6 191.1 L 162.2 195.9 L 162.2 195.9 L 156.1 201 L 150.2 206.4 L 144.6 212 L 139.3 218 L 134.3 224.3 L 129.6 230.7 L 125.3 237.4 L 125.3 237.4 L 121.3 244.3 L 117.7 251.4 L 114.4 258.7 L 111.5 266.1 L 108.9 273.7 L 106.8 281.3 L 105.1 289.1 L 105.1 289.1 L 103.7 297 L 102.7 304.9 L 102.2 312.9 L 102 320.9 L 102.2 328.8 L 102.9 336.8 L 103.9 344.7 L 103.9 344.7 L 105.4 352.5 L 107.2 360.3 L 109.5 367.9 L 112.1 375.5 L 115.1 382.9 L 118.4 390.1 L 122.1 397.2 L 122.1 397.2 L 126.2 404.1 L 130.6 410.7 L 135.3 417.1 L 140.4 423.3 L 145.8 429.2 L 151.5 434.8 L 157.4 440.1 L 157.4 440.1 L 163.5 445.1 L 170 449.9 L 176.7 454.2 L 183.6 458.3 L 190.7 462 L 197.9 465.3 L 205.3 468.2 L 205.3 468.2 L 212.9 470.8 L 220.5 473 L 228.3 474.8 L 236.2 476.2 L 244 477.2 L 252 477.8 L 260 478 Z" fill="url(#m-felt)" stroke="#3E4E42" stroke-width="1.5"/>
+<g class="k69-felter">
+<g class="k69-felt" data-nr="1" data-type="tre">
+<polygon points="260,562 274.2,561.3 288.1,559.2 301.3,556.1 313.7,552.1 325.2,547.6 335.9,542.8 346,538 308.5,462.8 300.4,466.7 292.6,470.2 285.3,473 278.4,475.2 272,476.8 265.9,477.7 260,478" fill="#1D2A21" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(294.7, 514.2) rotate(-17.9)" text-anchor="middle" dominant-baseline="central" fill="#93AE7C" font-size="12" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">3 til..?</tspan></text>
+</g>
+<g class="k69-felt" data-nr="2" data-type="fri">
+<polygon points="346,538 355.6,533.1 364.8,528.2 373.7,523.5 382.4,519 391,514.6 399.5,510.3 407.9,506.3 372.4,430.2 362.7,434.8 353.1,439.6 343.7,444.4 334.5,449.2 325.5,454 316.9,458.5 308.5,462.8" fill="#1B2820" stroke="#4C5C50" stroke-width="1"/>
+<circle cx="358.6" cy="484" r="3.2" fill="#5E6E5F"/>
+</g>
+<g class="k69-felt" data-nr="3" data-type="gobm">
+<polygon points="407.9,506.3 416.4,502.5 424.8,498.8 433.3,495.4 441.8,492.2 450.4,489.2 459.1,486.4 467.8,483.8 444.8,403 434.1,406.2 423.6,409.6 413.1,413.3 402.7,417.2 392.5,421.3 382.4,425.7 372.4,430.2" fill="#26221B" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(422.7, 454.5) rotate(-20.7)" text-anchor="middle" dominant-baseline="central" fill="#D08A4E" font-size="10" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-11.4">Go!</tspan><tspan x="0" dy="11.4">Bier</tspan><tspan x="0" dy="11.4">Meister</tspan></text>
+</g>
+<g class="k69-felt" data-nr="4" data-type="fri">
+<polygon points="467.8,483.8 476.6,481.4 485.4,479.2 494.4,477.2 503.4,475.4 512.4,473.8 521.6,472.4 530.8,471.1 520.3,387.8 509.4,389.2 498.6,390.9 487.8,392.9 477,395 466.2,397.4 455.5,400.1 444.8,403" fill="#1B2820" stroke="#4C5C50" stroke-width="1"/>
+<circle cx="490.6" cy="435.1" r="3.2" fill="#5E6E5F"/>
+</g>
+<g class="k69-felt" data-nr="5" data-type="drik">
+<polygon points="530.8,471.1 540,470 549.3,469.1 558.6,468.4 568,467.8 577.4,467.4 586.8,467.1 596.3,467 595.8,383 585.1,383.2 574.3,383.5 563.5,383.9 552.7,384.6 541.9,385.5 531.1,386.5 520.3,387.8" fill="#8E2F2C" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(560.7, 426.2) rotate(-3.5)" text-anchor="middle" dominant-baseline="central" fill="#F6E7E1" font-size="14" font-weight="700" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">DRIK!</tspan></text>
+</g>
+<g class="k69-felt" data-nr="6" data-type="tre">
+<polygon points="596.3,467 605.7,467 615.2,467.2 624.7,467.5 634,467.9 643.4,468.5 652.7,469.3 662,470.2 671.2,386.8 660.4,385.7 649.6,384.8 638.8,384.1 628,383.5 617.2,383.2 606.5,383 595.8,383" fill="#1D2A21" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(631.4, 425.7) rotate(2.8)" text-anchor="middle" dominant-baseline="central" fill="#93AE7C" font-size="12" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">3 til..?</tspan></text>
+</g>
+<g class="k69-felt" data-nr="7" data-type="kort">
+<polygon points="662,470.2 671.2,471.4 680.4,472.6 689.5,474.1 698.5,475.8 707.5,477.6 716.4,479.6 725.3,481.9 746.8,400.7 736.1,398 725.3,395.5 714.5,393.3 703.7,391.3 692.9,389.6 682,388.1 671.2,386.8" fill="#1B222B" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(701.6, 433.6) rotate(10.3)" text-anchor="middle" dominant-baseline="central" fill="#88A2C2" font-size="11" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-6.3">Træk et</tspan><tspan x="0" dy="12.5">kort</tspan></text>
+</g>
+<g class="k69-felt" data-nr="8" data-type="fri">
+<polygon points="725.3,481.9 734.1,484.3 742.8,487 751.4,489.8 760,492.9 768.5,496.1 777,499.6 785.4,503.3 819.8,426.6 809.7,422.2 799.5,418 789.1,414.1 778.7,410.4 768.1,406.9 757.5,403.7 746.8,400.7" fill="#1B2820" stroke="#4C5C50" stroke-width="1"/>
+<circle cx="769.8" cy="451.8" r="3.2" fill="#5E6E5F"/>
+</g>
+<g class="k69-felt" data-nr="9" data-type="taarn">
+<polygon points="785.4,503.3 793.9,507.2 802.3,511.2 810.8,515.5 819.4,519.9 828.2,524.5 837.2,529.3 846.4,534.1 885,459.5 876.3,455 867.4,450.3 858.3,445.5 849,440.6 839.4,435.9 829.7,431.2 819.8,426.6" fill="#27231A" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(834.4, 480.4) rotate(27.3)" text-anchor="middle" dominant-baseline="central" fill="#E0A03C" font-size="11" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-6.3">Øl i</tspan><tspan x="0" dy="12.5">tårnet</tspan></text>
+</g>
+<g class="k69-felt" data-nr="10" data-type="fri">
+<polygon points="846.4,534.1 856.1,539 866.3,543.9 877.2,548.6 888.9,553 901.4,556.8 914.8,559.8 928.8,561.6 935.4,477.8 929.3,477 923,475.6 916.2,473.6 909,470.8 901.3,467.5 893.3,463.7 885,459.5" fill="#1B2820" stroke="#4C5C50" stroke-width="1"/>
+<circle cx="897.8" cy="511.6" r="3.2" fill="#5E6E5F"/>
+</g>
+<g class="k69-felt" data-nr="11" data-type="bm">
+<polygon points="928.8,561.6 942.6,562 954.8,561.5 967,560.5 979.1,558.8 991.1,556.5 1003,553.7 1014.7,550.2 988.8,470.3 981.1,472.6 973.3,474.4 965.5,475.9 957.6,477 949.7,477.7 941.7,478 935.4,477.8" fill="#C9A227" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(967.3, 518.1) rotate(-7.8)" text-anchor="middle" dominant-baseline="central" fill="#1A1509" font-size="11" font-weight="700" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-6.3">Bier</tspan><tspan x="0" dy="12.5">Meister</tspan></text>
+</g>
+<g class="k69-felt" data-nr="12" data-type="skaal">
+<polygon points="1014.7,550.2 1026.2,546.1 1037.5,541.5 1048.6,536.3 1059.4,530.5 1069.8,524.2 1080,517.4 1089.7,510.1 1037.8,444.1 1031.4,448.9 1024.8,453.3 1017.9,457.5 1010.9,461.2 1003.7,464.6 996.3,467.6 988.8,470.3" fill="#252C1D" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(1034.2, 496.4) rotate(-28.1)" text-anchor="middle" dominant-baseline="central" fill="#D3B44E" font-size="12.5" font-weight="700" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">SKÅL!</tspan></text>
+</g>
+<g class="k69-felt" data-nr="13" data-type="tre">
+<polygon points="1089.7,510.1 1099.1,502.3 1108.2,494 1116.7,485.3 1124.9,476.2 1132.5,466.7 1139.6,456.8 1146.3,446.5 1074.7,402.6 1070.4,409.3 1065.7,415.7 1060.7,422 1055.4,428 1049.8,433.6 1043.9,439 1037.8,444.1" fill="#1D2A21" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(1089.5, 452.9) rotate(-48.4)" text-anchor="middle" dominant-baseline="central" fill="#93AE7C" font-size="12" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">3 til..?</tspan></text>
+</g>
+<g class="k69-felt" data-nr="14" data-type="krone">
+<polygon points="1146.3,446.5 1152.4,435.9 1158,425 1163,413.9 1167.5,402.6 1171.3,391 1174.7,379.2 1177.3,367.2 1094.9,350.9 1093.2,358.7 1091.1,366.3 1088.5,373.9 1085.6,381.3 1082.3,388.6 1078.7,395.7 1074.7,402.6" fill="#25241A" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(1126.2, 392.9) rotate(-68.6)" text-anchor="middle" dominant-baseline="central" fill="#DCC684" font-size="11" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">2-krone</tspan></text>
+</g>
+<g class="k69-felt" data-nr="15" data-type="taarn">
+<polygon points="1177.3,367.2 1179.4,355.2 1180.9,343.1 1181.7,330.9 1182,318.7 1181.6,306.4 1180.6,294.3 1179,282.2 1096.1,295.3 1097.1,303.2 1097.8,311.2 1098,319.1 1097.8,327.1 1097.3,335.1 1096.3,343 1094.9,350.9" fill="#27231A" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(1140, 324) rotate(-88.8)" text-anchor="middle" dominant-baseline="central" fill="#E0A03C" font-size="11" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-6.3">Øl i</tspan><tspan x="0" dy="12.5">tårnet</tspan></text>
+</g>
+<g class="k69-felt" data-nr="16" data-type="fri">
+<polygon points="1179,282.2 1176.8,270.2 1174,258.3 1170.6,246.5 1166.6,235 1162,223.7 1156.9,212.6 1151.2,201.8 1077.9,242.8 1081.6,249.9 1084.9,257.1 1087.9,264.5 1090.5,272.1 1092.8,279.7 1094.6,287.5 1096.1,295.3" fill="#1B2820" stroke="#4C5C50" stroke-width="1"/>
+<circle cx="1129" cy="254.5" r="3.2" fill="#5E6E5F"/>
+</g>
+<g class="k69-felt" data-nr="17" data-type="meier">
+<polygon points="1151.2,201.8 1144.9,191.3 1138.1,181.1 1130.9,171.3 1123.1,161.8 1114.9,152.8 1106.3,144.2 1097.2,136 1042.6,199.9 1048.5,205.2 1054.2,210.8 1059.6,216.7 1064.7,222.9 1069.4,229.3 1073.8,235.9 1077.9,242.8" fill="#241D24" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(1094.6, 193.1) rotate(50.6)" text-anchor="middle" dominant-baseline="central" fill="#B084A0" font-size="12" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">Meier</tspan></text>
+</g>
+<g class="k69-felt" data-nr="18" data-type="fri">
+<polygon points="1097.2,136 1087.7,128.3 1077.8,121.1 1067.6,114.4 1057.1,108.2 1046.3,102.6 1035.1,97.5 1023.7,93 994.7,171.8 1002.1,174.7 1009.3,178 1016.4,181.7 1023.3,185.8 1030,190.1 1036.5,194.9 1042.6,199.9" fill="#1B2820" stroke="#4C5C50" stroke-width="1"/>
+<circle cx="1041.1" cy="147.5" r="3.2" fill="#5E6E5F"/>
+</g>
+<g class="k69-felt" data-nr="19" data-type="kort">
+<polygon points="1023.7,93 1012.2,89 1000.5,85.7 988.6,82.9 976.5,80.8 964.4,79.2 952.2,78.3 940,78 940,162 948,162.2 956,162.8 963.8,163.8 971.7,165.2 979.5,167 987.1,169.2 994.7,171.8" fill="#1B222B" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(975.2, 123.1) rotate(10.2)" text-anchor="middle" dominant-baseline="central" fill="#88A2C2" font-size="11" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-6.3">Træk et</tspan><tspan x="0" dy="12.5">kort</tspan></text>
+</g>
+<g class="k69-felt" data-nr="20" data-type="skaal">
+<polygon points="940,78 925.8,78.7 911.9,80.8 898.7,83.9 886.3,87.9 874.8,92.4 864.1,97.2 854,102 891.5,177.2 899.6,173.3 907.4,169.8 914.7,167 921.6,164.8 928,163.2 934.1,162.3 940,162" fill="#252C1D" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(905.3, 125.8) rotate(342.1)" text-anchor="middle" dominant-baseline="central" fill="#D3B44E" font-size="12.5" font-weight="700" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">SKÅL!</tspan></text>
+</g>
+<g class="k69-felt" data-nr="21" data-type="gobm">
+<polygon points="854,102 844.4,106.9 835.2,111.8 826.3,116.5 817.6,121 809,125.4 800.5,129.7 792.1,133.7 827.6,209.8 837.3,205.2 846.9,200.4 856.3,195.6 865.5,190.8 874.5,186 883.1,181.5 891.5,177.2" fill="#26221B" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(841.4, 156) rotate(332.3)" text-anchor="middle" dominant-baseline="central" fill="#D08A4E" font-size="10" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-11.4">Go!</tspan><tspan x="0" dy="11.4">Bier</tspan><tspan x="0" dy="11.4">Meister</tspan></text>
+</g>
+<g class="k69-felt" data-nr="22" data-type="fri">
+<polygon points="792.1,133.7 783.6,137.5 775.2,141.2 766.7,144.6 758.2,147.8 749.6,150.8 740.9,153.6 732.2,156.2 755.2,237 765.9,233.8 776.4,230.4 786.9,226.7 797.3,222.8 807.5,218.7 817.6,214.3 827.6,209.8" fill="#1B2820" stroke="#4C5C50" stroke-width="1"/>
+<circle cx="777.3" cy="185.5" r="3.2" fill="#5E6E5F"/>
+</g>
+<g class="k69-felt" data-nr="23" data-type="tre">
+<polygon points="732.2,156.2 723.4,158.6 714.6,160.8 705.6,162.8 696.6,164.6 687.6,166.2 678.4,167.6 669.2,168.9 679.7,252.2 690.6,250.8 701.4,249.1 712.2,247.1 723,245 733.8,242.6 744.5,239.9 755.2,237" fill="#1D2A21" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(709.4, 204.9) rotate(348.7)" text-anchor="middle" dominant-baseline="central" fill="#93AE7C" font-size="12" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">3 til..?</tspan></text>
+</g>
+<g class="k69-felt" data-nr="24" data-type="drik">
+<polygon points="669.2,168.9 660,170 650.7,170.9 641.4,171.6 632,172.2 622.6,172.6 613.2,172.9 603.7,173 604.2,257 614.9,256.8 625.7,256.5 636.5,256.1 647.3,255.4 658.1,254.5 668.9,253.5 679.7,252.2" fill="#8E2F2C" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(639.3, 213.8) rotate(356.5)" text-anchor="middle" dominant-baseline="central" fill="#F6E7E1" font-size="14" font-weight="700" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">DRIK!</tspan></text>
+</g>
+<g class="k69-felt" data-nr="25" data-type="taarn">
+<polygon points="603.7,173 594.3,173 584.8,172.8 575.3,172.5 566,172.1 556.6,171.5 547.3,170.7 538,169.8 528.8,253.2 539.6,254.3 550.4,255.2 561.2,255.9 572,256.5 582.8,256.8 593.5,257 604.2,257" fill="#27231A" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(568.6, 214.3) rotate(2.8)" text-anchor="middle" dominant-baseline="central" fill="#E0A03C" font-size="11" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-6.3">Øl i</tspan><tspan x="0" dy="12.5">tårnet</tspan></text>
+</g>
+<g class="k69-felt" data-nr="26" data-type="meier">
+<polygon points="538,169.8 528.8,168.6 519.6,167.4 510.5,165.9 501.5,164.2 492.5,162.4 483.6,160.4 474.7,158.1 453.2,239.3 463.9,242 474.7,244.5 485.5,246.7 496.3,248.7 507.1,250.4 518,251.9 528.8,253.2" fill="#241D24" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(498.4, 206.4) rotate(10.3)" text-anchor="middle" dominant-baseline="central" fill="#B084A0" font-size="12" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">Meier</tspan></text>
+</g>
+<g class="k69-felt" data-nr="27" data-type="fri">
+<polygon points="474.7,158.1 465.9,155.7 457.2,153 448.6,150.2 440,147.1 431.5,143.9 423,140.4 414.6,136.7 380.2,213.4 390.3,217.8 400.5,222 410.9,225.9 421.3,229.6 431.9,233.1 442.5,236.3 453.2,239.3" fill="#1B2820" stroke="#4C5C50" stroke-width="1"/>
+<circle cx="430.2" cy="188.2" r="3.2" fill="#5E6E5F"/>
+</g>
+<g class="k69-felt" data-nr="28" data-type="kort">
+<polygon points="414.6,136.7 406.1,132.8 397.7,128.8 389.2,124.5 380.6,120.1 371.8,115.5 362.8,110.7 353.6,105.9 315,180.5 323.7,185 332.6,189.7 341.7,194.5 351,199.4 360.6,204.1 370.3,208.8 380.2,213.4" fill="#1B222B" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(365.6, 159.6) rotate(27.3)" text-anchor="middle" dominant-baseline="central" fill="#88A2C2" font-size="11" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-6.3">Træk et</tspan><tspan x="0" dy="12.5">kort</tspan></text>
+</g>
+<g class="k69-felt" data-nr="29" data-type="fri">
+<polygon points="353.6,105.9 343.9,101 333.7,96.1 322.8,91.4 311.1,87 298.6,83.2 285.2,80.2 271.2,78.4 264.6,162.2 270.7,163 277,164.4 283.8,166.4 291,169.2 298.7,172.5 306.7,176.3 315,180.5" fill="#1B2820" stroke="#4C5C50" stroke-width="1"/>
+<circle cx="302.2" cy="128.4" r="3.2" fill="#5E6E5F"/>
+</g>
+<g class="k69-felt" data-nr="30" data-type="gobm">
+<polygon points="271.2,78.4 257.4,78 245.2,78.5 233,79.5 220.9,81.2 208.9,83.5 197,86.3 185.3,89.8 211.2,169.7 218.9,167.4 226.7,165.6 234.5,164.1 242.4,163 250.3,162.3 258.3,162 264.6,162.2" fill="#26221B" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(232.7, 121.9) rotate(352.2)" text-anchor="middle" dominant-baseline="central" fill="#D08A4E" font-size="10" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-11.4">Go!</tspan><tspan x="0" dy="11.4">Bier</tspan><tspan x="0" dy="11.4">Meister</tspan></text>
+</g>
+<g class="k69-felt" data-nr="31" data-type="skaal">
+<polygon points="185.3,89.8 173.8,93.9 162.5,98.5 151.4,103.7 140.6,109.5 130.2,115.8 120,122.6 110.3,129.9 162.2,195.9 168.6,191.1 175.2,186.7 182.1,182.5 189.1,178.8 196.3,175.4 203.7,172.4 211.2,169.7" fill="#252C1D" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(165.8, 143.6) rotate(331.9)" text-anchor="middle" dominant-baseline="central" fill="#D3B44E" font-size="12.5" font-weight="700" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">SKÅL!</tspan></text>
+</g>
+<g class="k69-felt" data-nr="32" data-type="taarn">
+<polygon points="110.3,129.9 100.9,137.7 91.8,146 83.3,154.7 75.1,163.8 67.5,173.3 60.4,183.2 53.7,193.5 125.3,237.4 129.6,230.7 134.3,224.3 139.3,218 144.6,212 150.2,206.4 156.1,201 162.2,195.9" fill="#27231A" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(110.5, 187.1) rotate(311.6)" text-anchor="middle" dominant-baseline="central" fill="#E0A03C" font-size="11" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-6.3">Øl i</tspan><tspan x="0" dy="12.5">tårnet</tspan></text>
+</g>
+<g class="k69-felt" data-nr="33" data-type="krone">
+<polygon points="53.7,193.5 47.6,204.1 42,215 37,226.1 32.5,237.4 28.7,249 25.3,260.8 22.7,272.8 105.1,289.1 106.8,281.3 108.9,273.7 111.5,266.1 114.4,258.7 117.7,251.4 121.3,244.3 125.3,237.4" fill="#25241A" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(73.8, 247.1) rotate(291.4)" text-anchor="middle" dominant-baseline="central" fill="#DCC684" font-size="11" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">2-krone</tspan></text>
+</g>
+<g class="k69-felt" data-nr="34" data-type="fri">
+<polygon points="22.7,272.8 20.6,284.8 19.1,296.9 18.3,309.1 18,321.3 18.4,333.6 19.4,345.7 21,357.8 103.9,344.7 102.9,336.8 102.2,328.8 102,320.9 102.2,312.9 102.7,304.9 103.7,297 105.1,289.1" fill="#1B2820" stroke="#4C5C50" stroke-width="1"/>
+<circle cx="60" cy="316" r="3.2" fill="#5E6E5F"/>
+</g>
+<g class="k69-felt" data-nr="35" data-type="meier">
+<polygon points="21,357.8 23.2,369.8 26,381.7 29.4,393.5 33.4,405 38,416.3 43.1,427.4 48.8,438.2 122.1,397.2 118.4,390.1 115.1,382.9 112.1,375.5 109.5,367.9 107.2,360.3 105.4,352.5 103.9,344.7" fill="#241D24" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(71, 385.5) rotate(70.8)" text-anchor="middle" dominant-baseline="central" fill="#B084A0" font-size="12" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">Meier</tspan></text>
+</g>
+<g class="k69-felt" data-nr="36" data-type="fri">
+<polygon points="48.8,438.2 55.1,448.7 61.9,458.9 69.1,468.7 76.9,478.2 85.1,487.2 93.7,495.8 102.8,504 157.4,440.1 151.5,434.8 145.8,429.2 140.4,423.3 135.3,417.1 130.6,410.7 126.2,404.1 122.1,397.2" fill="#1B2820" stroke="#4C5C50" stroke-width="1"/>
+<circle cx="105.4" cy="446.9" r="3.2" fill="#5E6E5F"/>
+</g>
+<g class="k69-felt" data-nr="37" data-type="taarn">
+<polygon points="102.8,504 112.3,511.7 122.2,518.9 132.4,525.6 142.9,531.8 153.7,537.4 164.9,542.5 176.3,547 205.3,468.2 197.9,465.3 190.7,462 183.6,458.3 176.7,454.2 170,449.9 163.5,445.1 157.4,440.1" fill="#27231A" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(158.9, 492.5) rotate(30.4)" text-anchor="middle" dominant-baseline="central" fill="#E0A03C" font-size="11" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-6.3">Øl i</tspan><tspan x="0" dy="12.5">tårnet</tspan></text>
+</g>
+<g class="k69-felt" data-nr="38" data-type="kort">
+<polygon points="176.3,547 187.8,551 199.5,554.3 211.4,557.1 223.5,559.2 235.6,560.8 247.8,561.7 260,562 260,478 252,477.8 244,477.2 236.2,476.2 228.3,474.8 220.5,473 212.9,470.8 205.3,468.2" fill="#1B222B" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(224.8, 516.9) rotate(10.2)" text-anchor="middle" dominant-baseline="central" fill="#88A2C2" font-size="11" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-6.3">Træk et</tspan><tspan x="0" dy="12.5">kort</tspan></text>
+</g>
+</g>
+<g class="k69-pit">
+<g class="k69-pitud">
+<path d="M 412 548 C 350 554 319.3 517 290.3 488" fill="none" stroke="#C9A227" stroke-width="1.8" stroke-dasharray="6 5" opacity="0.9"/>
+<path d="M 279.3 493 L 290.3 488 L 287.3 500" fill="#C9A227" stroke="#C9A227" stroke-width="2" stroke-linejoin="round"/>
+</g>
+<text x="420" y="498" fill="#8A9A8B" font-size="11.5" letter-spacing="3.6" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">PITTEN</text>
+<text x="780" y="498" text-anchor="end" fill="#6B796D" font-size="9.5" letter-spacing="1.6" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">DU RYGER IND PÅ DEN PLADS DU SLÅR</text>
+<g class="k69-pitplads" data-plads="1">
+<rect x="420" y="512" width="60" height="72" fill="#26301F" stroke="#8A722C" stroke-width="1.6"/>
+<text x="450" y="539" text-anchor="middle" dominant-baseline="central" fill="#D3B44E" font-size="22" style="font-family: 'Bodoni Moda', Georgia, 'Times New Roman', serif">1</text>
+<text x="450" y="564" text-anchor="middle" dominant-baseline="central" fill="#8A9A8B" font-size="8.5" letter-spacing="1.1" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">1 SHOTS</text>
+</g>
+<g class="k69-pitplads" data-plads="2">
+<rect x="480" y="512" width="60" height="72" fill="#1D2A23" stroke="#4C5C50" stroke-width="1"/>
+<text x="510" y="539" text-anchor="middle" dominant-baseline="central" fill="#D3B44E" font-size="22" style="font-family: 'Bodoni Moda', Georgia, 'Times New Roman', serif">2</text>
+<text x="510" y="564" text-anchor="middle" dominant-baseline="central" fill="#8A9A8B" font-size="8.5" letter-spacing="1.1" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">2 SHOTS</text>
+<path d="M 476 543 L 470 548 L 476 553" fill="none" stroke="#5C6C5F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g class="k69-pitplads" data-plads="3">
+<rect x="540" y="512" width="60" height="72" fill="#1D2A23" stroke="#4C5C50" stroke-width="1"/>
+<text x="570" y="539" text-anchor="middle" dominant-baseline="central" fill="#D3B44E" font-size="22" style="font-family: 'Bodoni Moda', Georgia, 'Times New Roman', serif">3</text>
+<text x="570" y="564" text-anchor="middle" dominant-baseline="central" fill="#8A9A8B" font-size="8.5" letter-spacing="1.1" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">3 SHOTS</text>
+<path d="M 536 543 L 530 548 L 536 553" fill="none" stroke="#5C6C5F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g class="k69-pitplads" data-plads="4">
+<rect x="600" y="512" width="60" height="72" fill="#1D2A23" stroke="#4C5C50" stroke-width="1"/>
+<text x="630" y="539" text-anchor="middle" dominant-baseline="central" fill="#D3B44E" font-size="22" style="font-family: 'Bodoni Moda', Georgia, 'Times New Roman', serif">4</text>
+<text x="630" y="564" text-anchor="middle" dominant-baseline="central" fill="#8A9A8B" font-size="8.5" letter-spacing="1.1" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">4 SHOTS</text>
+<path d="M 596 543 L 590 548 L 596 553" fill="none" stroke="#5C6C5F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g class="k69-pitplads" data-plads="5">
+<rect x="660" y="512" width="60" height="72" fill="#1D2A23" stroke="#4C5C50" stroke-width="1"/>
+<text x="690" y="539" text-anchor="middle" dominant-baseline="central" fill="#D3B44E" font-size="22" style="font-family: 'Bodoni Moda', Georgia, 'Times New Roman', serif">5</text>
+<text x="690" y="564" text-anchor="middle" dominant-baseline="central" fill="#8A9A8B" font-size="8.5" letter-spacing="1.1" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">5 SHOTS</text>
+<path d="M 656 543 L 650 548 L 656 553" fill="none" stroke="#5C6C5F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g class="k69-pitplads" data-plads="6">
+<rect x="720" y="512" width="60" height="72" fill="#1D2A23" stroke="#4C5C50" stroke-width="1"/>
+<text x="750" y="539" text-anchor="middle" dominant-baseline="central" fill="#D3B44E" font-size="22" style="font-family: 'Bodoni Moda', Georgia, 'Times New Roman', serif">6</text>
+<text x="750" y="564" text-anchor="middle" dominant-baseline="central" fill="#8A9A8B" font-size="8.5" letter-spacing="1.1" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">6 SHOTS</text>
+<path d="M 716 543 L 710 548 L 716 553" fill="none" stroke="#5C6C5F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<text x="420" y="604" fill="#C9A227" font-size="9.5" letter-spacing="1.5" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">UD PÅ FELT 1</text>
+<text x="780" y="604" text-anchor="end" fill="#6B796D" font-size="9.5" letter-spacing="1.5" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">SLÅ DIG NED MOD 1 — SLÅR DU OVER, ER DU UDE</text>
+</g>
+    <g class="k69-bordet">
+<rect x="452" y="266" width="296" height="124" rx="18" fill="#0D1410" opacity="0.8"/>
+<rect x="452" y="258" width="296" height="124" rx="18" fill="#18231D" stroke="url(#m-brass)" stroke-width="2"/>
+<rect x="459" y="265" width="282" height="110" rx="12" fill="none" stroke="#C9A227" stroke-width="0.6" opacity="0.4"/>
+<line x1="552" y1="274" x2="552" y2="366" stroke="#C9A227" stroke-width="0.6" opacity="0.35"/>
+<line x1="648" y1="274" x2="648" y2="366" stroke="#C9A227" stroke-width="0.6" opacity="0.35"/>
+<g transform="translate(477, 283) rotate(-3)">
+    <rect x="0" y="0" width="34" height="48" rx="3" fill="#0B100D" opacity="0.5" transform="translate(1, 2)"/>
+    <rect x="0" y="0" width="34" height="48" rx="3" fill="#1F2C25" stroke="#8C6F16" stroke-width="1"/>
+    <rect x="4" y="4" width="26" height="40" rx="2" fill="none" stroke="#C9A227" stroke-width="0.6" opacity="0.7"/>
+    <path d="M17 12 L23 24 L17 36 L11 24 Z" fill="none" stroke="#C9A227" stroke-width="0.8" opacity="0.7"/>
+  </g>
+<g transform="translate(475.5, 281.5) rotate(-1.5)">
+    <rect x="0" y="0" width="34" height="48" rx="3" fill="#0B100D" opacity="0.5" transform="translate(1, 2)"/>
+    <rect x="0" y="0" width="34" height="48" rx="3" fill="#1F2C25" stroke="#8C6F16" stroke-width="1"/>
+    <rect x="4" y="4" width="26" height="40" rx="2" fill="none" stroke="#C9A227" stroke-width="0.6" opacity="0.7"/>
+    <path d="M17 12 L23 24 L17 36 L11 24 Z" fill="none" stroke="#C9A227" stroke-width="0.8" opacity="0.7"/>
+  </g>
+<g transform="translate(474, 280) rotate(0)">
+    <rect x="0" y="0" width="34" height="48" rx="3" fill="#0B100D" opacity="0.5" transform="translate(1, 2)"/>
+    <rect x="0" y="0" width="34" height="48" rx="3" fill="#1F2C25" stroke="#8C6F16" stroke-width="1"/>
+    <rect x="4" y="4" width="26" height="40" rx="2" fill="none" stroke="#C9A227" stroke-width="0.6" opacity="0.7"/>
+    <path d="M17 12 L23 24 L17 36 L11 24 Z" fill="none" stroke="#C9A227" stroke-width="0.8" opacity="0.7"/>
+  </g>
+<g transform="translate(518, 282) rotate(7) scale(1)">
+    <rect x="0" y="0" width="34" height="48" rx="3" fill="#0B100D" opacity="0.55" transform="translate(1.5, 3)"/>
+    <rect x="0" y="0" width="34" height="48" rx="3" fill="#F3EDDF" stroke="#B9AE93" stroke-width="0.8"/>
+    <text x="4" y="10" font-size="9" font-weight="700" fill="#9E3B33" style="font-family: 'Bodoni Moda', Georgia, 'Times New Roman', serif">9</text>
+    <text x="4" y="18" font-size="7" fill="#9E3B33" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">♥</text>
+    <text x="17" y="31" text-anchor="middle" dominant-baseline="central" font-size="16" fill="#9E3B33" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">♥</text>
+  </g>
+<text x="502" y="364" text-anchor="middle" fill="#D3B44E" font-size="9.5" letter-spacing="3" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">KORTENE</text>
+<text x="502" y="375" text-anchor="middle" fill="#6B796D" font-size="7.5" letter-spacing="1.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">37 TILBAGE</text>
+<rect x="579" y="272" width="42" height="62" rx="4" fill="#0E1512"/><rect x="581" y="299.9" width="38" height="34.1" rx="3" fill="url(#m-beer)"/><rect x="581" y="293.9" width="38" height="7" rx="3" fill="#F6EBD4"/><rect x="579" y="272" width="42" height="62" rx="4" fill="none" stroke="#C4D3C6" stroke-width="1.4"/>
+<text x="600" y="364" text-anchor="middle" fill="#D3B44E" font-size="10.5" letter-spacing="3.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">TÅRNET</text>
+<text x="600" y="375" text-anchor="middle" fill="#E0A03C" font-size="8" letter-spacing="1.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">31 CL · 50 CL GLAS</text>
+<g transform="translate(671, 276) scale(0.54)"><g><rect x="-6" y="-6" width="112" height="112" rx="22" fill="none" stroke="#D8A93F" stroke-width="3" opacity="0.9"/><rect x="6" y="9" width="88" height="88" rx="17" fill="#0B100D" opacity="0.55"/><rect x="4" y="4" width="88" height="88" rx="17" fill="#EFE6D4" stroke="#8E8878" stroke-width="1.5"/><circle cx="30" cy="30" r="7.5" fill="#1B241C"/><circle cx="70" cy="30" r="7.5" fill="#1B241C"/><circle cx="30" cy="70" r="7.5" fill="#1B241C"/><circle cx="70" cy="70" r="7.5" fill="#1B241C"/></g></g>
+<text x="698" y="364" text-anchor="middle" fill="#D3B44E" font-size="9.5" letter-spacing="3" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">TERNINGEN</text>
+<text x="698" y="375" text-anchor="middle" fill="#D8A93F" font-size="7.5" letter-spacing="1.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">METTE SLOG 4</text>
+</g>
+    <g transform="translate(639.3, 213.8)">
+      <circle cx="0" cy="3" r="17" fill="#0B100D" opacity="0.55"/>
+      <circle cx="0" cy="0" r="22" fill="none" stroke="#C9A227" stroke-width="2" opacity="0.75"/>
+      <circle cx="0" cy="0" r="16" fill="#D8A93F" stroke="#0E1512" stroke-width="2"/>
+      <text x="0" y="1" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="#14180C" style="font-family: 'Bodoni Moda', Georgia, 'Times New Roman', serif">M</text>
+    </g>
+<g transform="translate(967.3, 518.1)">
+      <circle cx="0" cy="3" r="17" fill="#0B100D" opacity="0.55"/>
+      
+      <circle cx="0" cy="0" r="16" fill="#8FAF74" stroke="#0E1512" stroke-width="2"/>
+      <text x="0" y="1" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="#14180C" style="font-family: 'Bodoni Moda', Georgia, 'Times New Roman', serif">J</text>
+    </g>
+<g transform="translate(570, 544)">
+      <circle cx="0" cy="3" r="17" fill="#0B100D" opacity="0.55"/>
+      
+      <circle cx="0" cy="0" r="16" fill="#87A4C6" stroke="#0E1512" stroke-width="2"/>
+      <text x="0" y="1" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="#14180C" style="font-family: 'Bodoni Moda', Georgia, 'Times New Roman', serif">S</text>
+    </g>
+<g transform="translate(110.5, 187.1)">
+      <circle cx="0" cy="3" r="17" fill="#0B100D" opacity="0.55"/>
+      
+      <circle cx="0" cy="0" r="16" fill="#C4776B" stroke="#0E1512" stroke-width="2"/>
+      <text x="0" y="1" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="#14180C" style="font-family: 'Bodoni Moda', Georgia, 'Times New Roman', serif">R</text>
+    </g>
+  </svg>
+        <div class="plade-hint">Træk for at flytte pladen · rul for at zoome</div>
+        <div class="zoom"><div class="zknap">−</div><div class="zknap">⤢</div><div class="zknap">+</div></div>
+      </div>
+    </main>
+    <aside class="rail rail-h">
+    <section class="action action-farvet" style="--sp: #D8A93F;">
+    <div class="action-hat"><span style="width: 9px; height: 9px; border-radius: 50%; background: #D8A93F;"></span><span class="eyebrow">Runde 3</span></div>
+    <div class="action-titel">Din tur</div>
+    <p class="action-txt">Slå med terningen — den ruller på bordet, og appen rykker selv din brik.</p>
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div class="knap knap-primaer" style="min-height: 58px;">Slå med terningen</div>
+    <div class="knap knap-tom">Meld afgang efter dette slag</div>
+  </div>
+  </section>
+    <section class="rail-sek" style="flex-grow: 1; min-height: 0; border-bottom: none;">
+      <div class="rail-hoved"><span class="eyebrow">Hændelser</span></div>
+      <div class="log"><div class="log-linje"><span class="log-prik" style="background: #D8A93F;"></span><span>Mette slog 4.</span></div><div class="log-linje"><span class="log-prik" style="background: #8FAF74;"></span><span>Jeppe trak Ni hjerter — Emne.</span></div><div class="log-linje"><span class="log-prik" style="background: #87A4C6;"></span><span>Sofie slog 3: plads 3 i pitten og 3 shots.</span></div><div class="log-linje"><span class="log-prik" style="background: #C4776B;"></span><span>Rasmus landede på Bier Meister (felt 29).</span></div><div class="log-linje"><span class="log-prik" style="background: #8FAF74;"></span><span>DRIK! Jeppe skal bunde tårnet — 10,3 slurke.</span></div></div>
+    </section>
+  </aside>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {}
+</script>
+</body>
+</html>

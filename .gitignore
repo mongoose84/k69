@@ -1,0 +1,11 @@
+node_modules/
+dist/
+dist-test/
+*.tsbuildinfo
+.env
+*.local
+.DS_Store
+design/k69-online.html
+design/meier/meier-baegeret.html
+design/bordet/k69-bordet.html
+design/syver/k69-syveren.html

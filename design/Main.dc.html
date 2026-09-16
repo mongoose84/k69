@@ -1,0 +1,814 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,700&family=Karla:wght@400;500;600;700&display=swap">
+  <style>
+  :root {
+    --bg: #0E1512;
+    --panel: #141D18;
+    --panel-2: #1A241E;
+    --raise: #1F2C25;
+    --line: #26332B;
+    --line-2: #364739;
+    --ink: #EDE7DA;
+    --ink-dim: #97A398;
+    --ink-faint: #6B796D;
+    --brass: #C9A227;
+    --brass-lt: #E8CE7E;
+    --amber: #E0A03C;
+    --rust: #B4483F;
+    --sage: #93AE7C;
+    --slate: #88A2C2;
+    --plum: #B084A0;
+    --serif: 'Bodoni Moda', Georgia, 'Times New Roman', serif;
+    --sans: Karla, 'Helvetica Neue', Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+  a { color: var(--brass-lt); text-decoration: none; }
+  a:hover { color: var(--brass); }
+  h1, h2, h3 { margin: 0; font-family: var(--serif); font-weight: 500; letter-spacing: 0.01em; }
+  .eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-faint); }
+  .rule { height: 1px; background: var(--line); }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 3px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 46px; padding: 0 22px;
+         border: 1px solid var(--line-2); border-radius: 2px; background: var(--raise); color: var(--ink);
+         font-family: var(--sans); font-size: 13px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; cursor: pointer; }
+  .btn:hover { border-color: var(--brass); color: var(--brass-lt); }
+  .btn-primary { background: linear-gradient(180deg, #E8CE7E 0%, #C9A227 48%, #A5811A 100%); border-color: #7E6413; color: #14180C; }
+  .btn-primary:hover { color: #14180C; filter: brightness(1.06); }
+  .btn-ghost { background: transparent; }
+  .k69-felt { cursor: pointer; }
+  .k69-felt:hover polygon { stroke: var(--brass); stroke-width: 1.6; }
+  .app { width: 1440px; height: 900px; display: flex; flex-direction: column;
+         background: radial-gradient(120% 90% at 50% -10%, #1A2620 0%, #0E1512 62%); }
+
+  .top { height: 74px; flex: 0 0 74px; display: flex; align-items: center; gap: 26px;
+         padding: 0 26px; border-bottom: 1px solid var(--line); background: rgba(12,18,15,0.72); }
+  .mark { font-family: var(--serif); font-size: 30px; font-weight: 700; letter-spacing: 0.02em;
+          background: linear-gradient(180deg, #F0DCA0 0%, #C9A227 55%, #9A7A18 100%);
+          -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .kode { display: flex; align-items: center; gap: 9px; height: 30px; padding: 0 12px;
+          border: 1px solid var(--line-2); border-radius: 2px; font-size: 11.5px; font-weight: 600;
+          letter-spacing: 0.16em; color: var(--ink-dim); }
+  .kode b { color: var(--brass-lt); font-weight: 700; }
+  .tur-pill { display: flex; align-items: center; gap: 12px; height: 40px; padding: 0 18px 0 8px;
+              border: 1px solid var(--line-2); border-radius: 999px; background: var(--panel-2); }
+  .top-spacer { flex-grow: 1; }
+  .top-actions { display: flex; align-items: center; gap: 10px; }
+  .icon-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+              border: 1px solid var(--line-2); border-radius: 2px; background: transparent; cursor: pointer; color: var(--ink-dim); }
+  .icon-btn:hover { color: var(--brass-lt); border-color: var(--brass); }
+
+  .body { flex-grow: 1; display: flex; min-height: 0; }
+  .rail { width: 316px; flex: 0 0 316px; display: flex; flex-direction: column; gap: 0;
+          background: rgba(16,23,19,0.6); overflow: hidden; }
+  .rail-l { border-right: 1px solid var(--line); }
+  .rail-r { border-left: 1px solid var(--line); }
+  .rail-sec { padding: 18px 20px 20px; border-bottom: 1px solid var(--line); }
+  .rail-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
+
+  .spillere { display: flex; flex-direction: column; gap: 4px; }
+  .sp { display: flex; align-items: center; gap: 12px; padding: 9px 10px; border-radius: 2px; border: 1px solid transparent; }
+  .sp-aktiv { background: linear-gradient(90deg, rgba(201,162,39,0.14), rgba(201,162,39,0.02)); border-color: rgba(201,162,39,0.4); }
+  .brik { width: 34px; height: 34px; flex: 0 0 34px; border-radius: 50%; display: flex; align-items: center;
+          justify-content: center; font-family: var(--serif); font-size: 15px; font-weight: 700; color: #14180C;
+          box-shadow: inset 0 -2px 5px rgba(0,0,0,0.35), 0 1px 2px rgba(0,0,0,0.5); }
+  .sp-txt { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex-grow: 1; }
+  .sp-linje { display: flex; align-items: center; gap: 7px; }
+  .sp-navn { font-size: 14px; font-weight: 600; color: var(--ink); }
+  .sp-sub { font-size: 11px; color: var(--ink-faint); letter-spacing: 0.03em; }
+  .slurkebar { height: 3px; border-radius: 2px; background: #2B382E; overflow: hidden; margin-top: 2px; }
+  .slurkefyld { height: 100%; border-radius: 2px; opacity: 0.85; }
+  .slurketal { text-align: right; flex: 0 0 46px; }
+  .slurketal b { display: block; font-family: var(--serif); font-size: 17px; color: var(--ink); line-height: 1.1; }
+  .slurketal span { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); }
+  .laast { display: flex; gap: 10px; align-items: flex-start; padding: 11px 12px; border-radius: 2px;
+           border: 1px solid rgba(180,72,63,0.35); background: rgba(180,72,63,0.09);
+           font-size: 11.5px; line-height: 1.5; color: #C58A83; }
+  .laast svg { flex: 0 0 14px; margin-top: 1px; }
+  .badge { display: flex; align-items: center; gap: 5px; height: 22px; padding: 0 8px; border-radius: 2px;
+           font-size: 10px; font-weight: 700; letter-spacing: 0.1em; }
+  .badge-bm { background: rgba(201,162,39,0.18); color: var(--brass-lt); border: 1px solid rgba(201,162,39,0.42); }
+  .badge-pit { background: rgba(180,72,63,0.16); color: #D98279; border: 1px solid rgba(180,72,63,0.4); }
+
+  .status { display: flex; flex-direction: column; gap: 14px; }
+  .taarn-row { display: flex; align-items: center; gap: 16px; }
+  .glasbar { width: 46px; height: 74px; flex: 0 0 46px; border: 1.5px solid #9FB0A2; border-radius: 4px;
+             background: #0E1512; position: relative; overflow: hidden; }
+  .glas-fyld { position: absolute; left: 0; right: 0; bottom: 0;
+               background: linear-gradient(180deg, #F2C060, #C4761A); }
+  .glas-skum { position: absolute; left: 0; right: 0; height: 7px; background: #F6EBD4; }
+  .taarn-txt { display: flex; flex-direction: column; gap: 5px; }
+  .taarn-maal { font-family: var(--serif); font-size: 28px; color: var(--amber); line-height: 1.05; }
+  .enhed { font-family: var(--sans); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); }
+  .omregn { display: flex; gap: 6px; }
+  .om { flex-grow: 1; display: flex; flex-direction: column; gap: 3px; padding: 8px 9px; border-radius: 2px;
+        border: 1px solid var(--line); background: rgba(20,29,24,0.55); }
+  .om span { font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); }
+  .om b { font-family: var(--serif); font-size: 15px; font-weight: 500; color: var(--ink); }
+  .hold { position: relative; height: 66px; border-radius: 3px; border: 1px solid #7E6413; overflow: hidden;
+          background: #1D2118; cursor: pointer; user-select: none; display: flex; align-items: center; justify-content: center; }
+  .hold-fyld { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(180deg, #F2C060 0%, #C4761A 100%); }
+  .hold-txt { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .hold-t { font-size: 11.5px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink); }
+  .hold-d { font-size: 11px; color: var(--ink-dim); }
+  .hold-on .hold-t, .hold-on .hold-d { color: #14180C; }
+  .note { font-size: 11.5px; line-height: 1.5; color: var(--ink-faint); }
+
+  .bm-row { display: flex; align-items: center; gap: 14px; }
+  .krone { width: 42px; height: 42px; flex: 0 0 42px; display: flex; align-items: center; justify-content: center;
+           border: 1px solid rgba(201,162,39,0.45); border-radius: 2px; background: rgba(201,162,39,0.1); }
+
+  .stage { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; }
+  .viewport { flex-grow: 1; position: relative; overflow: hidden; cursor: grab;
+              background: radial-gradient(70% 60% at 50% 42%, #223129 0%, #131C17 70%, #0C120F 100%); }
+  .viewport svg { display: block; width: 100%; height: 100%; }
+  .vp-hint { position: absolute; left: 18px; bottom: 16px; display: flex; align-items: center; gap: 8px;
+             font-size: 10.5px; letter-spacing: 0.14em; color: var(--ink-faint); text-transform: uppercase; }
+  .zoom { position: absolute; right: 18px; bottom: 16px; display: flex; gap: 6px; }
+  .zbtn { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+          border: 1px solid var(--line-2); border-radius: 2px; background: rgba(14,21,18,0.82); color: var(--ink-dim);
+          font-size: 16px; font-family: var(--sans); }
+  .zbtn:hover { color: var(--brass-lt); border-color: var(--brass); }
+
+  .dock { height: 150px; flex: 0 0 150px; display: flex; align-items: center; gap: 24px; padding: 0 24px;
+          border-top: 1px solid var(--line); background: linear-gradient(180deg, #131C17 0%, #0F1713 100%); }
+  .dock-left { display: flex; flex-direction: column; gap: 6px; width: 190px; flex: 0 0 190px; }
+  .dock-navn { font-family: var(--serif); font-size: 27px; color: var(--ink); }
+  .terning-boks { display: flex; align-items: center; gap: 18px; flex-grow: 1; min-width: 0; }
+  .terning-boks .btn { flex-grow: 1; max-width: 290px; }
+  .dock-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; width: 165px; flex: 0 0 165px; }
+  .miniplan { display: flex; gap: 4px; }
+  .mini { width: 9px; height: 9px; border-radius: 1px; background: var(--line-2); }
+
+  .event { display: flex; flex-direction: column; gap: 12px; }
+  .event-hat { display: flex; align-items: center; gap: 10px; }
+  .event-titel { font-family: var(--serif); font-size: 28px; line-height: 1.05; }
+  .event-txt { font-size: 13px; line-height: 1.62; color: var(--ink-dim); }
+  .event-cta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .btn-sm { height: 38px; padding: 0 16px; font-size: 11px; }
+
+  .log { display: flex; flex-direction: column; gap: 0; overflow: hidden; }
+  .log-i { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line); }
+  .log-dot { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; margin-top: 5px; }
+  .log-t { font-size: 12.5px; line-height: 1.5; color: var(--ink-dim); }
+  .log-t b { color: var(--ink); font-weight: 600; }
+  </style>
+</helmet>
+<div class="app">
+
+  <header class="top">
+    <div class="mark">K69</div>
+    <div class="kode"><span>SPIL</span><b>TINGLEV-4471</b></div>
+    <div class="tur-pill">
+      <div class="brik" style="background: {{turFarve}}">{{turInitial}}</div>
+      <div style="display: flex; flex-direction: column; gap: 1px">
+        <div class="eyebrow">Tur</div>
+        <div style="font-size: 14px; font-weight: 600">{{turNavn}}</div>
+      </div>
+    </div>
+    <div class="top-spacer"></div>
+    <div class="top-actions">
+      <button class="btn btn-ghost btn-sm" style="height: 40px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"></path><path d="M12 15V3"></path><path d="M8 7l4-4 4 4"></path></svg>
+        Del link
+      </button>
+      <button class="icon-btn" title="Regler">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2z"></path><path d="M8 8h6"></path><path d="M8 12h6"></path></svg>
+      </button>
+      <button class="icon-btn" title="Indstillinger">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="body">
+
+    <aside class="rail rail-l">
+      <div class="rail-sec" style="flex-grow: 1; min-height: 0">
+        <div class="rail-head">
+          <div class="eyebrow">Ved bordet</div>
+          <div class="eyebrow" style="color: var(--brass)">{{antal}}</div>
+        </div>
+        <div class="spillere">
+          <sc-for list="{{spillere}}" as="sp" hint-placeholder-count="5">
+            <div class="sp {{sp.klasse}}">
+              <div class="brik" style="background: {{sp.farve}}">{{sp.initial}}</div>
+              <div class="sp-txt">
+                <div class="sp-linje">
+                  <div class="sp-navn">{{sp.navn}}</div>
+                  <sc-if value="{{sp.erBM}}" hint-placeholder-val="{{true}}">
+                    <div class="badge badge-bm">BM</div>
+                  </sc-if>
+                  <sc-if value="{{sp.iPit}}" hint-placeholder-val="{{false}}">
+                    <div class="badge badge-pit">PIT {{sp.pitPlads}}</div>
+                  </sc-if>
+                </div>
+                <div class="sp-sub">{{sp.sub}}</div>
+                <div class="slurkebar"><div class="slurkefyld" style="width: {{sp.slurkePct}}; background: {{sp.farve}}"></div></div>
+              </div>
+              <div class="slurketal">
+                <b>{{sp.slurke}}</b>
+                <span>{{sp.drik}}</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div class="rail-sec" style="border-bottom: none">
+        <div class="rail-head"><div class="eyebrow">Bordet</div></div>
+        <div class="status">
+          <div class="taarn-row">
+            <div class="glasbar">
+              <div class="glas-fyld" style="height: {{taarnH}}"></div>
+              <div class="glas-skum" style="bottom: {{taarnH}}"></div>
+            </div>
+            <div class="taarn-txt">
+              <div class="taarn-maal">{{taarnSlurke}} <span class="enhed">slurke i tårnet</span></div>
+              <div class="note">Det er <b style="color: var(--amber)">{{minCl}}</b> af din {{minDrik}}. Sidst fyldt af Rasmus.</div>
+            </div>
+          </div>
+          <div class="omregn">
+            <sc-for list="{{omregning}}" as="o" hint-placeholder-count="3">
+              <div class="om"><span>{{o.navn}}</span><b>{{o.cl}}</b></div>
+            </sc-for>
+          </div>
+          <div class="bm-row">
+            <div class="krone">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#C9A227" stroke-width="1.6" stroke-linejoin="round"><path d="M3 8l4 4 5-8 5 8 4-4v10H3z"></path></svg>
+            </div>
+            <div class="sp-txt">
+              <div class="sp-navn">{{bmNavn}} er Bier Meister</div>
+              <div class="note">Henter øl og drikker 3 slurke hver gang nogen lander på Go!</div>
+            </div>
+          </div>
+          <div class="laast">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+            <div>Ingen kan hoppe ud: der er øl i tårnet, og {{bmNavn}} er Bier Meister.</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="stage">
+      <div class="viewport" onPointerDown="{{greb}}" onPointerMove="{{traek}}" onPointerUp="{{slip}}" onWheel="{{hjul}}">
+        <svg viewBox="0 0 808 676" preserveAspectRatio="xMidYMid slice">
+          <defs>
+<radialGradient id="m-felt" cx="50%" cy="42%" r="72%"><stop offset="0%" stop-color="#25352B"/><stop offset="60%" stop-color="#1A2620"/><stop offset="100%" stop-color="#111A15"/></radialGradient>
+<linearGradient id="m-brass" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E8CE7E"/><stop offset="45%" stop-color="#C9A227"/><stop offset="100%" stop-color="#8C6F16"/></linearGradient>
+<linearGradient id="m-beer" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F2C060"/><stop offset="100%" stop-color="#C4761A"/></linearGradient>
+<filter id="m-grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope="0.06"/></feComponentTransfer></filter>
+<filter id="m-glow" x="-70%" y="-70%" width="240%" height="240%"><feGaussianBlur stdDeviation="7" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+          <rect x="0" y="0" width="808" height="676" fill="url(#m-felt)"></rect>
+          <rect x="0" y="0" width="808" height="676" fill="#ffffff" filter="url(#m-grain)" opacity="0.5"></rect>
+          <g transform="translate({{panX}}, {{panY}}) scale({{zoom}})">
+            <path d="M 260 562 L 274.2 561.3 L 288.1 559.2 L 301.3 556.1 L 313.7 552.1 L 325.2 547.6 L 335.9 542.8 L 346 538 L 346 538 L 355.6 533.1 L 364.8 528.2 L 373.7 523.5 L 382.4 519 L 391 514.6 L 399.5 510.3 L 407.9 506.3 L 407.9 506.3 L 416.4 502.5 L 424.8 498.8 L 433.3 495.4 L 441.8 492.2 L 450.4 489.2 L 459.1 486.4 L 467.8 483.8 L 467.8 483.8 L 476.6 481.4 L 485.4 479.2 L 494.4 477.2 L 503.4 475.4 L 512.4 473.8 L 521.6 472.4 L 530.8 471.1 L 530.8 471.1 L 540 470 L 549.3 469.1 L 558.6 468.4 L 568 467.8 L 577.4 467.4 L 586.8 467.1 L 596.3 467 L 596.3 467 L 605.7 467 L 615.2 467.2 L 624.7 467.5 L 634 467.9 L 643.4 468.5 L 652.7 469.3 L 662 470.2 L 662 470.2 L 671.2 471.4 L 680.4 472.6 L 689.5 474.1 L 698.5 475.8 L 707.5 477.6 L 716.4 479.6 L 725.3 481.9 L 725.3 481.9 L 734.1 484.3 L 742.8 487 L 751.4 489.8 L 760 492.9 L 768.5 496.1 L 777 499.6 L 785.4 503.3 L 785.4 503.3 L 793.9 507.2 L 802.3 511.2 L 810.8 515.5 L 819.4 519.9 L 828.2 524.5 L 837.2 529.3 L 846.4 534.1 L 846.4 534.1 L 856.1 539 L 866.3 543.9 L 877.2 548.6 L 888.9 553 L 901.4 556.8 L 914.8 559.8 L 928.8 561.6 L 928.8 561.6 L 942.6 562 L 954.8 561.5 L 967 560.5 L 979.1 558.8 L 991.1 556.5 L 1003 553.7 L 1014.7 550.2 L 1014.7 550.2 L 1026.2 546.1 L 1037.5 541.5 L 1048.6 536.3 L 1059.4 530.5 L 1069.8 524.2 L 1080 517.4 L 1089.7 510.1 L 1089.7 510.1 L 1099.1 502.3 L 1108.2 494 L 1116.7 485.3 L 1124.9 476.2 L 1132.5 466.7 L 1139.6 456.8 L 1146.3 446.5 L 1146.3 446.5 L 1152.4 435.9 L 1158 425 L 1163 413.9 L 1167.5 402.6 L 1171.3 391 L 1174.7 379.2 L 1177.3 367.2 L 1177.3 367.2 L 1179.4 355.2 L 1180.9 343.1 L 1181.7 330.9 L 1182 318.7 L 1181.6 306.4 L 1180.6 294.3 L 1179 282.2 L 1179 282.2 L 1176.8 270.2 L 1174 258.3 L 1170.6 246.5 L 1166.6 235 L 1162 223.7 L 1156.9 212.6 L 1151.2 201.8 L 1151.2 201.8 L 1144.9 191.3 L 1138.1 181.1 L 1130.9 171.3 L 1123.1 161.8 L 1114.9 152.8 L 1106.3 144.2 L 1097.2 136 L 1097.2 136 L 1087.7 128.3 L 1077.8 121.1 L 1067.6 114.4 L 1057.1 108.2 L 1046.3 102.6 L 1035.1 97.5 L 1023.7 93 L 1023.7 93 L 1012.2 89 L 1000.5 85.7 L 988.6 82.9 L 976.5 80.8 L 964.4 79.2 L 952.2 78.3 L 940 78 L 940 78 L 925.8 78.7 L 911.9 80.8 L 898.7 83.9 L 886.3 87.9 L 874.8 92.4 L 864.1 97.2 L 854 102 L 854 102 L 844.4 106.9 L 835.2 111.8 L 826.3 116.5 L 817.6 121 L 809 125.4 L 800.5 129.7 L 792.1 133.7 L 792.1 133.7 L 783.6 137.5 L 775.2 141.2 L 766.7 144.6 L 758.2 147.8 L 749.6 150.8 L 740.9 153.6 L 732.2 156.2 L 732.2 156.2 L 723.4 158.6 L 714.6 160.8 L 705.6 162.8 L 696.6 164.6 L 687.6 166.2 L 678.4 167.6 L 669.2 168.9 L 669.2 168.9 L 660 170 L 650.7 170.9 L 641.4 171.6 L 632 172.2 L 622.6 172.6 L 613.2 172.9 L 603.7 173 L 603.7 173 L 594.3 173 L 584.8 172.8 L 575.3 172.5 L 566 172.1 L 556.6 171.5 L 547.3 170.7 L 538 169.8 L 538 169.8 L 528.8 168.6 L 519.6 167.4 L 510.5 165.9 L 501.5 164.2 L 492.5 162.4 L 483.6 160.4 L 474.7 158.1 L 474.7 158.1 L 465.9 155.7 L 457.2 153 L 448.6 150.2 L 440 147.1 L 431.5 143.9 L 423 140.4 L 414.6 136.7 L 414.6 136.7 L 406.1 132.8 L 397.7 128.8 L 389.2 124.5 L 380.6 120.1 L 371.8 115.5 L 362.8 110.7 L 353.6 105.9 L 353.6 105.9 L 343.9 101 L 333.7 96.1 L 322.8 91.4 L 311.1 87 L 298.6 83.2 L 285.2 80.2 L 271.2 78.4 L 271.2 78.4 L 257.4 78 L 245.2 78.5 L 233 79.5 L 220.9 81.2 L 208.9 83.5 L 197 86.3 L 185.3 89.8 L 185.3 89.8 L 173.8 93.9 L 162.5 98.5 L 151.4 103.7 L 140.6 109.5 L 130.2 115.8 L 120 122.6 L 110.3 129.9 L 110.3 129.9 L 100.9 137.7 L 91.8 146 L 83.3 154.7 L 75.1 163.8 L 67.5 173.3 L 60.4 183.2 L 53.7 193.5 L 53.7 193.5 L 47.6 204.1 L 42 215 L 37 226.1 L 32.5 237.4 L 28.7 249 L 25.3 260.8 L 22.7 272.8 L 22.7 272.8 L 20.6 284.8 L 19.1 296.9 L 18.3 309.1 L 18 321.3 L 18.4 333.6 L 19.4 345.7 L 21 357.8 L 21 357.8 L 23.2 369.8 L 26 381.7 L 29.4 393.5 L 33.4 405 L 38 416.3 L 43.1 427.4 L 48.8 438.2 L 48.8 438.2 L 55.1 448.7 L 61.9 458.9 L 69.1 468.7 L 76.9 478.2 L 85.1 487.2 L 93.7 495.8 L 102.8 504 L 102.8 504 L 112.3 511.7 L 122.2 518.9 L 132.4 525.6 L 142.9 531.8 L 153.7 537.4 L 164.9 542.5 L 176.3 547 L 176.3 547 L 187.8 551 L 199.5 554.3 L 211.4 557.1 L 223.5 559.2 L 235.6 560.8 L 247.8 561.7 L 260 562 Z" fill="#0C120E" opacity="0.6" transform="translate(0, 8)"/>
+<path d="M 260 562 L 274.2 561.3 L 288.1 559.2 L 301.3 556.1 L 313.7 552.1 L 325.2 547.6 L 335.9 542.8 L 346 538 L 346 538 L 355.6 533.1 L 364.8 528.2 L 373.7 523.5 L 382.4 519 L 391 514.6 L 399.5 510.3 L 407.9 506.3 L 407.9 506.3 L 416.4 502.5 L 424.8 498.8 L 433.3 495.4 L 441.8 492.2 L 450.4 489.2 L 459.1 486.4 L 467.8 483.8 L 467.8 483.8 L 476.6 481.4 L 485.4 479.2 L 494.4 477.2 L 503.4 475.4 L 512.4 473.8 L 521.6 472.4 L 530.8 471.1 L 530.8 471.1 L 540 470 L 549.3 469.1 L 558.6 468.4 L 568 467.8 L 577.4 467.4 L 586.8 467.1 L 596.3 467 L 596.3 467 L 605.7 467 L 615.2 467.2 L 624.7 467.5 L 634 467.9 L 643.4 468.5 L 652.7 469.3 L 662 470.2 L 662 470.2 L 671.2 471.4 L 680.4 472.6 L 689.5 474.1 L 698.5 475.8 L 707.5 477.6 L 716.4 479.6 L 725.3 481.9 L 725.3 481.9 L 734.1 484.3 L 742.8 487 L 751.4 489.8 L 760 492.9 L 768.5 496.1 L 777 499.6 L 785.4 503.3 L 785.4 503.3 L 793.9 507.2 L 802.3 511.2 L 810.8 515.5 L 819.4 519.9 L 828.2 524.5 L 837.2 529.3 L 846.4 534.1 L 846.4 534.1 L 856.1 539 L 866.3 543.9 L 877.2 548.6 L 888.9 553 L 901.4 556.8 L 914.8 559.8 L 928.8 561.6 L 928.8 561.6 L 942.6 562 L 954.8 561.5 L 967 560.5 L 979.1 558.8 L 991.1 556.5 L 1003 553.7 L 1014.7 550.2 L 1014.7 550.2 L 1026.2 546.1 L 1037.5 541.5 L 1048.6 536.3 L 1059.4 530.5 L 1069.8 524.2 L 1080 517.4 L 1089.7 510.1 L 1089.7 510.1 L 1099.1 502.3 L 1108.2 494 L 1116.7 485.3 L 1124.9 476.2 L 1132.5 466.7 L 1139.6 456.8 L 1146.3 446.5 L 1146.3 446.5 L 1152.4 435.9 L 1158 425 L 1163 413.9 L 1167.5 402.6 L 1171.3 391 L 1174.7 379.2 L 1177.3 367.2 L 1177.3 367.2 L 1179.4 355.2 L 1180.9 343.1 L 1181.7 330.9 L 1182 318.7 L 1181.6 306.4 L 1180.6 294.3 L 1179 282.2 L 1179 282.2 L 1176.8 270.2 L 1174 258.3 L 1170.6 246.5 L 1166.6 235 L 1162 223.7 L 1156.9 212.6 L 1151.2 201.8 L 1151.2 201.8 L 1144.9 191.3 L 1138.1 181.1 L 1130.9 171.3 L 1123.1 161.8 L 1114.9 152.8 L 1106.3 144.2 L 1097.2 136 L 1097.2 136 L 1087.7 128.3 L 1077.8 121.1 L 1067.6 114.4 L 1057.1 108.2 L 1046.3 102.6 L 1035.1 97.5 L 1023.7 93 L 1023.7 93 L 1012.2 89 L 1000.5 85.7 L 988.6 82.9 L 976.5 80.8 L 964.4 79.2 L 952.2 78.3 L 940 78 L 940 78 L 925.8 78.7 L 911.9 80.8 L 898.7 83.9 L 886.3 87.9 L 874.8 92.4 L 864.1 97.2 L 854 102 L 854 102 L 844.4 106.9 L 835.2 111.8 L 826.3 116.5 L 817.6 121 L 809 125.4 L 800.5 129.7 L 792.1 133.7 L 792.1 133.7 L 783.6 137.5 L 775.2 141.2 L 766.7 144.6 L 758.2 147.8 L 749.6 150.8 L 740.9 153.6 L 732.2 156.2 L 732.2 156.2 L 723.4 158.6 L 714.6 160.8 L 705.6 162.8 L 696.6 164.6 L 687.6 166.2 L 678.4 167.6 L 669.2 168.9 L 669.2 168.9 L 660 170 L 650.7 170.9 L 641.4 171.6 L 632 172.2 L 622.6 172.6 L 613.2 172.9 L 603.7 173 L 603.7 173 L 594.3 173 L 584.8 172.8 L 575.3 172.5 L 566 172.1 L 556.6 171.5 L 547.3 170.7 L 538 169.8 L 538 169.8 L 528.8 168.6 L 519.6 167.4 L 510.5 165.9 L 501.5 164.2 L 492.5 162.4 L 483.6 160.4 L 474.7 158.1 L 474.7 158.1 L 465.9 155.7 L 457.2 153 L 448.6 150.2 L 440 147.1 L 431.5 143.9 L 423 140.4 L 414.6 136.7 L 414.6 136.7 L 406.1 132.8 L 397.7 128.8 L 389.2 124.5 L 380.6 120.1 L 371.8 115.5 L 362.8 110.7 L 353.6 105.9 L 353.6 105.9 L 343.9 101 L 333.7 96.1 L 322.8 91.4 L 311.1 87 L 298.6 83.2 L 285.2 80.2 L 271.2 78.4 L 271.2 78.4 L 257.4 78 L 245.2 78.5 L 233 79.5 L 220.9 81.2 L 208.9 83.5 L 197 86.3 L 185.3 89.8 L 185.3 89.8 L 173.8 93.9 L 162.5 98.5 L 151.4 103.7 L 140.6 109.5 L 130.2 115.8 L 120 122.6 L 110.3 129.9 L 110.3 129.9 L 100.9 137.7 L 91.8 146 L 83.3 154.7 L 75.1 163.8 L 67.5 173.3 L 60.4 183.2 L 53.7 193.5 L 53.7 193.5 L 47.6 204.1 L 42 215 L 37 226.1 L 32.5 237.4 L 28.7 249 L 25.3 260.8 L 22.7 272.8 L 22.7 272.8 L 20.6 284.8 L 19.1 296.9 L 18.3 309.1 L 18 321.3 L 18.4 333.6 L 19.4 345.7 L 21 357.8 L 21 357.8 L 23.2 369.8 L 26 381.7 L 29.4 393.5 L 33.4 405 L 38 416.3 L 43.1 427.4 L 48.8 438.2 L 48.8 438.2 L 55.1 448.7 L 61.9 458.9 L 69.1 468.7 L 76.9 478.2 L 85.1 487.2 L 93.7 495.8 L 102.8 504 L 102.8 504 L 112.3 511.7 L 122.2 518.9 L 132.4 525.6 L 142.9 531.8 L 153.7 537.4 L 164.9 542.5 L 176.3 547 L 176.3 547 L 187.8 551 L 199.5 554.3 L 211.4 557.1 L 223.5 559.2 L 235.6 560.8 L 247.8 561.7 L 260 562 Z" fill="#16211B" stroke="#3E4E42" stroke-width="1.5"/>
+<path d="M 260 478 L 265.9 477.7 L 272 476.8 L 278.4 475.2 L 285.3 473 L 292.6 470.2 L 300.4 466.7 L 308.5 462.8 L 308.5 462.8 L 316.9 458.5 L 325.5 454 L 334.5 449.2 L 343.7 444.4 L 353.1 439.6 L 362.7 434.8 L 372.4 430.2 L 372.4 430.2 L 382.4 425.7 L 392.5 421.3 L 402.7 417.2 L 413.1 413.3 L 423.6 409.6 L 434.1 406.2 L 444.8 403 L 444.8 403 L 455.5 400.1 L 466.2 397.4 L 477 395 L 487.8 392.9 L 498.6 390.9 L 509.4 389.2 L 520.3 387.8 L 520.3 387.8 L 531.1 386.5 L 541.9 385.5 L 552.7 384.6 L 563.5 383.9 L 574.3 383.5 L 585.1 383.2 L 595.8 383 L 595.8 383 L 606.5 383 L 617.2 383.2 L 628 383.5 L 638.8 384.1 L 649.6 384.8 L 660.4 385.7 L 671.2 386.8 L 671.2 386.8 L 682 388.1 L 692.9 389.6 L 703.7 391.3 L 714.5 393.3 L 725.3 395.5 L 736.1 398 L 746.8 400.7 L 746.8 400.7 L 757.5 403.7 L 768.1 406.9 L 778.7 410.4 L 789.1 414.1 L 799.5 418 L 809.7 422.2 L 819.8 426.6 L 819.8 426.6 L 829.7 431.2 L 839.4 435.9 L 849 440.6 L 858.3 445.5 L 867.4 450.3 L 876.3 455 L 885 459.5 L 885 459.5 L 893.3 463.7 L 901.3 467.5 L 909 470.8 L 916.2 473.6 L 923 475.6 L 929.3 477 L 935.4 477.8 L 935.4 477.8 L 941.7 478 L 949.7 477.7 L 957.6 477 L 965.5 475.9 L 973.3 474.4 L 981.1 472.6 L 988.8 470.3 L 988.8 470.3 L 996.3 467.6 L 1003.7 464.6 L 1010.9 461.2 L 1017.9 457.5 L 1024.8 453.3 L 1031.4 448.9 L 1037.8 444.1 L 1037.8 444.1 L 1043.9 439 L 1049.8 433.6 L 1055.4 428 L 1060.7 422 L 1065.7 415.7 L 1070.4 409.3 L 1074.7 402.6 L 1074.7 402.6 L 1078.7 395.7 L 1082.3 388.6 L 1085.6 381.3 L 1088.5 373.9 L 1091.1 366.3 L 1093.2 358.7 L 1094.9 350.9 L 1094.9 350.9 L 1096.3 343 L 1097.3 335.1 L 1097.8 327.1 L 1098 319.1 L 1097.8 311.2 L 1097.1 303.2 L 1096.1 295.3 L 1096.1 295.3 L 1094.6 287.5 L 1092.8 279.7 L 1090.5 272.1 L 1087.9 264.5 L 1084.9 257.1 L 1081.6 249.9 L 1077.9 242.8 L 1077.9 242.8 L 1073.8 235.9 L 1069.4 229.3 L 1064.7 222.9 L 1059.6 216.7 L 1054.2 210.8 L 1048.5 205.2 L 1042.6 199.9 L 1042.6 199.9 L 1036.5 194.9 L 1030 190.1 L 1023.3 185.8 L 1016.4 181.7 L 1009.3 178 L 1002.1 174.7 L 994.7 171.8 L 994.7 171.8 L 987.1 169.2 L 979.5 167 L 971.7 165.2 L 963.8 163.8 L 956 162.8 L 948 162.2 L 940 162 L 940 162 L 934.1 162.3 L 928 163.2 L 921.6 164.8 L 914.7 167 L 907.4 169.8 L 899.6 173.3 L 891.5 177.2 L 891.5 177.2 L 883.1 181.5 L 874.5 186 L 865.5 190.8 L 856.3 195.6 L 846.9 200.4 L 837.3 205.2 L 827.6 209.8 L 827.6 209.8 L 817.6 214.3 L 807.5 218.7 L 797.3 222.8 L 786.9 226.7 L 776.4 230.4 L 765.9 233.8 L 755.2 237 L 755.2 237 L 744.5 239.9 L 733.8 242.6 L 723 245 L 712.2 247.1 L 701.4 249.1 L 690.6 250.8 L 679.7 252.2 L 679.7 252.2 L 668.9 253.5 L 658.1 254.5 L 647.3 255.4 L 636.5 256.1 L 625.7 256.5 L 614.9 256.8 L 604.2 257 L 604.2 257 L 593.5 257 L 582.8 256.8 L 572 256.5 L 561.2 255.9 L 550.4 255.2 L 539.6 254.3 L 528.8 253.2 L 528.8 253.2 L 518 251.9 L 507.1 250.4 L 496.3 248.7 L 485.5 246.7 L 474.7 244.5 L 463.9 242 L 453.2 239.3 L 453.2 239.3 L 442.5 236.3 L 431.9 233.1 L 421.3 229.6 L 410.9 225.9 L 400.5 222 L 390.3 217.8 L 380.2 213.4 L 380.2 213.4 L 370.3 208.8 L 360.6 204.1 L 351 199.4 L 341.7 194.5 L 332.6 189.7 L 323.7 185 L 315 180.5 L 315 180.5 L 306.7 176.3 L 298.7 172.5 L 291 169.2 L 283.8 166.4 L 277 164.4 L 270.7 163 L 264.6 162.2 L 264.6 162.2 L 258.3 162 L 250.3 162.3 L 242.4 163 L 234.5 164.1 L 226.7 165.6 L 218.9 167.4 L 211.2 169.7 L 211.2 169.7 L 203.7 172.4 L 196.3 175.4 L 189.1 178.8 L 182.1 182.5 L 175.2 186.7 L 168.6 191.1 L 162.2 195.9 L 162.2 195.9 L 156.1 201 L 150.2 206.4 L 144.6 212 L 139.3 218 L 134.3 224.3 L 129.6 230.7 L 125.3 237.4 L 125.3 237.4 L 121.3 244.3 L 117.7 251.4 L 114.4 258.7 L 111.5 266.1 L 108.9 273.7 L 106.8 281.3 L 105.1 289.1 L 105.1 289.1 L 103.7 297 L 102.7 304.9 L 102.2 312.9 L 102 320.9 L 102.2 328.8 L 102.9 336.8 L 103.9 344.7 L 103.9 344.7 L 105.4 352.5 L 107.2 360.3 L 109.5 367.9 L 112.1 375.5 L 115.1 382.9 L 118.4 390.1 L 122.1 397.2 L 122.1 397.2 L 126.2 404.1 L 130.6 410.7 L 135.3 417.1 L 140.4 423.3 L 145.8 429.2 L 151.5 434.8 L 157.4 440.1 L 157.4 440.1 L 163.5 445.1 L 170 449.9 L 176.7 454.2 L 183.6 458.3 L 190.7 462 L 197.9 465.3 L 205.3 468.2 L 205.3 468.2 L 212.9 470.8 L 220.5 473 L 228.3 474.8 L 236.2 476.2 L 244 477.2 L 252 477.8 L 260 478 Z" fill="url(#m-felt)" stroke="#3E4E42" stroke-width="1.5"/>
+<g class="k69-felter">
+<g class="k69-felt" data-nr="1" data-type="tre">
+<polygon points="260,562 274.2,561.3 288.1,559.2 301.3,556.1 313.7,552.1 325.2,547.6 335.9,542.8 346,538 308.5,462.8 300.4,466.7 292.6,470.2 285.3,473 278.4,475.2 272,476.8 265.9,477.7 260,478" fill="#1D2A21" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(294.7, 514.2) rotate(-17.9)" text-anchor="middle" dominant-baseline="central" fill="#93AE7C" font-size="12" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">3 til..?</tspan></text>
+</g>
+<g class="k69-felt" data-nr="2" data-type="fri">
+<polygon points="346,538 355.6,533.1 364.8,528.2 373.7,523.5 382.4,519 391,514.6 399.5,510.3 407.9,506.3 372.4,430.2 362.7,434.8 353.1,439.6 343.7,444.4 334.5,449.2 325.5,454 316.9,458.5 308.5,462.8" fill="#1B2820" stroke="#4C5C50" stroke-width="1"/>
+<circle cx="358.6" cy="484" r="3.2" fill="#5E6E5F"/>
+</g>
+<g class="k69-felt" data-nr="3" data-type="gobm">
+<polygon points="407.9,506.3 416.4,502.5 424.8,498.8 433.3,495.4 441.8,492.2 450.4,489.2 459.1,486.4 467.8,483.8 444.8,403 434.1,406.2 423.6,409.6 413.1,413.3 402.7,417.2 392.5,421.3 382.4,425.7 372.4,430.2" fill="#26221B" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(422.7, 454.5) rotate(-20.7)" text-anchor="middle" dominant-baseline="central" fill="#D08A4E" font-size="10" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-11.4">Go!</tspan><tspan x="0" dy="11.4">Bier</tspan><tspan x="0" dy="11.4">Meister</tspan></text>
+</g>
+<g class="k69-felt" data-nr="4" data-type="fri">
+<polygon points="467.8,483.8 476.6,481.4 485.4,479.2 494.4,477.2 503.4,475.4 512.4,473.8 521.6,472.4 530.8,471.1 520.3,387.8 509.4,389.2 498.6,390.9 487.8,392.9 477,395 466.2,397.4 455.5,400.1 444.8,403" fill="#1B2820" stroke="#4C5C50" stroke-width="1"/>
+<circle cx="490.6" cy="435.1" r="3.2" fill="#5E6E5F"/>
+</g>
+<g class="k69-felt" data-nr="5" data-type="drik">
+<polygon points="530.8,471.1 540,470 549.3,469.1 558.6,468.4 568,467.8 577.4,467.4 586.8,467.1 596.3,467 595.8,383 585.1,383.2 574.3,383.5 563.5,383.9 552.7,384.6 541.9,385.5 531.1,386.5 520.3,387.8" fill="#8E2F2C" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(560.7, 426.2) rotate(-3.5)" text-anchor="middle" dominant-baseline="central" fill="#F6E7E1" font-size="14" font-weight="700" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">DRIK!</tspan></text>
+</g>
+<g class="k69-felt" data-nr="6" data-type="tre">
+<polygon points="596.3,467 605.7,467 615.2,467.2 624.7,467.5 634,467.9 643.4,468.5 652.7,469.3 662,470.2 671.2,386.8 660.4,385.7 649.6,384.8 638.8,384.1 628,383.5 617.2,383.2 606.5,383 595.8,383" fill="#1D2A21" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(631.4, 425.7) rotate(2.8)" text-anchor="middle" dominant-baseline="central" fill="#93AE7C" font-size="12" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">3 til..?</tspan></text>
+</g>
+<g class="k69-felt" data-nr="7" data-type="kort">
+<polygon points="662,470.2 671.2,471.4 680.4,472.6 689.5,474.1 698.5,475.8 707.5,477.6 716.4,479.6 725.3,481.9 746.8,400.7 736.1,398 725.3,395.5 714.5,393.3 703.7,391.3 692.9,389.6 682,388.1 671.2,386.8" fill="#1B222B" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(701.6, 433.6) rotate(10.3)" text-anchor="middle" dominant-baseline="central" fill="#88A2C2" font-size="11" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-6.3">Træk et</tspan><tspan x="0" dy="12.5">kort</tspan></text>
+</g>
+<g class="k69-felt" data-nr="8" data-type="fri">
+<polygon points="725.3,481.9 734.1,484.3 742.8,487 751.4,489.8 760,492.9 768.5,496.1 777,499.6 785.4,503.3 819.8,426.6 809.7,422.2 799.5,418 789.1,414.1 778.7,410.4 768.1,406.9 757.5,403.7 746.8,400.7" fill="#1B2820" stroke="#4C5C50" stroke-width="1"/>
+<circle cx="769.8" cy="451.8" r="3.2" fill="#5E6E5F"/>
+</g>
+<g class="k69-felt" data-nr="9" data-type="taarn">
+<polygon points="785.4,503.3 793.9,507.2 802.3,511.2 810.8,515.5 819.4,519.9 828.2,524.5 837.2,529.3 846.4,534.1 885,459.5 876.3,455 867.4,450.3 858.3,445.5 849,440.6 839.4,435.9 829.7,431.2 819.8,426.6" fill="#27231A" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(834.4, 480.4) rotate(27.3)" text-anchor="middle" dominant-baseline="central" fill="#E0A03C" font-size="11" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-6.3">Øl i</tspan><tspan x="0" dy="12.5">tårnet</tspan></text>
+</g>
+<g class="k69-felt" data-nr="10" data-type="fri">
+<polygon points="846.4,534.1 856.1,539 866.3,543.9 877.2,548.6 888.9,553 901.4,556.8 914.8,559.8 928.8,561.6 935.4,477.8 929.3,477 923,475.6 916.2,473.6 909,470.8 901.3,467.5 893.3,463.7 885,459.5" fill="#1B2820" stroke="#4C5C50" stroke-width="1"/>
+<circle cx="897.8" cy="511.6" r="3.2" fill="#5E6E5F"/>
+</g>
+<g class="k69-felt" data-nr="11" data-type="bm">
+<polygon points="928.8,561.6 942.6,562 954.8,561.5 967,560.5 979.1,558.8 991.1,556.5 1003,553.7 1014.7,550.2 988.8,470.3 981.1,472.6 973.3,474.4 965.5,475.9 957.6,477 949.7,477.7 941.7,478 935.4,477.8" fill="#C9A227" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(967.3, 518.1) rotate(-7.8)" text-anchor="middle" dominant-baseline="central" fill="#1A1509" font-size="11" font-weight="700" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-6.3">Bier</tspan><tspan x="0" dy="12.5">Meister</tspan></text>
+</g>
+<g class="k69-felt" data-nr="12" data-type="skaal">
+<polygon points="1014.7,550.2 1026.2,546.1 1037.5,541.5 1048.6,536.3 1059.4,530.5 1069.8,524.2 1080,517.4 1089.7,510.1 1037.8,444.1 1031.4,448.9 1024.8,453.3 1017.9,457.5 1010.9,461.2 1003.7,464.6 996.3,467.6 988.8,470.3" fill="#252C1D" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(1034.2, 496.4) rotate(-28.1)" text-anchor="middle" dominant-baseline="central" fill="#D3B44E" font-size="12.5" font-weight="700" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">SKÅL!</tspan></text>
+</g>
+<g class="k69-felt" data-nr="13" data-type="tre">
+<polygon points="1089.7,510.1 1099.1,502.3 1108.2,494 1116.7,485.3 1124.9,476.2 1132.5,466.7 1139.6,456.8 1146.3,446.5 1074.7,402.6 1070.4,409.3 1065.7,415.7 1060.7,422 1055.4,428 1049.8,433.6 1043.9,439 1037.8,444.1" fill="#1D2A21" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(1089.5, 452.9) rotate(-48.4)" text-anchor="middle" dominant-baseline="central" fill="#93AE7C" font-size="12" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">3 til..?</tspan></text>
+</g>
+<g class="k69-felt" data-nr="14" data-type="krone">
+<polygon points="1146.3,446.5 1152.4,435.9 1158,425 1163,413.9 1167.5,402.6 1171.3,391 1174.7,379.2 1177.3,367.2 1094.9,350.9 1093.2,358.7 1091.1,366.3 1088.5,373.9 1085.6,381.3 1082.3,388.6 1078.7,395.7 1074.7,402.6" fill="#25241A" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(1126.2, 392.9) rotate(-68.6)" text-anchor="middle" dominant-baseline="central" fill="#DCC684" font-size="11" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">2-krone</tspan></text>
+</g>
+<g class="k69-felt" data-nr="15" data-type="taarn">
+<polygon points="1177.3,367.2 1179.4,355.2 1180.9,343.1 1181.7,330.9 1182,318.7 1181.6,306.4 1180.6,294.3 1179,282.2 1096.1,295.3 1097.1,303.2 1097.8,311.2 1098,319.1 1097.8,327.1 1097.3,335.1 1096.3,343 1094.9,350.9" fill="#27231A" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(1140, 324) rotate(-88.8)" text-anchor="middle" dominant-baseline="central" fill="#E0A03C" font-size="11" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-6.3">Øl i</tspan><tspan x="0" dy="12.5">tårnet</tspan></text>
+</g>
+<g class="k69-felt" data-nr="16" data-type="fri">
+<polygon points="1179,282.2 1176.8,270.2 1174,258.3 1170.6,246.5 1166.6,235 1162,223.7 1156.9,212.6 1151.2,201.8 1077.9,242.8 1081.6,249.9 1084.9,257.1 1087.9,264.5 1090.5,272.1 1092.8,279.7 1094.6,287.5 1096.1,295.3" fill="#1B2820" stroke="#4C5C50" stroke-width="1"/>
+<circle cx="1129" cy="254.5" r="3.2" fill="#5E6E5F"/>
+</g>
+<g class="k69-felt" data-nr="17" data-type="meier">
+<polygon points="1151.2,201.8 1144.9,191.3 1138.1,181.1 1130.9,171.3 1123.1,161.8 1114.9,152.8 1106.3,144.2 1097.2,136 1042.6,199.9 1048.5,205.2 1054.2,210.8 1059.6,216.7 1064.7,222.9 1069.4,229.3 1073.8,235.9 1077.9,242.8" fill="#241D24" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(1094.6, 193.1) rotate(50.6)" text-anchor="middle" dominant-baseline="central" fill="#B084A0" font-size="12" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">Meier</tspan></text>
+</g>
+<g class="k69-felt" data-nr="18" data-type="fri">
+<polygon points="1097.2,136 1087.7,128.3 1077.8,121.1 1067.6,114.4 1057.1,108.2 1046.3,102.6 1035.1,97.5 1023.7,93 994.7,171.8 1002.1,174.7 1009.3,178 1016.4,181.7 1023.3,185.8 1030,190.1 1036.5,194.9 1042.6,199.9" fill="#1B2820" stroke="#4C5C50" stroke-width="1"/>
+<circle cx="1041.1" cy="147.5" r="3.2" fill="#5E6E5F"/>
+</g>
+<g class="k69-felt" data-nr="19" data-type="kort">
+<polygon points="1023.7,93 1012.2,89 1000.5,85.7 988.6,82.9 976.5,80.8 964.4,79.2 952.2,78.3 940,78 940,162 948,162.2 956,162.8 963.8,163.8 971.7,165.2 979.5,167 987.1,169.2 994.7,171.8" fill="#1B222B" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(975.2, 123.1) rotate(10.2)" text-anchor="middle" dominant-baseline="central" fill="#88A2C2" font-size="11" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-6.3">Træk et</tspan><tspan x="0" dy="12.5">kort</tspan></text>
+</g>
+<g class="k69-felt" data-nr="20" data-type="skaal">
+<polygon points="940,78 925.8,78.7 911.9,80.8 898.7,83.9 886.3,87.9 874.8,92.4 864.1,97.2 854,102 891.5,177.2 899.6,173.3 907.4,169.8 914.7,167 921.6,164.8 928,163.2 934.1,162.3 940,162" fill="#252C1D" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(905.3, 125.8) rotate(342.1)" text-anchor="middle" dominant-baseline="central" fill="#D3B44E" font-size="12.5" font-weight="700" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">SKÅL!</tspan></text>
+</g>
+<g class="k69-felt" data-nr="21" data-type="gobm">
+<polygon points="854,102 844.4,106.9 835.2,111.8 826.3,116.5 817.6,121 809,125.4 800.5,129.7 792.1,133.7 827.6,209.8 837.3,205.2 846.9,200.4 856.3,195.6 865.5,190.8 874.5,186 883.1,181.5 891.5,177.2" fill="#26221B" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(841.4, 156) rotate(332.3)" text-anchor="middle" dominant-baseline="central" fill="#D08A4E" font-size="10" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-11.4">Go!</tspan><tspan x="0" dy="11.4">Bier</tspan><tspan x="0" dy="11.4">Meister</tspan></text>
+</g>
+<g class="k69-felt" data-nr="22" data-type="fri">
+<polygon points="792.1,133.7 783.6,137.5 775.2,141.2 766.7,144.6 758.2,147.8 749.6,150.8 740.9,153.6 732.2,156.2 755.2,237 765.9,233.8 776.4,230.4 786.9,226.7 797.3,222.8 807.5,218.7 817.6,214.3 827.6,209.8" fill="#1B2820" stroke="#4C5C50" stroke-width="1"/>
+<circle cx="777.3" cy="185.5" r="3.2" fill="#5E6E5F"/>
+</g>
+<g class="k69-felt" data-nr="23" data-type="tre">
+<polygon points="732.2,156.2 723.4,158.6 714.6,160.8 705.6,162.8 696.6,164.6 687.6,166.2 678.4,167.6 669.2,168.9 679.7,252.2 690.6,250.8 701.4,249.1 712.2,247.1 723,245 733.8,242.6 744.5,239.9 755.2,237" fill="#1D2A21" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(709.4, 204.9) rotate(348.7)" text-anchor="middle" dominant-baseline="central" fill="#93AE7C" font-size="12" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">3 til..?</tspan></text>
+</g>
+<g class="k69-felt" data-nr="24" data-type="drik">
+<polygon points="669.2,168.9 660,170 650.7,170.9 641.4,171.6 632,172.2 622.6,172.6 613.2,172.9 603.7,173 604.2,257 614.9,256.8 625.7,256.5 636.5,256.1 647.3,255.4 658.1,254.5 668.9,253.5 679.7,252.2" fill="#8E2F2C" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(639.3, 213.8) rotate(356.5)" text-anchor="middle" dominant-baseline="central" fill="#F6E7E1" font-size="14" font-weight="700" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">DRIK!</tspan></text>
+</g>
+<g class="k69-felt" data-nr="25" data-type="taarn">
+<polygon points="603.7,173 594.3,173 584.8,172.8 575.3,172.5 566,172.1 556.6,171.5 547.3,170.7 538,169.8 528.8,253.2 539.6,254.3 550.4,255.2 561.2,255.9 572,256.5 582.8,256.8 593.5,257 604.2,257" fill="#27231A" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(568.6, 214.3) rotate(2.8)" text-anchor="middle" dominant-baseline="central" fill="#E0A03C" font-size="11" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-6.3">Øl i</tspan><tspan x="0" dy="12.5">tårnet</tspan></text>
+</g>
+<g class="k69-felt" data-nr="26" data-type="meier">
+<polygon points="538,169.8 528.8,168.6 519.6,167.4 510.5,165.9 501.5,164.2 492.5,162.4 483.6,160.4 474.7,158.1 453.2,239.3 463.9,242 474.7,244.5 485.5,246.7 496.3,248.7 507.1,250.4 518,251.9 528.8,253.2" fill="#241D24" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(498.4, 206.4) rotate(10.3)" text-anchor="middle" dominant-baseline="central" fill="#B084A0" font-size="12" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">Meier</tspan></text>
+</g>
+<g class="k69-felt" data-nr="27" data-type="fri">
+<polygon points="474.7,158.1 465.9,155.7 457.2,153 448.6,150.2 440,147.1 431.5,143.9 423,140.4 414.6,136.7 380.2,213.4 390.3,217.8 400.5,222 410.9,225.9 421.3,229.6 431.9,233.1 442.5,236.3 453.2,239.3" fill="#1B2820" stroke="#4C5C50" stroke-width="1"/>
+<circle cx="430.2" cy="188.2" r="3.2" fill="#5E6E5F"/>
+</g>
+<g class="k69-felt" data-nr="28" data-type="kort">
+<polygon points="414.6,136.7 406.1,132.8 397.7,128.8 389.2,124.5 380.6,120.1 371.8,115.5 362.8,110.7 353.6,105.9 315,180.5 323.7,185 332.6,189.7 341.7,194.5 351,199.4 360.6,204.1 370.3,208.8 380.2,213.4" fill="#1B222B" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(365.6, 159.6) rotate(27.3)" text-anchor="middle" dominant-baseline="central" fill="#88A2C2" font-size="11" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-6.3">Træk et</tspan><tspan x="0" dy="12.5">kort</tspan></text>
+</g>
+<g class="k69-felt" data-nr="29" data-type="fri">
+<polygon points="353.6,105.9 343.9,101 333.7,96.1 322.8,91.4 311.1,87 298.6,83.2 285.2,80.2 271.2,78.4 264.6,162.2 270.7,163 277,164.4 283.8,166.4 291,169.2 298.7,172.5 306.7,176.3 315,180.5" fill="#1B2820" stroke="#4C5C50" stroke-width="1"/>
+<circle cx="302.2" cy="128.4" r="3.2" fill="#5E6E5F"/>
+</g>
+<g class="k69-felt" data-nr="30" data-type="gobm">
+<polygon points="271.2,78.4 257.4,78 245.2,78.5 233,79.5 220.9,81.2 208.9,83.5 197,86.3 185.3,89.8 211.2,169.7 218.9,167.4 226.7,165.6 234.5,164.1 242.4,163 250.3,162.3 258.3,162 264.6,162.2" fill="#26221B" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(232.7, 121.9) rotate(352.2)" text-anchor="middle" dominant-baseline="central" fill="#D08A4E" font-size="10" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-11.4">Go!</tspan><tspan x="0" dy="11.4">Bier</tspan><tspan x="0" dy="11.4">Meister</tspan></text>
+</g>
+<g class="k69-felt" data-nr="31" data-type="skaal">
+<polygon points="185.3,89.8 173.8,93.9 162.5,98.5 151.4,103.7 140.6,109.5 130.2,115.8 120,122.6 110.3,129.9 162.2,195.9 168.6,191.1 175.2,186.7 182.1,182.5 189.1,178.8 196.3,175.4 203.7,172.4 211.2,169.7" fill="#252C1D" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(165.8, 143.6) rotate(331.9)" text-anchor="middle" dominant-baseline="central" fill="#D3B44E" font-size="12.5" font-weight="700" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">SKÅL!</tspan></text>
+</g>
+<g class="k69-felt" data-nr="32" data-type="taarn">
+<polygon points="110.3,129.9 100.9,137.7 91.8,146 83.3,154.7 75.1,163.8 67.5,173.3 60.4,183.2 53.7,193.5 125.3,237.4 129.6,230.7 134.3,224.3 139.3,218 144.6,212 150.2,206.4 156.1,201 162.2,195.9" fill="#27231A" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(110.5, 187.1) rotate(311.6)" text-anchor="middle" dominant-baseline="central" fill="#E0A03C" font-size="11" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-6.3">Øl i</tspan><tspan x="0" dy="12.5">tårnet</tspan></text>
+</g>
+<g class="k69-felt" data-nr="33" data-type="krone">
+<polygon points="53.7,193.5 47.6,204.1 42,215 37,226.1 32.5,237.4 28.7,249 25.3,260.8 22.7,272.8 105.1,289.1 106.8,281.3 108.9,273.7 111.5,266.1 114.4,258.7 117.7,251.4 121.3,244.3 125.3,237.4" fill="#25241A" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(73.8, 247.1) rotate(291.4)" text-anchor="middle" dominant-baseline="central" fill="#DCC684" font-size="11" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">2-krone</tspan></text>
+</g>
+<g class="k69-felt" data-nr="34" data-type="fri">
+<polygon points="22.7,272.8 20.6,284.8 19.1,296.9 18.3,309.1 18,321.3 18.4,333.6 19.4,345.7 21,357.8 103.9,344.7 102.9,336.8 102.2,328.8 102,320.9 102.2,312.9 102.7,304.9 103.7,297 105.1,289.1" fill="#1B2820" stroke="#4C5C50" stroke-width="1"/>
+<circle cx="60" cy="316" r="3.2" fill="#5E6E5F"/>
+</g>
+<g class="k69-felt" data-nr="35" data-type="meier">
+<polygon points="21,357.8 23.2,369.8 26,381.7 29.4,393.5 33.4,405 38,416.3 43.1,427.4 48.8,438.2 122.1,397.2 118.4,390.1 115.1,382.9 112.1,375.5 109.5,367.9 107.2,360.3 105.4,352.5 103.9,344.7" fill="#241D24" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(71, 385.5) rotate(70.8)" text-anchor="middle" dominant-baseline="central" fill="#B084A0" font-size="12" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="0">Meier</tspan></text>
+</g>
+<g class="k69-felt" data-nr="36" data-type="fri">
+<polygon points="48.8,438.2 55.1,448.7 61.9,458.9 69.1,468.7 76.9,478.2 85.1,487.2 93.7,495.8 102.8,504 157.4,440.1 151.5,434.8 145.8,429.2 140.4,423.3 135.3,417.1 130.6,410.7 126.2,404.1 122.1,397.2" fill="#1B2820" stroke="#4C5C50" stroke-width="1"/>
+<circle cx="105.4" cy="446.9" r="3.2" fill="#5E6E5F"/>
+</g>
+<g class="k69-felt" data-nr="37" data-type="taarn">
+<polygon points="102.8,504 112.3,511.7 122.2,518.9 132.4,525.6 142.9,531.8 153.7,537.4 164.9,542.5 176.3,547 205.3,468.2 197.9,465.3 190.7,462 183.6,458.3 176.7,454.2 170,449.9 163.5,445.1 157.4,440.1" fill="#27231A" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(158.9, 492.5) rotate(30.4)" text-anchor="middle" dominant-baseline="central" fill="#E0A03C" font-size="11" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-6.3">Øl i</tspan><tspan x="0" dy="12.5">tårnet</tspan></text>
+</g>
+<g class="k69-felt" data-nr="38" data-type="kort">
+<polygon points="176.3,547 187.8,551 199.5,554.3 211.4,557.1 223.5,559.2 235.6,560.8 247.8,561.7 260,562 260,478 252,477.8 244,477.2 236.2,476.2 228.3,474.8 220.5,473 212.9,470.8 205.3,468.2" fill="#1B222B" stroke="#4C5C50" stroke-width="1"/>
+<text transform="translate(224.8, 516.9) rotate(10.2)" text-anchor="middle" dominant-baseline="central" fill="#88A2C2" font-size="11" font-weight="600" letter-spacing="0.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif"><tspan x="0" dy="-6.3">Træk et</tspan><tspan x="0" dy="12.5">kort</tspan></text>
+</g>
+</g>
+<g class="k69-pit">
+<g class="k69-pitud">
+<path d="M 412 548 C 350 554 319.3 517 290.3 488" fill="none" stroke="#C9A227" stroke-width="1.8" stroke-dasharray="6 5" opacity="0.9"/>
+<path d="M 279.3 493 L 290.3 488 L 287.3 500" fill="#C9A227" stroke="#C9A227" stroke-width="2" stroke-linejoin="round"/>
+</g>
+<text x="420" y="498" fill="#8A9A8B" font-size="11.5" letter-spacing="3.6" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">PITTEN</text>
+<text x="780" y="498" text-anchor="end" fill="#6B796D" font-size="9.5" letter-spacing="1.6" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">DU RYGER IND PÅ DEN PLADS DU SLÅR</text>
+<g class="k69-pitplads" data-plads="1">
+<rect x="420" y="512" width="60" height="72" fill="#26301F" stroke="#8A722C" stroke-width="1.6"/>
+<text x="450" y="539" text-anchor="middle" dominant-baseline="central" fill="#D3B44E" font-size="22" style="font-family: 'Bodoni Moda', Georgia, 'Times New Roman', serif">1</text>
+<text x="450" y="564" text-anchor="middle" dominant-baseline="central" fill="#8A9A8B" font-size="8.5" letter-spacing="1.1" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">1 SHOTS</text>
+</g>
+<g class="k69-pitplads" data-plads="2">
+<rect x="480" y="512" width="60" height="72" fill="#1D2A23" stroke="#4C5C50" stroke-width="1"/>
+<text x="510" y="539" text-anchor="middle" dominant-baseline="central" fill="#D3B44E" font-size="22" style="font-family: 'Bodoni Moda', Georgia, 'Times New Roman', serif">2</text>
+<text x="510" y="564" text-anchor="middle" dominant-baseline="central" fill="#8A9A8B" font-size="8.5" letter-spacing="1.1" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">2 SHOTS</text>
+<path d="M 476 543 L 470 548 L 476 553" fill="none" stroke="#5C6C5F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g class="k69-pitplads" data-plads="3">
+<rect x="540" y="512" width="60" height="72" fill="#1D2A23" stroke="#4C5C50" stroke-width="1"/>
+<text x="570" y="539" text-anchor="middle" dominant-baseline="central" fill="#D3B44E" font-size="22" style="font-family: 'Bodoni Moda', Georgia, 'Times New Roman', serif">3</text>
+<text x="570" y="564" text-anchor="middle" dominant-baseline="central" fill="#8A9A8B" font-size="8.5" letter-spacing="1.1" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">3 SHOTS</text>
+<path d="M 536 543 L 530 548 L 536 553" fill="none" stroke="#5C6C5F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g class="k69-pitplads" data-plads="4">
+<rect x="600" y="512" width="60" height="72" fill="#1D2A23" stroke="#4C5C50" stroke-width="1"/>
+<text x="630" y="539" text-anchor="middle" dominant-baseline="central" fill="#D3B44E" font-size="22" style="font-family: 'Bodoni Moda', Georgia, 'Times New Roman', serif">4</text>
+<text x="630" y="564" text-anchor="middle" dominant-baseline="central" fill="#8A9A8B" font-size="8.5" letter-spacing="1.1" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">4 SHOTS</text>
+<path d="M 596 543 L 590 548 L 596 553" fill="none" stroke="#5C6C5F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g class="k69-pitplads" data-plads="5">
+<rect x="660" y="512" width="60" height="72" fill="#1D2A23" stroke="#4C5C50" stroke-width="1"/>
+<text x="690" y="539" text-anchor="middle" dominant-baseline="central" fill="#D3B44E" font-size="22" style="font-family: 'Bodoni Moda', Georgia, 'Times New Roman', serif">5</text>
+<text x="690" y="564" text-anchor="middle" dominant-baseline="central" fill="#8A9A8B" font-size="8.5" letter-spacing="1.1" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">5 SHOTS</text>
+<path d="M 656 543 L 650 548 L 656 553" fill="none" stroke="#5C6C5F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g class="k69-pitplads" data-plads="6">
+<rect x="720" y="512" width="60" height="72" fill="#1D2A23" stroke="#4C5C50" stroke-width="1"/>
+<text x="750" y="539" text-anchor="middle" dominant-baseline="central" fill="#D3B44E" font-size="22" style="font-family: 'Bodoni Moda', Georgia, 'Times New Roman', serif">6</text>
+<text x="750" y="564" text-anchor="middle" dominant-baseline="central" fill="#8A9A8B" font-size="8.5" letter-spacing="1.1" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">6 SHOTS</text>
+<path d="M 716 543 L 710 548 L 716 553" fill="none" stroke="#5C6C5F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<text x="420" y="604" fill="#C9A227" font-size="9.5" letter-spacing="1.5" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">UD PÅ FELT 1</text>
+<text x="780" y="604" text-anchor="end" fill="#6B796D" font-size="9.5" letter-spacing="1.5" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">SLÅ DIG NED MOD 1 — SLÅR DU OVER, ER DU UDE</text>
+</g>
+            <g class="k69-taarn">
+<circle cx="600" cy="320" r="67" fill="#0D1410" opacity="0.8"/>
+<circle cx="600" cy="320" r="58" fill="#18231D" stroke="url(#m-brass)" stroke-width="2"/>
+<circle cx="600" cy="320" r="51" fill="none" stroke="#C9A227" stroke-width="0.6" opacity="0.4"/>
+<rect x="579" y="287" width="42" height="62" rx="4" fill="#0E1512"/>
+<rect x="581" y="314.9" width="38" height="34.1" rx="3" fill="url(#m-beer)"/>
+<rect x="581" y="308.9" width="38" height="7" rx="3" fill="#F6EBD4"/>
+<rect x="579" y="287" width="42" height="62" rx="4" fill="none" stroke="#C4D3C6" stroke-width="1.4"/>
+<text x="600" y="365" text-anchor="middle" fill="#D3B44E" font-size="10.5" letter-spacing="3.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">TÅRNET</text>
+</g>
+            <polygon points="{{aktivPoints}}" fill="none" stroke="{{accent}}" stroke-width="3.5" filter="url(#m-glow)" opacity="0.95"></polygon>
+            <sc-for list="{{brikker}}" as="bk" hint-placeholder-count="5">
+              <g transform="translate({{bk.x}}, {{bk.y}})" style="transition: transform 480ms cubic-bezier(0.33, 1.08, 0.45, 1)">
+                <circle cx="0" cy="3" r="17" fill="#0B100D" opacity="0.55"></circle>
+                <circle cx="0" cy="0" r="16" fill="{{bk.farve}}" stroke="#0E1512" stroke-width="2"></circle>
+                <text x="0" y="1" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="#14180C" style="font-family: var(--serif)">{{bk.initial}}</text>
+              </g>
+            </sc-for>
+          </g>
+        </svg>
+        <div class="vp-hint">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 12h14M5 12l4-4M5 12l4 4M19 12l-4-4M19 12l-4 4"></path></svg>
+          Træk for at flytte pladen · rul for at zoome
+        </div>
+        <div class="zoom">
+          <div class="zbtn" onClick="{{ud}}">−</div>
+          <div class="zbtn" onClick="{{fit}}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path></svg>
+          </div>
+          <div class="zbtn" onClick="{{ind}}">+</div>
+        </div>
+      </div>
+
+      <div class="dock">
+        <div class="dock-left">
+          <div class="eyebrow">Det er din tur</div>
+          <div class="dock-navn">{{turNavn}}</div>
+          <div class="note">Slå — appen rykker selv brikken og sender turen videre.</div>
+        </div>
+
+        <div class="terning-boks">
+          <svg width="86" height="86" viewBox="0 0 100 100">
+            <defs>
+              <linearGradient id="t-face" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F3EADA"></stop><stop offset="100%" stop-color="#CFC4AE"></stop></linearGradient>
+            </defs>
+            <rect x="6" y="9" width="88" height="88" rx="17" fill="#0B100D" opacity="0.55"></rect>
+            <rect x="4" y="4" width="88" height="88" rx="17" fill="url(#t-face)" stroke="#8E8878" stroke-width="1.5"></rect>
+            <sc-for list="{{pips}}" as="pip" hint-placeholder-count="4">
+              <circle cx="{{pip.cx}}" cy="{{pip.cy}}" r="7.5" fill="#1B241C"></circle>
+            </sc-for>
+          </svg>
+          <button class="btn btn-primary" style="height: 54px; padding: 0 20px; font-size: 12px" onClick="{{slaa}}">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"></rect><circle cx="8.5" cy="8.5" r="1.4" fill="currentColor"></circle><circle cx="15.5" cy="15.5" r="1.4" fill="currentColor"></circle></svg>
+            Slå med terningen
+          </button>
+        </div>
+
+        <div class="dock-right">
+          <div class="eyebrow">Runde 7 · med uret</div>
+          <div class="miniplan">
+            <sc-for list="{{turRaekke}}" as="t" hint-placeholder-count="6">
+              <div class="mini" style="background: {{t.farve}}"></div>
+            </sc-for>
+          </div>
+          <div class="note" style="text-align: right; max-width: 210px">Næste: {{naesteNavn}}</div>
+        </div>
+      </div>
+    </main>
+
+    <aside class="rail rail-r">
+      <div class="rail-sec">
+        <div class="rail-head"><div class="eyebrow">Denne tur</div><div class="eyebrow">Felt {{aktivNr}}</div></div>
+        <div class="event">
+          <div class="event-hat">
+            <div style="width: 10px; height: 10px; border-radius: 50%; background: {{aktivFarve}}"></div>
+            <div class="eyebrow" style="color: {{aktivFarve}}">{{turNavn}} slog {{terning}}</div>
+          </div>
+          <div class="event-titel" style="color: {{aktivFarve}}">{{aktivTitel}}</div>
+          <div class="event-txt">{{aktivTekst}}</div>
+          <sc-if value="{{erDrik}}" hint-placeholder-val="{{false}}">
+            <div class="event-txt" style="color: var(--amber)">Det er {{taarnSlurke}} slurke — {{minCl}} af din {{minDrik}}.</div>
+          </sc-if>
+          <sc-if value="{{erTaarn}}" hint-placeholder-val="{{true}}">
+            <div class="hold {{holdKlasse}}" onPointerDown="{{start}}" onPointerUp="{{stop}}" onPointerLeave="{{stop}}" onPointerCancel="{{stop}}">
+              <div class="hold-fyld" style="width: {{holdPct}}"></div>
+              <div class="hold-txt">
+                <div class="hold-t">{{holdTekst}}</div>
+                <div class="hold-d">{{holdUnder}}</div>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ikkeTaarn}}" hint-placeholder-val="{{false}}">
+            <div class="event-cta">
+              <button class="btn btn-sm">Vælg spiller</button>
+              <button class="btn btn-sm btn-ghost">Kvitter</button>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+
+      <div class="rail-sec" style="flex-grow: 1; border-bottom: none">
+        <div class="rail-head"><div class="eyebrow">Hændelser</div></div>
+        <div class="log">
+          <sc-for list="{{log}}" as="l" hint-placeholder-count="7">
+            <div class="log-i">
+              <div class="log-dot" style="background: {{l.farve}}"></div>
+              <div class="log-t">{{l.tekst}}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"accent":{"editor":"color","default":"#C9A227","options":["#C9A227","#E0A03C","#93AE7C","#88A2C2"],"section":"Stil"},"antalSpillere":{"editor":"int","default":5,"min":1,"max":8,"section":"Spil"},"$preview":{"width":1440,"height":900}}'>
+const FELTER = [{"nr":1,"type":"tre","cx":294.7,"cy":514.2,"points":"260,562 274.2,561.3 288.1,559.2 301.3,556.1 313.7,552.1 325.2,547.6 335.9,542.8 346,538 308.5,462.8 300.4,466.7 292.6,470.2 285.3,473 278.4,475.2 272,476.8 265.9,477.7 260,478"},{"nr":2,"type":"fri","cx":358.6,"cy":484,"points":"346,538 355.6,533.1 364.8,528.2 373.7,523.5 382.4,519 391,514.6 399.5,510.3 407.9,506.3 372.4,430.2 362.7,434.8 353.1,439.6 343.7,444.4 334.5,449.2 325.5,454 316.9,458.5 308.5,462.8"},{"nr":3,"type":"gobm","cx":422.7,"cy":454.5,"points":"407.9,506.3 416.4,502.5 424.8,498.8 433.3,495.4 441.8,492.2 450.4,489.2 459.1,486.4 467.8,483.8 444.8,403 434.1,406.2 423.6,409.6 413.1,413.3 402.7,417.2 392.5,421.3 382.4,425.7 372.4,430.2"},{"nr":4,"type":"fri","cx":490.6,"cy":435.1,"points":"467.8,483.8 476.6,481.4 485.4,479.2 494.4,477.2 503.4,475.4 512.4,473.8 521.6,472.4 530.8,471.1 520.3,387.8 509.4,389.2 498.6,390.9 487.8,392.9 477,395 466.2,397.4 455.5,400.1 444.8,403"},{"nr":5,"type":"drik","cx":560.7,"cy":426.2,"points":"530.8,471.1 540,470 549.3,469.1 558.6,468.4 568,467.8 577.4,467.4 586.8,467.1 596.3,467 595.8,383 585.1,383.2 574.3,383.5 563.5,383.9 552.7,384.6 541.9,385.5 531.1,386.5 520.3,387.8"},{"nr":6,"type":"tre","cx":631.4,"cy":425.7,"points":"596.3,467 605.7,467 615.2,467.2 624.7,467.5 634,467.9 643.4,468.5 652.7,469.3 662,470.2 671.2,386.8 660.4,385.7 649.6,384.8 638.8,384.1 628,383.5 617.2,383.2 606.5,383 595.8,383"},{"nr":7,"type":"kort","cx":701.6,"cy":433.6,"points":"662,470.2 671.2,471.4 680.4,472.6 689.5,474.1 698.5,475.8 707.5,477.6 716.4,479.6 725.3,481.9 746.8,400.7 736.1,398 725.3,395.5 714.5,393.3 703.7,391.3 692.9,389.6 682,388.1 671.2,386.8"},{"nr":8,"type":"fri","cx":769.8,"cy":451.8,"points":"725.3,481.9 734.1,484.3 742.8,487 751.4,489.8 760,492.9 768.5,496.1 777,499.6 785.4,503.3 819.8,426.6 809.7,422.2 799.5,418 789.1,414.1 778.7,410.4 768.1,406.9 757.5,403.7 746.8,400.7"},{"nr":9,"type":"taarn","cx":834.4,"cy":480.4,"points":"785.4,503.3 793.9,507.2 802.3,511.2 810.8,515.5 819.4,519.9 828.2,524.5 837.2,529.3 846.4,534.1 885,459.5 876.3,455 867.4,450.3 858.3,445.5 849,440.6 839.4,435.9 829.7,431.2 819.8,426.6"},{"nr":10,"type":"fri","cx":897.8,"cy":511.6,"points":"846.4,534.1 856.1,539 866.3,543.9 877.2,548.6 888.9,553 901.4,556.8 914.8,559.8 928.8,561.6 935.4,477.8 929.3,477 923,475.6 916.2,473.6 909,470.8 901.3,467.5 893.3,463.7 885,459.5"},{"nr":11,"type":"bm","cx":967.3,"cy":518.1,"points":"928.8,561.6 942.6,562 954.8,561.5 967,560.5 979.1,558.8 991.1,556.5 1003,553.7 1014.7,550.2 988.8,470.3 981.1,472.6 973.3,474.4 965.5,475.9 957.6,477 949.7,477.7 941.7,478 935.4,477.8"},{"nr":12,"type":"skaal","cx":1034.2,"cy":496.4,"points":"1014.7,550.2 1026.2,546.1 1037.5,541.5 1048.6,536.3 1059.4,530.5 1069.8,524.2 1080,517.4 1089.7,510.1 1037.8,444.1 1031.4,448.9 1024.8,453.3 1017.9,457.5 1010.9,461.2 1003.7,464.6 996.3,467.6 988.8,470.3"},{"nr":13,"type":"tre","cx":1089.5,"cy":452.9,"points":"1089.7,510.1 1099.1,502.3 1108.2,494 1116.7,485.3 1124.9,476.2 1132.5,466.7 1139.6,456.8 1146.3,446.5 1074.7,402.6 1070.4,409.3 1065.7,415.7 1060.7,422 1055.4,428 1049.8,433.6 1043.9,439 1037.8,444.1"},{"nr":14,"type":"krone","cx":1126.2,"cy":392.9,"points":"1146.3,446.5 1152.4,435.9 1158,425 1163,413.9 1167.5,402.6 1171.3,391 1174.7,379.2 1177.3,367.2 1094.9,350.9 1093.2,358.7 1091.1,366.3 1088.5,373.9 1085.6,381.3 1082.3,388.6 1078.7,395.7 1074.7,402.6"},{"nr":15,"type":"taarn","cx":1140,"cy":324,"points":"1177.3,367.2 1179.4,355.2 1180.9,343.1 1181.7,330.9 1182,318.7 1181.6,306.4 1180.6,294.3 1179,282.2 1096.1,295.3 1097.1,303.2 1097.8,311.2 1098,319.1 1097.8,327.1 1097.3,335.1 1096.3,343 1094.9,350.9"},{"nr":16,"type":"fri","cx":1129,"cy":254.5,"points":"1179,282.2 1176.8,270.2 1174,258.3 1170.6,246.5 1166.6,235 1162,223.7 1156.9,212.6 1151.2,201.8 1077.9,242.8 1081.6,249.9 1084.9,257.1 1087.9,264.5 1090.5,272.1 1092.8,279.7 1094.6,287.5 1096.1,295.3"},{"nr":17,"type":"meier","cx":1094.6,"cy":193.1,"points":"1151.2,201.8 1144.9,191.3 1138.1,181.1 1130.9,171.3 1123.1,161.8 1114.9,152.8 1106.3,144.2 1097.2,136 1042.6,199.9 1048.5,205.2 1054.2,210.8 1059.6,216.7 1064.7,222.9 1069.4,229.3 1073.8,235.9 1077.9,242.8"},{"nr":18,"type":"fri","cx":1041.1,"cy":147.5,"points":"1097.2,136 1087.7,128.3 1077.8,121.1 1067.6,114.4 1057.1,108.2 1046.3,102.6 1035.1,97.5 1023.7,93 994.7,171.8 1002.1,174.7 1009.3,178 1016.4,181.7 1023.3,185.8 1030,190.1 1036.5,194.9 1042.6,199.9"},{"nr":19,"type":"kort","cx":975.2,"cy":123.1,"points":"1023.7,93 1012.2,89 1000.5,85.7 988.6,82.9 976.5,80.8 964.4,79.2 952.2,78.3 940,78 940,162 948,162.2 956,162.8 963.8,163.8 971.7,165.2 979.5,167 987.1,169.2 994.7,171.8"},{"nr":20,"type":"skaal","cx":905.3,"cy":125.8,"points":"940,78 925.8,78.7 911.9,80.8 898.7,83.9 886.3,87.9 874.8,92.4 864.1,97.2 854,102 891.5,177.2 899.6,173.3 907.4,169.8 914.7,167 921.6,164.8 928,163.2 934.1,162.3 940,162"},{"nr":21,"type":"gobm","cx":841.4,"cy":156,"points":"854,102 844.4,106.9 835.2,111.8 826.3,116.5 817.6,121 809,125.4 800.5,129.7 792.1,133.7 827.6,209.8 837.3,205.2 846.9,200.4 856.3,195.6 865.5,190.8 874.5,186 883.1,181.5 891.5,177.2"},{"nr":22,"type":"fri","cx":777.3,"cy":185.5,"points":"792.1,133.7 783.6,137.5 775.2,141.2 766.7,144.6 758.2,147.8 749.6,150.8 740.9,153.6 732.2,156.2 755.2,237 765.9,233.8 776.4,230.4 786.9,226.7 797.3,222.8 807.5,218.7 817.6,214.3 827.6,209.8"},{"nr":23,"type":"tre","cx":709.4,"cy":204.9,"points":"732.2,156.2 723.4,158.6 714.6,160.8 705.6,162.8 696.6,164.6 687.6,166.2 678.4,167.6 669.2,168.9 679.7,252.2 690.6,250.8 701.4,249.1 712.2,247.1 723,245 733.8,242.6 744.5,239.9 755.2,237"},{"nr":24,"type":"drik","cx":639.3,"cy":213.8,"points":"669.2,168.9 660,170 650.7,170.9 641.4,171.6 632,172.2 622.6,172.6 613.2,172.9 603.7,173 604.2,257 614.9,256.8 625.7,256.5 636.5,256.1 647.3,255.4 658.1,254.5 668.9,253.5 679.7,252.2"},{"nr":25,"type":"taarn","cx":568.6,"cy":214.3,"points":"603.7,173 594.3,173 584.8,172.8 575.3,172.5 566,172.1 556.6,171.5 547.3,170.7 538,169.8 528.8,253.2 539.6,254.3 550.4,255.2 561.2,255.9 572,256.5 582.8,256.8 593.5,257 604.2,257"},{"nr":26,"type":"meier","cx":498.4,"cy":206.4,"points":"538,169.8 528.8,168.6 519.6,167.4 510.5,165.9 501.5,164.2 492.5,162.4 483.6,160.4 474.7,158.1 453.2,239.3 463.9,242 474.7,244.5 485.5,246.7 496.3,248.7 507.1,250.4 518,251.9 528.8,253.2"},{"nr":27,"type":"fri","cx":430.2,"cy":188.2,"points":"474.7,158.1 465.9,155.7 457.2,153 448.6,150.2 440,147.1 431.5,143.9 423,140.4 414.6,136.7 380.2,213.4 390.3,217.8 400.5,222 410.9,225.9 421.3,229.6 431.9,233.1 442.5,236.3 453.2,239.3"},{"nr":28,"type":"kort","cx":365.6,"cy":159.6,"points":"414.6,136.7 406.1,132.8 397.7,128.8 389.2,124.5 380.6,120.1 371.8,115.5 362.8,110.7 353.6,105.9 315,180.5 323.7,185 332.6,189.7 341.7,194.5 351,199.4 360.6,204.1 370.3,208.8 380.2,213.4"},{"nr":29,"type":"fri","cx":302.2,"cy":128.4,"points":"353.6,105.9 343.9,101 333.7,96.1 322.8,91.4 311.1,87 298.6,83.2 285.2,80.2 271.2,78.4 264.6,162.2 270.7,163 277,164.4 283.8,166.4 291,169.2 298.7,172.5 306.7,176.3 315,180.5"},{"nr":30,"type":"gobm","cx":232.7,"cy":121.9,"points":"271.2,78.4 257.4,78 245.2,78.5 233,79.5 220.9,81.2 208.9,83.5 197,86.3 185.3,89.8 211.2,169.7 218.9,167.4 226.7,165.6 234.5,164.1 242.4,163 250.3,162.3 258.3,162 264.6,162.2"},{"nr":31,"type":"skaal","cx":165.8,"cy":143.6,"points":"185.3,89.8 173.8,93.9 162.5,98.5 151.4,103.7 140.6,109.5 130.2,115.8 120,122.6 110.3,129.9 162.2,195.9 168.6,191.1 175.2,186.7 182.1,182.5 189.1,178.8 196.3,175.4 203.7,172.4 211.2,169.7"},{"nr":32,"type":"taarn","cx":110.5,"cy":187.1,"points":"110.3,129.9 100.9,137.7 91.8,146 83.3,154.7 75.1,163.8 67.5,173.3 60.4,183.2 53.7,193.5 125.3,237.4 129.6,230.7 134.3,224.3 139.3,218 144.6,212 150.2,206.4 156.1,201 162.2,195.9"},{"nr":33,"type":"krone","cx":73.8,"cy":247.1,"points":"53.7,193.5 47.6,204.1 42,215 37,226.1 32.5,237.4 28.7,249 25.3,260.8 22.7,272.8 105.1,289.1 106.8,281.3 108.9,273.7 111.5,266.1 114.4,258.7 117.7,251.4 121.3,244.3 125.3,237.4"},{"nr":34,"type":"fri","cx":60,"cy":316,"points":"22.7,272.8 20.6,284.8 19.1,296.9 18.3,309.1 18,321.3 18.4,333.6 19.4,345.7 21,357.8 103.9,344.7 102.9,336.8 102.2,328.8 102,320.9 102.2,312.9 102.7,304.9 103.7,297 105.1,289.1"},{"nr":35,"type":"meier","cx":71,"cy":385.5,"points":"21,357.8 23.2,369.8 26,381.7 29.4,393.5 33.4,405 38,416.3 43.1,427.4 48.8,438.2 122.1,397.2 118.4,390.1 115.1,382.9 112.1,375.5 109.5,367.9 107.2,360.3 105.4,352.5 103.9,344.7"},{"nr":36,"type":"fri","cx":105.4,"cy":446.9,"points":"48.8,438.2 55.1,448.7 61.9,458.9 69.1,468.7 76.9,478.2 85.1,487.2 93.7,495.8 102.8,504 157.4,440.1 151.5,434.8 145.8,429.2 140.4,423.3 135.3,417.1 130.6,410.7 126.2,404.1 122.1,397.2"},{"nr":37,"type":"taarn","cx":158.9,"cy":492.5,"points":"102.8,504 112.3,511.7 122.2,518.9 132.4,525.6 142.9,531.8 153.7,537.4 164.9,542.5 176.3,547 205.3,468.2 197.9,465.3 190.7,462 183.6,458.3 176.7,454.2 170,449.9 163.5,445.1 157.4,440.1"},{"nr":38,"type":"kort","cx":224.8,"cy":516.9,"points":"176.3,547 187.8,551 199.5,554.3 211.4,557.1 223.5,559.2 235.6,560.8 247.8,561.7 260,562 260,478 252,477.8 244,477.2 236.2,476.2 228.3,474.8 220.5,473 212.9,470.8 205.3,468.2"}];
+const PIT = [{"plads":1,"cx":450,"cy":548},{"plads":2,"cx":510,"cy":548},{"plads":3,"cx":570,"cy":548},{"plads":4,"cx":630,"cy":548},{"plads":5,"cx":690,"cy":548},{"plads":6,"cx":750,"cy":548}];
+const SPILLERE = [{"navn":"Mette","farve":"#D8A93F"},{"navn":"Jeppe","farve":"#8FAF74"},{"navn":"Sofie","farve":"#87A4C6"},{"navn":"Rasmus","farve":"#C4776B"},{"navn":"Ida","farve":"#B189A6"},{"navn":"Kasper","farve":"#7FB0A4"},{"navn":"Line","farve":"#C9A227"},{"navn":"Emil","farve":"#9C9A78"}];
+const TEKST = {"fri":["Frifelt","Der sker ingenting. Men fredet er du ikke — de andre må stadig give dig slurke."],"tre":["3 til..?","Du deler tre slurke ud. Du bestemmer selv om én tager alle tre, eller om tre tager én hver."],"skaal":["SKÅL!","Alle ved bordet tager en fællesskål."],"bm":["Bier Meister","Du er nu Bier Meister. Find noget grimt at sætte på hovedet. Du henter øl, og du drikker hver gang nogen lander på Go! Bier Meister. Titlen ryger først videre når en anden lander her."],"gobm":["Go! Bier Meister","Bier Meisteren drikker 3 slurke. Er der ingen Bier Meister, drikker du selv."],"taarn":["Øl i tårnet","Hæld så meget øl i tårnet du har lyst til. Løber det over, bunder du det selv."],"kort":["Træk et kort","Træk et kort fra bunken og gør hvad der står."],"drik":["DRIK!","Kort og godt: bund tårnet."],"meier":["Meier","Udfordr en spiller til én runde Meyer. Taberen drikker — taber du på en Meyer, drikker du dobbelt."],"krone":["2-krone","Ét forsøg: smid 2-kronen i tårnet. Den skal ramme bordet først. Lykkes det, udpeger du én der skal bunde tårnet."]};
+const FARVER = { fri: '#8C9689', tre: '#93AE7C', skaal: '#D3B44E', bm: '#C9A227', gobm: '#D08A4E',
+  taarn: '#E0A03C', kort: '#88A2C2', drik: '#C4635B', meier: '#B084A0', krone: '#DCC684' };
+const PIPS = {
+  1: [[50,50]],
+  2: [[30,30],[70,70]],
+  3: [[30,30],[50,50],[70,70]],
+  4: [[30,30],[70,30],[30,70],[70,70]],
+  5: [[30,30],[70,30],[50,50],[30,70],[70,70]],
+  6: [[30,28],[70,28],[30,50],[70,50],[30,72],[70,72]]
+};
+const START = [2, 4, 8, 10, 16, 18, 22, 27];
+const DRIK_NAVN = { ol: 'Pilsner', vin: 'Vin', whisky: 'Whisky' };
+const KAP = 16;
+
+const CL_PR_SLURK = { ol: 3, vin: 15 / 11, whisky: 4 / 11 };
+function iCl(slurke, drik) {
+  const v = slurke * (CL_PR_SLURK[drik] || 3);
+  return (v < 10 ? Math.round(v * 10) / 10 : Math.round(v)).toString().replace('.', ',') + ' cl';
+}
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      pos: START.slice(),
+      pit: [0, 0, 0, 0, 0, 0, 0, 0],
+      slurke: [8, 11, 5, 11, 3, 9, 11, 7],
+      drik: ['ol', 'ol', 'vin', 'ol', 'whisky', 'ol', 'vin', 'ol'],
+      tur: 0,
+      terning: 4,
+      aktiv: 9,
+      bm: 1,
+      taarn: 5,
+      tilfoejet: 0,
+      holder: false,
+      pan: { x: 8, y: 120, z: 0.66 },
+      drag: null,
+      log: [
+        { farve: '#C4635B', tekst: 'Mette landede på DRIK! — tårnet skal bundes.' },
+        { farve: '#E0A03C', tekst: 'Rasmus hældte 3 slurke i tårnet.' },
+        { farve: '#B084A0', tekst: 'Sofie udfordrede Jeppe til Meier — Jeppe tabte på en løftet bluff.' },
+        { farve: '#88A2C2', tekst: 'Jeppe trak Bonde — ny regel: kun tysk ved bordet.' },
+        { farve: '#C9A227', tekst: 'Ida blev Bier Meister.' },
+        { farve: '#93AE7C', tekst: 'Kasper gav 3 slurke til Mette.' },
+        { farve: '#8C9689', tekst: 'Spillet startet af Jeppe. 5 spillere ved bordet.' }
+      ]
+    };
+  }
+
+  antal() { return Math.max(1, Math.min(8, this.props.antalSpillere ?? 5)); }
+
+
+  slaaTerning() {
+    const n = this.antal();
+    const v = 1 + Math.floor(Math.random() * 6);
+    const pos = this.state.pos.slice();
+    const pit = this.state.pit.slice();
+    const slurke = this.state.slurke.slice();
+    const i = this.state.tur % n;
+    let taarn = this.state.taarn;
+    let bm = this.state.bm;
+    // Én enhed er 11 slurke; er den tom, hentes en ny.
+    const drik = (k, antal) => { slurke[k] = slurke[k] - antal; if (slurke[k] <= 0) slurke[k] = 11 + slurke[k]; };
+
+    if (pit[i] > 0) {
+      const ny = pit[i] - v;
+      if (ny <= 0) { pit[i] = 0; pos[i] = 1; } else { pit[i] = ny; }
+    } else {
+      pos[i] = ((pos[i] - 1 + v) % FELTER.length) + 1;
+      for (let j = 0; j < n; j++) {
+        if (j !== i && pit[j] === 0 && pos[j] === pos[i]) { pit[j] = 1 + Math.floor(Math.random() * 6); pos[j] = 0; }
+      }
+    }
+
+    const felt = FELTER[(pos[i] || 1) - 1];
+    if (pit[i] > 0) {
+      drik(i, pit[i]);
+    } else {
+      if (felt.type === 'drik') { drik(i, Math.round(taarn)); taarn = 0; }
+      if (felt.type === 'bm') bm = i;
+      if (felt.type === 'skaal') for (let j = 0; j < n; j++) drik(j, 1);
+      if (felt.type === 'gobm') drik(bm === null ? i : bm, 3);
+    }
+
+    const navn = SPILLERE[i].navn;
+    const linje = pit[i] > 0
+      ? { farve: '#C4635B', tekst: navn + ' slog ' + v + ' og er i pitten på plads ' + pit[i] + '.' }
+      : { farve: FARVER[felt.type], tekst: navn + ' slog ' + v + ' og landede på ' + (TEKST[felt.type][0]) + '.' };
+
+    this.setState({
+      pos, pit, slurke, terning: v, taarn, bm, tilfoejet: 0,
+      aktiv: pit[i] > 0 ? this.state.aktiv : pos[i],
+      tur: (this.state.tur + 1) % n,
+      log: [linje].concat(this.state.log).slice(0, 9)
+    });
+  }
+
+  // Hold knappen nede: tårnet fyldes videre indtil der slippes.
+  haeld() {
+    if (this.t) return;
+    this.setState({ holder: true });
+    this.t = setInterval(() => {
+      const nu = this.state.taarn;
+      const ny = Math.min(KAP + 3, nu + 0.25);
+      this.setState({ taarn: ny, tilfoejet: this.state.tilfoejet + (ny - nu) });
+    }, 95);
+  }
+
+  stopHaeld() {
+    if (this.t) { clearInterval(this.t); this.t = null; }
+    if (this.state.holder) this.setState({ holder: false });
+  }
+
+  componentWillUnmount() { if (this.t) clearInterval(this.t); }
+
+  zoom(f) {
+    const p = this.state.pan;
+    const z = Math.max(0.35, Math.min(1.8, p.z * f));
+    this.setState({ pan: { x: p.x + (404 - p.x) * (1 - z / p.z), y: p.y + (340 - p.y) * (1 - z / p.z), z } });
+  }
+
+  renderVals() {
+    const n = this.antal();
+    const st = this.state;
+    const accent = this.props.accent ?? '#C9A227';
+
+    const spillere = SPILLERE.slice(0, n).map((s, i) => {
+      const iPit = st.pit[i] > 0;
+      const felt = FELTER[(st.pos[i] || 1) - 1];
+      return {
+        navn: s.navn,
+        farve: s.farve,
+        initial: s.navn.slice(0, 1),
+        erBM: st.bm === i,
+        iPit,
+        pitPlads: st.pit[i],
+        sub: iPit ? 'Pitten · plads ' + st.pit[i] + ' · ' + st.pit[i] + ' shots' : 'Felt ' + st.pos[i] + ' · ' + TEKST[felt.type][0],
+        slurke: st.slurke[i] + '/11',
+        slurkePct: Math.round((st.slurke[i] / 11) * 100) + '%',
+        drik: DRIK_NAVN[st.drik[i]],
+        klasse: (st.tur % n) === i ? 'sp-aktiv' : ''
+      };
+    });
+
+    const paaFelt = {};
+    const brikker = spillere.map((s, i) => {
+      let base;
+      if (st.pit[i] > 0) { const c = PIT[st.pit[i] - 1]; base = { x: c.cx, y: c.cy - 4 }; }
+      else { const f = FELTER[st.pos[i] - 1]; base = { x: f.cx, y: f.cy }; }
+      const key = st.pit[i] > 0 ? 'p' + st.pit[i] : 'f' + st.pos[i];
+      const k = paaFelt[key] || 0;
+      paaFelt[key] = k + 1;
+      return { x: base.x + (k % 2) * 15 - (k > 0 ? 7 : 0), y: base.y + Math.floor(k / 2) * 15, farve: s.farve, initial: s.initial };
+    });
+
+    const aktiv = FELTER[st.aktiv - 1];
+    const t = TEKST[aktiv.type];
+    const turIdx = st.tur % n;
+    const minDrik = st.drik[turIdx];
+    const tal = (v) => (v % 1 === 0 ? String(v) : v.toFixed(1).replace('.', ','));
+    // Kun de drikke der faktisk sidder ved bordet vises i omregningen.
+    const brugte = [];
+    for (let j = 0; j < n; j++) if (brugte.indexOf(st.drik[j]) === -1) brugte.push(st.drik[j]);
+
+    return {
+      accent,
+      antal: n,
+      spillere,
+      brikker,
+      turNavn: SPILLERE[turIdx].navn,
+      turFarve: SPILLERE[turIdx].farve,
+      turInitial: SPILLERE[turIdx].navn.slice(0, 1),
+      naesteNavn: SPILLERE[(turIdx + 1) % n].navn,
+      turRaekke: SPILLERE.slice(0, n).map((s, i) => ({ farve: i === turIdx ? s.farve : '#36473A' })),
+      bmNavn: st.bm === null ? 'Ingen endnu' : SPILLERE[st.bm].navn,
+      terning: st.terning,
+      pips: (PIPS[st.terning] || PIPS[1]).map((p) => ({ cx: p[0], cy: p[1] })),
+      taarnH: Math.round(Math.min(1, st.taarn / (KAP + 3)) * 100) + '%',
+      taarnSlurke: tal(Math.round(st.taarn * 10) / 10),
+      minCl: iCl(st.taarn, minDrik),
+      minDrik: DRIK_NAVN[minDrik].toLowerCase(),
+      omregning: brugte.map((d) => ({ navn: DRIK_NAVN[d], cl: iCl(st.taarn, d) })),
+      erTaarn: aktiv.type === 'taarn',
+      ikkeTaarn: aktiv.type !== 'taarn',
+      erDrik: aktiv.type === 'drik',
+      holdKlasse: st.holder ? 'hold-on' : '',
+      holdPct: Math.round(Math.min(1, st.taarn / (KAP + 3)) * 100) + '%',
+      holdTekst: st.holder ? 'Hælder…' : (st.taarn > KAP ? 'Nu løber det over' : 'Hold for at hælde i tårnet'),
+      holdUnder: st.tilfoejet > 0 ? '+' + tal(Math.round(st.tilfoejet * 10) / 10) + ' slurke · ' + iCl(st.tilfoejet, minDrik) : 'Slip når du synes det er nok',
+      start: () => this.haeld(),
+      stop: () => this.stopHaeld(),
+      aktivNr: aktiv.nr,
+      aktivPoints: aktiv.points,
+      aktivFarve: FARVER[aktiv.type],
+      aktivTitel: t[0],
+      aktivTekst: t[1],
+      panX: Math.round(st.pan.x),
+      panY: Math.round(st.pan.y),
+      zoom: Math.round(st.pan.z * 1000) / 1000,
+      log: st.log,
+      slaa: () => this.slaaTerning(),
+      ind: () => this.zoom(1.18),
+      ud: () => this.zoom(1 / 1.18),
+      fit: () => this.setState({ pan: { x: 8, y: 120, z: 0.66 } }),
+      hjul: (e) => { e.preventDefault(); this.zoom(e.deltaY < 0 ? 1.08 : 1 / 1.08); },
+      greb: (e) => { this.setState({ drag: { x: e.clientX, y: e.clientY, px: this.state.pan.x, py: this.state.pan.y } }); },
+      traek: (e) => {
+        const d = this.state.drag;
+        if (!d) return;
+        this.setState({ pan: { x: d.px + (e.clientX - d.x), y: d.py + (e.clientY - d.y), z: this.state.pan.z } });
+      },
+      slip: () => this.setState({ drag: null })
+    };
+  }
+}
+</script>
+</body>
+</html>

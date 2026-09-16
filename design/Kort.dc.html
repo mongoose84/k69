@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,700&family=Karla:wght@400;500;600;700&display=swap">
+  <style>
+  :root {
+    --bg: #0E1512;
+    --panel: #141D18;
+    --panel-2: #1A241E;
+    --raise: #1F2C25;
+    --line: #26332B;
+    --line-2: #364739;
+    --ink: #EDE7DA;
+    --ink-dim: #97A398;
+    --ink-faint: #6B796D;
+    --brass: #C9A227;
+    --brass-lt: #E8CE7E;
+    --amber: #E0A03C;
+    --rust: #B4483F;
+    --sage: #93AE7C;
+    --slate: #88A2C2;
+    --plum: #B084A0;
+    --serif: 'Bodoni Moda', Georgia, 'Times New Roman', serif;
+    --sans: Karla, 'Helvetica Neue', Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+  a { color: var(--brass-lt); text-decoration: none; }
+  a:hover { color: var(--brass); }
+  h1, h2, h3 { margin: 0; font-family: var(--serif); font-weight: 500; letter-spacing: 0.01em; }
+  .eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-faint); }
+  .rule { height: 1px; background: var(--line); }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 3px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 46px; padding: 0 22px;
+         border: 1px solid var(--line-2); border-radius: 2px; background: var(--raise); color: var(--ink);
+         font-family: var(--sans); font-size: 13px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; cursor: pointer; }
+  .btn:hover { border-color: var(--brass); color: var(--brass-lt); }
+  .btn-primary { background: linear-gradient(180deg, #E8CE7E 0%, #C9A227 48%, #A5811A 100%); border-color: #7E6413; color: #14180C; }
+  .btn-primary:hover { color: #14180C; filter: brightness(1.06); }
+  .btn-ghost { background: transparent; }
+  .k69-felt { cursor: pointer; }
+  .k69-felt:hover polygon { stroke: var(--brass); stroke-width: 1.6; }
+  .app { width: 760px; height: 860px; display: flex; flex-direction: column; gap: 0;
+         background: radial-gradient(110% 80% at 50% 0%, #1E2C24 0%, #0D1310 70%); padding: 34px 40px 36px; }
+  .hd { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 26px; }
+  .h { font-family: var(--serif); font-size: 34px; }
+  .scene { flex-grow: 1; display: flex; gap: 34px; align-items: center; }
+  .kortside { width: 258px; height: 372px; flex: 0 0 258px; border-radius: 10px; position: relative; }
+  .front { background: linear-gradient(168deg, #F6F1E4 0%, #E4DCC8 100%); border: 1px solid #B9AE93;
+           box-shadow: 0 22px 40px rgba(0,0,0,0.55); display: flex; flex-direction: column; padding: 20px; }
+  .hjorne { display: flex; flex-direction: column; align-items: center; line-height: 0.92; }
+  .rang { font-family: var(--serif); font-size: 38px; font-weight: 700; }
+  .kulor { font-size: 26px; }
+  .midt { flex-grow: 1; display: flex; align-items: center; justify-content: center; font-size: 108px; }
+  .hjorne-b { transform: rotate(180deg); align-self: flex-end; }
+  .info { flex-grow: 1; display: flex; flex-direction: column; gap: 18px; }
+  .info-t { font-family: var(--serif); font-size: 30px; line-height: 1.14; color: var(--brass-lt); }
+  .info-d { font-size: 14px; line-height: 1.7; color: var(--ink-dim); }
+  .regelnote { font-size: 12px; line-height: 1.6; color: var(--ink-faint); border-left: 2px solid var(--line-2); padding-left: 14px; }
+  .cta { display: flex; gap: 10px; }
+  .bunke { margin-top: 26px; display: flex; flex-direction: column; gap: 12px; }
+  .strip { display: flex; gap: 7px; }
+  .mini { width: 40px; height: 56px; border-radius: 4px; background: #1B2620; border: 1px solid var(--line-2);
+          display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
+  .mini b { font-family: var(--serif); font-size: 15px; font-weight: 700; }
+  .mini span { font-size: 11px; }
+  .tael { display: flex; align-items: center; justify-content: space-between; }
+  </style>
+</helmet>
+<div class="app">
+  <div class="hd">
+    <div>
+      <div class="eyebrow" style="margin-bottom: 8px">Felt 28 · Træk et kort</div>
+      <div class="h">Mette trak et kort</div>
+    </div>
+    <div class="eyebrow">Bunke <span style="color: var(--brass-lt)">{{tilbage}}</span> / 52</div>
+  </div>
+
+  <div class="scene">
+    <div class="kortside front" onClick="{{traek}}" style="cursor: pointer">
+      <div class="hjorne" style="color: {{farve}}">
+        <div class="rang">{{rang}}</div>
+        <div class="kulor">{{tegn}}</div>
+      </div>
+      <div class="midt" style="color: {{farve}}">{{tegn}}</div>
+      <div class="hjorne hjorne-b" style="color: {{farve}}">
+        <div class="rang">{{rang}}</div>
+        <div class="kulor">{{tegn}}</div>
+      </div>
+    </div>
+
+    <div class="info">
+      <div class="eyebrow">Kortets betydning</div>
+      <div class="info-t">{{titel}}</div>
+      <div class="info-d">{{tekst}}</div>
+      <div class="regelnote">Reglerne her er som de spilles i Tinglev. Spar og klør er sort uheld — du drikker selv; hjerter og ruder må du give væk.</div>
+      <div style="flex-grow: 1"></div>
+      <div class="cta">
+        <button class="btn btn-primary" onClick="{{traek}}">Træk næste</button>
+        <button class="btn btn-ghost">Videre i spillet</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bunke">
+    <div class="tael">
+      <div class="eyebrow">Trukket indtil nu</div>
+      <div class="eyebrow">Blandet da spillet startede</div>
+    </div>
+    <div class="strip">
+      <sc-for list="{{historik}}" as="h" hint-placeholder-count="8">
+        <div class="mini" style="color: {{h.farve}}"><b>{{h.rang}}</b><span>{{h.tegn}}</span></div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":760,"height":860}}'>
+const KORT = [{"r":"A","k":"spar","t":"Sort uheld","d":"Spar og klør er sort uheld — du drikker selv. 1 slurk for es."},{"r":"4","k":"hjerter","t":"Del ud","d":"Hjerter og ruder må du give væk. 4 slurke at fordele."},{"r":"6","k":"ruder","t":"Frikort","d":"Der sker ingenting."},{"r":"7","k":"klør","t":"Fingeren på bordkanten","d":"Læg diskret en finger på bordkanten. Sidste mand drikker. Når du ikke det inden næste 7’er, drikker du selv."},{"r":"8","k":"spar","t":"Fingeren på næsen","d":"Hurtigt op på næsen. Sidste mand drikker."},{"r":"9","k":"hjerter","t":"Emne","d":"Sig et emne. Alle nævner noget nyt på skift indtil en går i stå eller gentager."},{"r":"10","k":"ruder","t":"Maraton","d":"Alle drikker samtidig. Du må stoppe først, så din venstremand, og så videre rundt."},{"r":"B","k":"klør","t":"Regelkort","d":"Lav en regel der gælder alle — eller ophæv en eksisterende. Den sidste regel gælder."},{"r":"D","k":"hjerter","t":"Damerne drikker","d":"Alle kvinder ved bordet drikker."},{"r":"K","k":"spar","t":"Herrerne drikker","d":"Alle mænd ved bordet drikker."}];
+const TEGN = { spar: ['\u2660', '#1B241C'], 'kl\u00f8r': ['\u2663', '#1B241C'], hjerter: ['\u2665', '#9E3B33'], ruder: ['\u2666', '#9E3B33'] };
+
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { i: 6, trukket: [0, 3, 9, 4, 8, 1, 5] }; }
+  renderVals() {
+    const k = KORT[this.state.i % KORT.length];
+    const t = TEGN[k.k] || TEGN.spar;
+    return {
+      rang: k.r, tegn: t[0], farve: t[1], titel: k.t, tekst: k.d,
+      tilbage: 52 - this.state.trukket.length,
+      historik: this.state.trukket.slice(-9).map((n) => {
+        const c = KORT[n % KORT.length]; const ct = TEGN[c.k] || TEGN.spar;
+        return { rang: c.r, tegn: ct[0], farve: ct[1] === '#1B241C' ? '#C7D2C8' : '#C0584E' };
+      }),
+      traek: () => {
+        const n = Math.floor(Math.random() * KORT.length);
+        this.setState({ i: n, trukket: this.state.trukket.concat([n]) });
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

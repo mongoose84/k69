@@ -1,0 +1,31 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 390, "h": 844, "title": "Kortet — dig med bægeret", "is_interactive": true },
+    { "file": "Bordet.dc.html", "x": 490, "y": 0, "w": 390, "h": 844, "title": "Kortet — resten af bordet", "is_interactive": true },
+    { "file": "Skrivebord.dc.html", "x": 0, "y": 1000, "w": 1440, "h": 900, "title": "Web — kortet over pladen" },
+    { "file": "Turskift.dc.html", "x": 0, "y": 2020, "w": 900, "h": 740, "title": "Din tur mod Meier" }
+  ],
+  "annotations": [
+    {
+      "id": "note-tre-greb",
+      "x": -350, "y": 0, "w": 290,
+      "text": "Tre greb fjerner forvirringen:\n\n1. Terningen bliver til et bæger. I Meier ligger to terninger under et læderbæger med messingring. Ingen løse terninger, ingen tal at se — modsat dit eget slag, hvor én elfenbensterning ligger frit i messinglys.\n\n2. Meier bliver et stort kort der lægger sig hen over spillepladen. Pladen ligger dæmpet bagved hele vejen rundt, så man kan se hvor man er, men kortet ejer skærmen indtil bægeret er løftet.\n\n3. Man kigger med fingeren. Bægeret vipper kun mens du holder fingeren nede, og falder ned igen når du slipper. Samme hold-mekanik som tårnet allerede bruger."
+    },
+    {
+      "id": "note-proev",
+      "x": -350, "y": 500, "w": 290,
+      "text": "Prøv prototypen: ryst bægeret, hold fingeren på den plum knap for at kigge, meld hvad du har lyst til (du behøver ikke sige sandheden), send videre — og løft til sidst.\n\nIda slår rigtigt: hun melder sandheden hvis hun kan, og lyver så lidt som muligt hvis hun ikke kan. Derfor vinder du ikke altid. Stige, Meyer og dobbelt straf følger packages/rules/src/meier.ts.\n\nNavne, runde og tal i skinnerne er eksempeldata."
+    },
+    {
+      "id": "note-fejring",
+      "x": -350, "y": 1000, "w": 290,
+      "text": "Fejringen er forslag A, som du valgte: kortet bliver taget over af messingflitter, et stempel og vinderens navn — men den bliver inde i kortet, så pladen stadig ligger rundt om. Kortets kant skifter fra plum til messing i samme øjeblik.\n\nDen kører hos begge duellanter og hos resten af bordet, så alle ser hvem der vandt. Kun spillets samlede vinder fejres ikke — det behøves ikke.\n\nBrættet bagved er tegnet af den rigtige geometri fra design/board.mjs, så kortet ligger over den plade spillet faktisk har."
+    },
+    {
+      "id": "note-web",
+      "x": 1560, "y": 1000, "w": 290,
+      "text": "På web lægger kortet sig midt i scenen mellem de to skinner — 600 px bredt, med pladen dæmpet udenom. Skinnerne bliver stående, så man stadig kan følge bordet og loggen mens duellen kører.\n\nMålene er de rigtige: skinnerne er 340 px hver fra apps/web/src/app.css, så scenen er 760 px på en 1440-skærm.\n\nWeb-kortet står på ét trin (du har kigget og skal melde). Det er telefonen der er klikbar."
+    }
+  ],
+  "launch": { "view": "canvas" }
+}

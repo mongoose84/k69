@@ -1,0 +1,169 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,700&family=Karla:wght@400;500;600;700&display=swap">
+  <style>
+  :root {
+    --bg: #0E1512;
+    --panel: #141D18;
+    --panel-2: #1A241E;
+    --raise: #1F2C25;
+    --line: #26332B;
+    --line-2: #364739;
+    --ink: #EDE7DA;
+    --ink-dim: #97A398;
+    --ink-faint: #6B796D;
+    --brass: #C9A227;
+    --brass-lt: #E8CE7E;
+    --amber: #E0A03C;
+    --rust: #B4483F;
+    --sage: #93AE7C;
+    --slate: #88A2C2;
+    --plum: #B084A0;
+    --serif: 'Bodoni Moda', Georgia, 'Times New Roman', serif;
+    --sans: Karla, 'Helvetica Neue', Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+  a { color: var(--brass-lt); text-decoration: none; }
+  a:hover { color: var(--brass); }
+  h1, h2, h3 { margin: 0; font-family: var(--serif); font-weight: 500; letter-spacing: 0.01em; }
+  .eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-faint); }
+  .rule { height: 1px; background: var(--line); }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 3px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 46px; padding: 0 22px;
+         border: 1px solid var(--line-2); border-radius: 2px; background: var(--raise); color: var(--ink);
+         font-family: var(--sans); font-size: 13px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; cursor: pointer; }
+  .btn:hover { border-color: var(--brass); color: var(--brass-lt); }
+  .btn-primary { background: linear-gradient(180deg, #E8CE7E 0%, #C9A227 48%, #A5811A 100%); border-color: #7E6413; color: #14180C; }
+  .btn-primary:hover { color: #14180C; filter: brightness(1.06); }
+  .btn-ghost { background: transparent; }
+  .k69-felt { cursor: pointer; }
+  .k69-felt:hover polygon { stroke: var(--brass); stroke-width: 1.6; }
+    .raekke { width: 1000px; height: 460px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; padding: 32px;
+              background: radial-gradient(70% 60% at 50% 42%, #223129 0%, #131C17 70%, #0C120F 100%); }
+    .trin { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 24px;
+            border: 1px solid var(--line); border-radius: 3px; background: rgba(16,23,19,0.5); }
+    .trin-t { font-family: var(--serif); font-size: 22px; color: var(--ink); }
+    .trin-d { font-size: 12px; line-height: 1.6; color: var(--ink-dim); text-align: center; max-width: 360px; }
+    .vend { animation: vend 2.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+    @keyframes vend {
+      0%, 20% { transform: translate(-44px, 0) scale(0.6) rotate(-10deg); opacity: 0; }
+      55%, 100% { transform: translate(0, 0) scale(1) rotate(7deg); opacity: 1; }
+    }
+  </style>
+</helmet>
+<div class="raekke">
+  <div class="trin">
+    <div class="eyebrow">Før man trækker</div>
+    <svg width="420" height="200" viewBox="440 245 320 150">
+    <defs>
+<radialGradient id="k-felt" cx="50%" cy="42%" r="72%"><stop offset="0%" stop-color="#25352B"/><stop offset="60%" stop-color="#1A2620"/><stop offset="100%" stop-color="#111A15"/></radialGradient>
+<linearGradient id="k-brass" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E8CE7E"/><stop offset="45%" stop-color="#C9A227"/><stop offset="100%" stop-color="#8C6F16"/></linearGradient>
+<linearGradient id="k-beer" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F2C060"/><stop offset="100%" stop-color="#C4761A"/></linearGradient>
+<filter id="k-grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope="0.06"/></feComponentTransfer></filter>
+<filter id="k-glow" x="-70%" y="-70%" width="240%" height="240%"><feGaussianBlur stdDeviation="7" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+    <g class="k69-bordet">
+<rect x="452" y="266" width="296" height="124" rx="18" fill="#0D1410" opacity="0.8"/>
+<rect x="452" y="258" width="296" height="124" rx="18" fill="#18231D" stroke="url(#k-brass)" stroke-width="2"/>
+<rect x="459" y="265" width="282" height="110" rx="12" fill="none" stroke="#C9A227" stroke-width="0.6" opacity="0.4"/>
+<line x1="552" y1="274" x2="552" y2="366" stroke="#C9A227" stroke-width="0.6" opacity="0.35"/>
+<line x1="648" y1="274" x2="648" y2="366" stroke="#C9A227" stroke-width="0.6" opacity="0.35"/>
+<g transform="translate(477, 283) rotate(-3)">
+    <rect x="0" y="0" width="34" height="48" rx="3" fill="#0B100D" opacity="0.5" transform="translate(1, 2)"/>
+    <rect x="0" y="0" width="34" height="48" rx="3" fill="#1F2C25" stroke="#8C6F16" stroke-width="1"/>
+    <rect x="4" y="4" width="26" height="40" rx="2" fill="none" stroke="#C9A227" stroke-width="0.6" opacity="0.7"/>
+    <path d="M17 12 L23 24 L17 36 L11 24 Z" fill="none" stroke="#C9A227" stroke-width="0.8" opacity="0.7"/>
+  </g>
+<g transform="translate(475.5, 281.5) rotate(-1.5)">
+    <rect x="0" y="0" width="34" height="48" rx="3" fill="#0B100D" opacity="0.5" transform="translate(1, 2)"/>
+    <rect x="0" y="0" width="34" height="48" rx="3" fill="#1F2C25" stroke="#8C6F16" stroke-width="1"/>
+    <rect x="4" y="4" width="26" height="40" rx="2" fill="none" stroke="#C9A227" stroke-width="0.6" opacity="0.7"/>
+    <path d="M17 12 L23 24 L17 36 L11 24 Z" fill="none" stroke="#C9A227" stroke-width="0.8" opacity="0.7"/>
+  </g>
+<g transform="translate(474, 280) rotate(0)">
+    <rect x="0" y="0" width="34" height="48" rx="3" fill="#0B100D" opacity="0.5" transform="translate(1, 2)"/>
+    <rect x="0" y="0" width="34" height="48" rx="3" fill="#1F2C25" stroke="#8C6F16" stroke-width="1"/>
+    <rect x="4" y="4" width="26" height="40" rx="2" fill="none" stroke="#C9A227" stroke-width="0.6" opacity="0.7"/>
+    <path d="M17 12 L23 24 L17 36 L11 24 Z" fill="none" stroke="#C9A227" stroke-width="0.8" opacity="0.7"/>
+  </g>
+<text x="502" y="364" text-anchor="middle" fill="#D3B44E" font-size="9.5" letter-spacing="3" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">KORTENE</text>
+<text x="502" y="375" text-anchor="middle" fill="#6B796D" font-size="7.5" letter-spacing="1.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">38 TILBAGE</text>
+<rect x="579" y="272" width="42" height="62" rx="4" fill="#0E1512"/><rect x="581" y="299.9" width="38" height="34.1" rx="3" fill="url(#k-beer)"/><rect x="581" y="293.9" width="38" height="7" rx="3" fill="#F6EBD4"/><rect x="579" y="272" width="42" height="62" rx="4" fill="none" stroke="#C4D3C6" stroke-width="1.4"/>
+<text x="600" y="364" text-anchor="middle" fill="#D3B44E" font-size="10.5" letter-spacing="3.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">TÅRNET</text>
+<text x="600" y="375" text-anchor="middle" fill="#E0A03C" font-size="8" letter-spacing="1.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">31 CL · 50 CL GLAS</text>
+<g transform="translate(671, 276) scale(0.54)"><g><rect x="-6" y="-6" width="112" height="112" rx="22" fill="none" stroke="#8FAF74" stroke-width="3" opacity="0.9"/><rect x="6" y="9" width="88" height="88" rx="17" fill="#0B100D" opacity="0.55"/><rect x="4" y="4" width="88" height="88" rx="17" fill="#EFE6D4" stroke="#8E8878" stroke-width="1.5"/><circle cx="30" cy="30" r="7.5" fill="#1B241C"/><circle cx="70" cy="70" r="7.5" fill="#1B241C"/></g></g>
+<text x="698" y="364" text-anchor="middle" fill="#D3B44E" font-size="9.5" letter-spacing="3" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">TERNINGEN</text>
+<text x="698" y="375" text-anchor="middle" fill="#8FAF74" font-size="7.5" letter-spacing="1.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">JEPPE SLOG 2</text>
+</g>
+  </svg>
+    <div class="trin-t">Bunken ligger på bordet</div>
+    <div class="trin-d">Til venstre for tårnet, hvor der er plads i midten. Man ser hvor mange kort der er tilbage, og at der ikke ligger noget vendt.</div>
+  </div>
+  <div class="trin">
+    <div class="eyebrow">Når kortet er trukket</div>
+    <svg width="420" height="200" viewBox="440 245 320 150">
+    <defs>
+<radialGradient id="k-felt" cx="50%" cy="42%" r="72%"><stop offset="0%" stop-color="#25352B"/><stop offset="60%" stop-color="#1A2620"/><stop offset="100%" stop-color="#111A15"/></radialGradient>
+<linearGradient id="k-brass" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E8CE7E"/><stop offset="45%" stop-color="#C9A227"/><stop offset="100%" stop-color="#8C6F16"/></linearGradient>
+<linearGradient id="k-beer" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F2C060"/><stop offset="100%" stop-color="#C4761A"/></linearGradient>
+<filter id="k-grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope="0.06"/></feComponentTransfer></filter>
+<filter id="k-glow" x="-70%" y="-70%" width="240%" height="240%"><feGaussianBlur stdDeviation="7" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+    <g class="k69-bordet">
+<rect x="452" y="266" width="296" height="124" rx="18" fill="#0D1410" opacity="0.8"/>
+<rect x="452" y="258" width="296" height="124" rx="18" fill="#18231D" stroke="url(#k-brass)" stroke-width="2"/>
+<rect x="459" y="265" width="282" height="110" rx="12" fill="none" stroke="#C9A227" stroke-width="0.6" opacity="0.4"/>
+<line x1="552" y1="274" x2="552" y2="366" stroke="#C9A227" stroke-width="0.6" opacity="0.35"/>
+<line x1="648" y1="274" x2="648" y2="366" stroke="#C9A227" stroke-width="0.6" opacity="0.35"/>
+<g transform="translate(477, 283) rotate(-3)">
+    <rect x="0" y="0" width="34" height="48" rx="3" fill="#0B100D" opacity="0.5" transform="translate(1, 2)"/>
+    <rect x="0" y="0" width="34" height="48" rx="3" fill="#1F2C25" stroke="#8C6F16" stroke-width="1"/>
+    <rect x="4" y="4" width="26" height="40" rx="2" fill="none" stroke="#C9A227" stroke-width="0.6" opacity="0.7"/>
+    <path d="M17 12 L23 24 L17 36 L11 24 Z" fill="none" stroke="#C9A227" stroke-width="0.8" opacity="0.7"/>
+  </g>
+<g transform="translate(475.5, 281.5) rotate(-1.5)">
+    <rect x="0" y="0" width="34" height="48" rx="3" fill="#0B100D" opacity="0.5" transform="translate(1, 2)"/>
+    <rect x="0" y="0" width="34" height="48" rx="3" fill="#1F2C25" stroke="#8C6F16" stroke-width="1"/>
+    <rect x="4" y="4" width="26" height="40" rx="2" fill="none" stroke="#C9A227" stroke-width="0.6" opacity="0.7"/>
+    <path d="M17 12 L23 24 L17 36 L11 24 Z" fill="none" stroke="#C9A227" stroke-width="0.8" opacity="0.7"/>
+  </g>
+<g transform="translate(474, 280) rotate(0)">
+    <rect x="0" y="0" width="34" height="48" rx="3" fill="#0B100D" opacity="0.5" transform="translate(1, 2)"/>
+    <rect x="0" y="0" width="34" height="48" rx="3" fill="#1F2C25" stroke="#8C6F16" stroke-width="1"/>
+    <rect x="4" y="4" width="26" height="40" rx="2" fill="none" stroke="#C9A227" stroke-width="0.6" opacity="0.7"/>
+    <path d="M17 12 L23 24 L17 36 L11 24 Z" fill="none" stroke="#C9A227" stroke-width="0.8" opacity="0.7"/>
+  </g>
+<text x="502" y="364" text-anchor="middle" fill="#D3B44E" font-size="9.5" letter-spacing="3" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">KORTENE</text>
+<text x="502" y="375" text-anchor="middle" fill="#6B796D" font-size="7.5" letter-spacing="1.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">37 TILBAGE</text>
+<rect x="579" y="272" width="42" height="62" rx="4" fill="#0E1512"/><rect x="581" y="299.9" width="38" height="34.1" rx="3" fill="url(#k-beer)"/><rect x="581" y="293.9" width="38" height="7" rx="3" fill="#F6EBD4"/><rect x="579" y="272" width="42" height="62" rx="4" fill="none" stroke="#C4D3C6" stroke-width="1.4"/>
+<text x="600" y="364" text-anchor="middle" fill="#D3B44E" font-size="10.5" letter-spacing="3.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">TÅRNET</text>
+<text x="600" y="375" text-anchor="middle" fill="#E0A03C" font-size="8" letter-spacing="1.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">31 CL · 50 CL GLAS</text>
+<g transform="translate(671, 276) scale(0.54)"><g><rect x="-6" y="-6" width="112" height="112" rx="22" fill="none" stroke="#8FAF74" stroke-width="3" opacity="0.9"/><rect x="6" y="9" width="88" height="88" rx="17" fill="#0B100D" opacity="0.55"/><rect x="4" y="4" width="88" height="88" rx="17" fill="#EFE6D4" stroke="#8E8878" stroke-width="1.5"/><circle cx="30" cy="30" r="7.5" fill="#1B241C"/><circle cx="70" cy="70" r="7.5" fill="#1B241C"/></g></g>
+<text x="698" y="364" text-anchor="middle" fill="#D3B44E" font-size="9.5" letter-spacing="3" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">TERNINGEN</text>
+<text x="698" y="375" text-anchor="middle" fill="#8FAF74" font-size="7.5" letter-spacing="1.4" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">JEPPE SLOG 2</text>
+</g><g class="vend"><g transform="translate(518, 272) rotate(0) scale(1.25)">
+    <rect x="0" y="0" width="34" height="48" rx="3" fill="#0B100D" opacity="0.55" transform="translate(1.5, 3)"/>
+    <rect x="0" y="0" width="34" height="48" rx="3" fill="#F3EDDF" stroke="#B9AE93" stroke-width="0.8"/>
+    <text x="4" y="10" font-size="9" font-weight="700" fill="#9E3B33" style="font-family: 'Bodoni Moda', Georgia, 'Times New Roman', serif">9</text>
+    <text x="4" y="18" font-size="7" fill="#9E3B33" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">♥</text>
+    <text x="17" y="31" text-anchor="middle" dominant-baseline="central" font-size="16" fill="#9E3B33" style="font-family: Karla, 'Helvetica Neue', Arial, sans-serif">♥</text>
+  </g></g>
+  </svg>
+    <div class="trin-t">Ni hjerter vendes op</div>
+    <div class="trin-d">Kortet glider ud af bunken og vender sig med forsiden op ved siden af den. Det bliver liggende til næste kort trækkes — så hele bordet kan se hvad der blev trukket, uden at kigge i loggen.</div>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":1000,"height":460}}'>
+class Component extends DCLogic {}
+</script>
+</body>
+</html>

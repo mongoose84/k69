@@ -1,0 +1,147 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,700&family=Karla:wght@400;500;600;700&display=swap">
+  <style>
+  :root {
+    --bg: #0E1512;
+    --panel: #141D18;
+    --panel-2: #1A241E;
+    --raise: #1F2C25;
+    --line: #26332B;
+    --line-2: #364739;
+    --ink: #EDE7DA;
+    --ink-dim: #97A398;
+    --ink-faint: #6B796D;
+    --brass: #C9A227;
+    --brass-lt: #E8CE7E;
+    --amber: #E0A03C;
+    --rust: #B4483F;
+    --sage: #93AE7C;
+    --slate: #88A2C2;
+    --plum: #B084A0;
+    --serif: 'Bodoni Moda', Georgia, 'Times New Roman', serif;
+    --sans: Karla, 'Helvetica Neue', Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+  a { color: var(--brass-lt); text-decoration: none; }
+  a:hover { color: var(--brass); }
+  h1, h2, h3 { margin: 0; font-family: var(--serif); font-weight: 500; letter-spacing: 0.01em; }
+  .eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-faint); }
+  .rule { height: 1px; background: var(--line); }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 3px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 46px; padding: 0 22px;
+         border: 1px solid var(--line-2); border-radius: 2px; background: var(--raise); color: var(--ink);
+         font-family: var(--sans); font-size: 13px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; cursor: pointer; }
+  .btn:hover { border-color: var(--brass); color: var(--brass-lt); }
+  .btn-primary { background: linear-gradient(180deg, #E8CE7E 0%, #C9A227 48%, #A5811A 100%); border-color: #7E6413; color: #14180C; }
+  .btn-primary:hover { color: #14180C; filter: brightness(1.06); }
+  .btn-ghost { background: transparent; }
+  .k69-felt { cursor: pointer; }
+  .k69-felt:hover polygon { stroke: var(--brass); stroke-width: 1.6; }
+  .app { width: 760px; height: 860px; display: flex; flex-direction: column;
+         background: radial-gradient(110% 80% at 50% 0%, #241D24 0%, #0D1310 68%); padding: 34px 40px 36px; gap: 24px; }
+  .hd { display: flex; align-items: baseline; justify-content: space-between; }
+  .h { font-family: var(--serif); font-size: 34px; }
+  .bord { display: flex; align-items: stretch; gap: 14px; }
+  .saede { flex-grow: 1; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 22px 16px;
+           border: 1px solid var(--line); border-radius: 3px; background: var(--panel); }
+  .saede-on { border-color: rgba(176,132,160,0.55); background: rgba(176,132,160,0.08); }
+  .brik { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+          font-family: var(--serif); font-size: 18px; font-weight: 700; color: #14180C; }
+  .s-navn { font-size: 15px; font-weight: 600; }
+  .s-rolle { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faint); }
+  .imellem { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; width: 96px; }
+  .vs { font-family: var(--serif); font-size: 22px; color: var(--ink-faint); }
+  .skjult { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+            padding: 30px 20px; border: 1px dashed var(--line-2); border-radius: 3px; background: rgba(20,29,24,0.5); }
+  .skjult-t { font-family: var(--serif); font-size: 25px; color: var(--ink-dim); text-align: center; }
+  .skjult-d { font-size: 12.5px; line-height: 1.6; color: var(--ink-faint); text-align: center; max-width: 420px; }
+  .feed { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .f-i { display: flex; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
+  .f-tid { font-size: 10.5px; letter-spacing: 0.1em; color: var(--ink-faint); flex: 0 0 42px; }
+  .f-t { font-size: 13.5px; line-height: 1.5; color: var(--ink-dim); flex-grow: 1; }
+  .f-t b { color: var(--ink); font-weight: 600; }
+  .f-meld { font-family: var(--serif); font-size: 16px; color: var(--plum); flex: 0 0 auto; }
+  .note { font-size: 11.5px; line-height: 1.6; color: var(--ink-faint); }
+  </style>
+</helmet>
+<div class="app">
+  <div class="hd">
+    <div>
+      <div class="eyebrow" style="margin-bottom: 8px">Felt 26 · Meier</div>
+      <div class="h">Jeppe mod Ida</div>
+    </div>
+    <div class="eyebrow" style="color: var(--plum)">Du ser med</div>
+  </div>
+
+  <div class="bord">
+    <div class="saede saede-on">
+      <div class="brik" style="background: #D8A93F">J</div>
+      <div class="s-navn">Jeppe</div>
+      <div class="s-rolle" style="color: var(--plum)">Har bægeret</div>
+    </div>
+    <div class="imellem">
+      <svg width="42" height="42" viewBox="0 0 48 48" fill="none" stroke="#7E6B8A" stroke-width="1.6" stroke-linejoin="round">
+        <path d="M13 12h22l-2.5 22a3 3 0 0 1-3 2.6h-11a3 3 0 0 1-3-2.6z"></path>
+        <path d="M10 12h28"></path>
+      </svg>
+      <div class="vs">mod</div>
+    </div>
+    <div class="saede">
+      <div class="brik" style="background: #B189A6">I</div>
+      <div class="s-navn">Ida</div>
+      <div class="s-rolle">Venter på meldingen</div>
+    </div>
+  </div>
+
+  <div class="skjult">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#7E6B8A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 12s3.8-6.5 10-6.5S22 12 22 12s-3.8 6.5-10 6.5S2 12 2 12z"></path>
+      <path d="M4 20L20 4"></path>
+    </svg>
+    <div class="skjult-t">Terningerne er kun synlige for Jeppe og Ida</div>
+    <div class="skjult-d">Du ser hvad de melder, om de tror på hinanden, og hvem der løfter — men aldrig hvad der ligger under bægeret. Løfter nogen, ser hele bordet slaget.</div>
+  </div>
+
+  <div class="feed">
+    <div class="eyebrow" style="margin-bottom: 4px">Ved bordet</div>
+    <div class="f-i">
+      <div class="f-tid">nu</div>
+      <div class="f-t"><b>Jeppe</b> slog og melder</div>
+      <div class="f-meld">Par 4</div>
+    </div>
+    <div class="f-i">
+      <div class="f-tid">nu</div>
+      <div class="f-t"><b>Jeppe</b> slog igen uden at kigge</div>
+    </div>
+    <div class="f-i">
+      <div class="f-tid">1 min</div>
+      <div class="f-t"><b>Jeppe</b> troede på Ida og tog bægeret</div>
+    </div>
+    <div class="f-i">
+      <div class="f-tid">1 min</div>
+      <div class="f-t"><b>Ida</b> meldte og sendte videre</div>
+      <div class="f-meld">63</div>
+    </div>
+    <div class="f-i">
+      <div class="f-tid">2 min</div>
+      <div class="f-t"><b>Ida</b> blev udfordret af Jeppe</div>
+    </div>
+  </div>
+
+  <div class="note">Bliver der løftet, står slaget her — og appen fordeler selv slurkene. Dobbelt hvis der blev tabt på en Meyer.</div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":760,"height":860}}'>
+class Component extends DCLogic {}
+</script>
+</body>
+</html>

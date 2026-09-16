@@ -1,0 +1,183 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,700&family=Karla:wght@400;500;600;700&display=swap">
+  <style>
+  :root {
+    --bg: #0E1512; --panel: #141D18; --panel-2: #1A241E; --raise: #1F2C25;
+    --line: #26332B; --line-2: #364739; --ink: #EDE7DA; --ink-dim: #97A398; --ink-faint: #6B796D;
+    --brass: #C9A227; --brass-lt: #E8CE7E; --amber: #E0A03C; --rust: #B4483F;
+    --sage: #93AE7C; --slate: #88A2C2; --plum: #B084A0;
+    --serif: 'Bodoni Moda', Georgia, 'Times New Roman', serif;
+    --sans: Karla, 'Helvetica Neue', Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+  a { color: var(--brass-lt); text-decoration: none; }
+  a:hover { color: var(--brass); }
+  h1, h2, h3 { margin: 0; font-family: var(--serif); font-weight: 500; letter-spacing: 0.01em; }
+  .eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-faint); }
+  .note { font-size: 11.5px; line-height: 1.6; color: var(--ink-faint); }
+
+  .ark { width: 900px; height: 740px; padding: 30px 36px 32px; display: flex; flex-direction: column; gap: 22px;
+         background: radial-gradient(100% 70% at 50% 0%, #1D2620 0%, #0D1310 66%); }
+  .hd { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
+  .hd h2 { font-size: 30px; }
+  .hd .note { max-width: 380px; text-align: right; }
+
+  .par { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+  .kort { border: 1px solid var(--line); border-radius: 3px; background: var(--panel); overflow: hidden;
+          display: flex; flex-direction: column; }
+  .kort-band { display: flex; align-items: center; gap: 9px; height: 32px; padding: 0 14px; }
+  .band-tur { background: linear-gradient(90deg, rgba(201,162,39,0.20), rgba(201,162,39,0.02));
+              border-bottom: 1px solid rgba(201,162,39,0.36); }
+  .band-meier { background: linear-gradient(90deg, rgba(176,132,160,0.20), rgba(176,132,160,0.03));
+                border-bottom: 1px solid rgba(176,132,160,0.34); }
+  .band-t { font-size: 10px; font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase; }
+  .prik { width: 7px; height: 7px; border-radius: 50%; }
+
+  .scene { position: relative; height: 216px; display: flex; align-items: center; justify-content: center;
+           border-bottom: 1px solid var(--line); }
+  .scene-tur { background: radial-gradient(52% 58% at 50% 52%, #1F2A22 0%, #101812 76%); }
+  .scene-meier { background: radial-gradient(52% 58% at 50% 52%, #1F2028 0%, #101812 76%); }
+  .glans { position: absolute; inset: 0; }
+  .glans-tur { background: radial-gradient(38% 42% at 50% 48%, rgba(201,162,39,0.15), transparent 72%); }
+  .glans-meier { background: radial-gradient(38% 42% at 50% 48%, rgba(176,132,160,0.15), transparent 72%); }
+
+  .under { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 10px; }
+  .under h3 { font-size: 21px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 18px;
+         border: 1px solid var(--line-2); border-radius: 2px; background: var(--raise); color: var(--ink);
+         font-size: 12px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; }
+  .btn-primary { background: linear-gradient(180deg, #E8CE7E 0%, #C9A227 48%, #A5811A 100%); border-color: #7E6413; color: #14180C; }
+
+  .regler { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: auto; }
+  .regel { display: flex; gap: 12px; padding: 14px 15px; border: 1px solid var(--line); border-radius: 3px;
+           background: rgba(20,29,24,0.6); }
+  .regel-nr { font-family: var(--serif); font-size: 20px; line-height: 1; color: var(--brass); }
+  .regel-t { font-size: 12.5px; font-weight: 600; margin-bottom: 5px; }
+  .regel-b { font-size: 11.5px; line-height: 1.55; color: var(--ink-faint); }
+  </style>
+</helmet>
+<div class="ark">
+  <div class="hd">
+    <div>
+      <div class="eyebrow" style="margin-bottom: 9px">Det der forvirrer</div>
+      <h2>Én løs terning er din tur. Et bæger er Meier.</h2>
+    </div>
+    <div class="note">
+      I dag tegner appen den samme elfenbensterning begge steder. Herefter deler de to øjeblikke
+      alt: farve, form, lys og hvad man må røre.
+    </div>
+  </div>
+
+  <div class="par">
+    <div class="kort">
+      <div class="kort-band band-tur">
+        <span class="prik" style="background: #C9A227"></span>
+        <span class="band-t" style="color: var(--brass)">Din tur · felt 12</span>
+      </div>
+      <div class="scene scene-tur">
+        <div class="glans glans-tur"></div>
+        <svg width="128" height="132" viewBox="0 0 128 132" style="position: relative">
+          <ellipse cx="64" cy="118" rx="48" ry="9" fill="#050806" opacity="0.5"></ellipse>
+          <g transform="translate(14, 8) rotate(-8 50 50)">
+            <rect x="4" y="4" width="88" height="88" rx="16" fill="#EFE6D4" stroke="#8E8878" stroke-width="1.5"></rect>
+            <circle cx="30" cy="30" r="8" fill="#241D24"></circle>
+            <circle cx="70" cy="30" r="8" fill="#241D24"></circle>
+            <circle cx="48" cy="48" r="8" fill="#241D24"></circle>
+            <circle cx="30" cy="66" r="8" fill="#241D24"></circle>
+            <circle cx="70" cy="66" r="8" fill="#241D24"></circle>
+          </g>
+        </svg>
+      </div>
+      <div class="under">
+        <h3>Slå med terningen</h3>
+        <div class="note">
+          Terningen ligger løst på filten i messinglys. Den viser altid et tal, alle må se det,
+          og den hører til dit eget slag på brættet.
+        </div>
+        <div class="btn btn-primary" style="margin-top: 4px">Slå med terningen</div>
+      </div>
+    </div>
+
+    <div class="kort">
+      <div class="kort-band band-meier">
+        <span class="prik" style="background: #B084A0"></span>
+        <span class="band-t" style="color: var(--plum)">Meier · felt 26</span>
+      </div>
+      <div class="scene scene-meier">
+        <div class="glans glans-meier"></div>
+        <svg width="150" height="164" viewBox="0 0 190 208" style="position: relative">
+          <defs>
+            <linearGradient id="laederT" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#241B14"></stop>
+              <stop offset="0.16" stop-color="#4A3826"></stop>
+              <stop offset="0.46" stop-color="#5E4831"></stop>
+              <stop offset="0.78" stop-color="#382A1D"></stop>
+              <stop offset="1" stop-color="#1F1710"></stop>
+            </linearGradient>
+            <linearGradient id="messingT" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#7E6413"></stop>
+              <stop offset="0.3" stop-color="#E8CE7E"></stop>
+              <stop offset="0.62" stop-color="#C9A227"></stop>
+              <stop offset="1" stop-color="#6E570F"></stop>
+            </linearGradient>
+          </defs>
+          <ellipse cx="95" cy="196" rx="80" ry="12" fill="#050806" opacity="0.55"></ellipse>
+          <path d="M57 24 L133 24 L149 178 Q95 194 41 178 Z" fill="url(#laederT)"></path>
+          <path d="M43 168 Q95 184 147 168 L149 180 Q95 196 41 180 Z" fill="url(#messingT)" opacity="0.92"></path>
+          <path d="M50 112 Q95 124 140 112 L141 120 Q95 132 49 120 Z" fill="#1B140E" opacity="0.55"></path>
+          <path d="M53 140 Q95 152 137 140 L138 147 Q95 159 52 147 Z" fill="#1B140E" opacity="0.45"></path>
+          <ellipse cx="95" cy="24" rx="38" ry="9" fill="#3B2C1E"></ellipse>
+          <ellipse cx="95" cy="24" rx="38" ry="9" fill="none" stroke="url(#messingT)" stroke-width="2.4"></ellipse>
+          <path d="M73 26 L80 26 L88 184 L79 183 Z" fill="#FFFFFF" opacity="0.07"></path>
+        </svg>
+      </div>
+      <div class="under">
+        <h3>Ryst bægeret og slå</h3>
+        <div class="note">
+          Bægeret står med bunden i vejret i plum lys. Der er ingen tal at se — to terninger ligger
+          under, og de kommer kun frem mens du holder fingeren på skærmen.
+        </div>
+        <div class="btn btn-primary" style="margin-top: 4px">Ryst bægeret og slå</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="regler">
+    <div class="regel">
+      <div class="regel-nr">1</div>
+      <div>
+        <div class="regel-t">Messing er dit eget slag</div>
+        <div class="regel-b">Én terning, løs på filten, med et tal alle må se. Kun her rykker din brik.</div>
+      </div>
+    </div>
+    <div class="regel">
+      <div class="regel-nr" style="color: var(--plum)">2</div>
+      <div>
+        <div class="regel-t">Plum er Meier</div>
+        <div class="regel-b">Bæger i stedet for terning, og et plum kort der lægger sig hen over spillepladen mens duellen kører.</div>
+      </div>
+    </div>
+    <div class="regel">
+      <div class="regel-nr" style="color: var(--plum)">3</div>
+      <div>
+        <div class="regel-t">Terninger vises aldrig af sig selv</div>
+        <div class="regel-b">I Meier kommer de kun frem mens du holder fingeren nede — eller når nogen løfter bægeret, og så ser hele bordet dem.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":900,"height":740}}'>
+class Component extends DCLogic {}
+</script>
+</body>
+</html>

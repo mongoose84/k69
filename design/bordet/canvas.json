@@ -1,0 +1,70 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Spillebordet — terning, kort og tårn på pladen"
+    },
+    {
+      "file": "Terningslag.dc.html",
+      "x": 0,
+      "y": 1040,
+      "w": 1000,
+      "h": 420,
+      "title": "Terningslaget — 2 sekunder"
+    },
+    {
+      "file": "Kortbunke.dc.html",
+      "x": 1120,
+      "y": 1040,
+      "w": 1000,
+      "h": 460,
+      "title": "Kortbunken på bordet"
+    },
+    {
+      "file": "Vundet.dc.html",
+      "x": 0,
+      "y": 1620,
+      "w": 760,
+      "h": 560,
+      "title": "Fejring — nogen vandt"
+    },
+    {
+      "file": "Tabt.dc.html",
+      "x": 880,
+      "y": 1620,
+      "w": 760,
+      "h": 560,
+      "title": "Fejring — nogen tabte"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note-bordet",
+      "x": -360,
+      "y": 0,
+      "w": 300,
+      "text": "Bordet midt på pladen er nu én bred plade i stedet for det runde tårn. Den spænder over begge DRIK!-felter, så DRIK! står ud for tårnet.\n\nTre zoner: kortene til venstre, tårnet i midten, terningen til højre. Alt der sker på bordet, sker ét sted — og der er stadig luft til pitten nedenunder."
+    },
+    {
+      "id": "note-action",
+      "x": 1520,
+      "y": 0,
+      "w": 300,
+      "text": "Action-area øverst til højre: hele blokken tager farve efter den der er på tur (venstre kant + tonet baggrund). Knappen \"Slå med terningen\" bliver her — selve terningen er flyttet ned på bordet.\n\nMens nogen bunder tårnet, ligger \"Tårnet er bundet\"-knappen øverst i samme blok (ikke tegnet her — det er bygget i koden)."
+    },
+    {
+      "id": "note-fejring",
+      "x": -360,
+      "y": 1620,
+      "w": 300,
+      "text": "Fejringen bruger samme greb som Meier: et stort kort hen over pladen, som bliver stående i 5 sekunder (eller til nogen trykker) før turen går videre. Messing når nogen vandt, rust når nogen tabte. Brikken hopper, gloriebølgen pulser, og bjælken i bunden viser hvor lang tid der er tilbage.\n\nSamme kort til kapløb (7 og 8), Meier, Emne (9) og når tårnet løber over."
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}
