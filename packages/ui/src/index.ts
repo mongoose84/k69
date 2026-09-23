@@ -12,3 +12,4 @@ export * from './Syver.js';
 export * from './Udraab.js';
 export * from './Seneste.js';
 export * from './Lyd.js';
+export * from './Elefant.js';

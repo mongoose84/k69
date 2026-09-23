@@ -148,34 +148,6 @@ function FyldTaarn({ spil, send, migId }: HandlingProps): JSX.Element {
   );
 }
 
-function NyRegel({ spil, send }: HandlingProps): JSX.Element {
-  const [tekst, saetTekst] = useState('');
-  return (
-    <div style={kolonne}>
-      <input
-        type="text"
-        value={tekst}
-        placeholder="Fx: der må kun snakkes tysk"
-        maxLength={140}
-        onChange={(e) => saetTekst(e.target.value)}
-      />
-      <button className="knap knap-primaer" disabled={!tekst.trim()} onClick={() => send({ type: 'ny-regel', regel: tekst })}>
-        Lav reglen
-      </button>
-      {spil.husregler.length > 0 && (
-        <>
-          <div className="eyebrow">Eller ophæv en der står</div>
-          {spil.husregler.map((r, i) => (
-            <button key={`${r}-${i}`} className="knap knap-tom" style={{ justifyContent: 'space-between', textTransform: 'none', letterSpacing: 0 }} onClick={() => send({ type: 'fjern-regel', index: i })}>
-              <span style={{ fontSize: 13 }}>{r}</span>
-              <span style={{ fontSize: 11, color: 'var(--ink-faint)' }}>Ophæv</span>
-            </button>
-          ))}
-        </>
-      )}
-    </div>
-  );
-}
 
 /** Den der har tårnet, siger selv til når det er tomt — uanset hvis tur det er. */
 function TaarnKnap({ spil, migId, send, kompakt }: HandlingProps): JSX.Element | null {
@@ -300,7 +272,7 @@ export function Handlingskort({ spil, migId, send, kompakt, ruller = false }: Ha
           <div className="note">{RANG_NAVN[a.kort.rang]} {KULOER_TEGN[a.kort.kuloer]}</div>
           {paaMig && (
             <button className="knap knap-primaer" onClick={() => send({ type: 'kort-kvitter' })}>
-              {a.kort.rang === '7' ? 'Tag kortet' : 'Videre'}
+              {a.kort.rang === '7' ? 'Tag kortet' : a.kort.rang === '10' ? 'Ryk i pitten' : 'Videre'}
             </button>
           )}
           {paaMig && a.kort.rang === '7' && (
@@ -330,8 +302,6 @@ export function Handlingskort({ spil, migId, send, kompakt, ruller = false }: Ha
         </div>
       </div>
     );
-  } else if (a.slags === 'ny-regel' && paaMig) {
-    styring = <NyRegel spil={spil} migId={migId} send={send} />;
   } else if (a.slags === 'vaelg-taber' && paaMig) {
     styring = <SpillerValg spil={spil} migId={migId} medMigSelv onVaelg={(id) => send({ type: 'vaelg-taber', spillerId: id })} knaptekst="Gik i stå" />;
   } else if (a.slags === 'meier-modstander' && paaMig) {

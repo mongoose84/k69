@@ -7,7 +7,7 @@ import {
 import { nyBunke, virkning } from '../src/cards.js';
 import { DRIKKE, clPrSlurk, iCl, slurkePrEnhed, taarnCl, tilDrik } from '../src/drinks.js';
 import { STIGE, kode, trin, trinNavn } from '../src/meier.js';
-import { MEIER_SLURKE, afventerSpiller, anvend, find, nytSpil, taarnLoeberOver } from '../src/engine.js';
+import { MEIER_SLURKE, afventerSpiller, anvend, find, nytSpil, opgraderGemt, taarnLoeberOver } from '../src/engine.js';
 import { RegelFejl, type FeltType, type Handling, type Kontekst, type Spil } from '../src/types.js';
 
 /* --------------------------------------------------------------- værktøj */
@@ -722,14 +722,57 @@ test('Dame-kortet rammer damerne, Konge-kortet herrerne', () => {
   assert.equal(find(spil, 'p0')!.slurkeIAlt, 0);
 });
 
-test('Maraton tæller ikke slurke — kortet vises bare', () => {
+test('10: man ryger direkte i pitten og slår om sin plads', () => {
   let spil = opsat(['A', 'B', 'C']);
   placer(spil, 'p0', foersteFeltAf('kort') - 1);
   spil = gør(spil, 'p0', { type: 'slaa' }, [1]);
   spil.bunke.unshift({ rang: '10', kuloer: 'hjerter' });
   spil = gør(spil, 'p0', { type: 'traek-kort' });
+  // Kortet vises først.
   assert.equal(spil.afventer?.slags, 'kort-udfald');
-  for (const s of spil.spillere) assert.equal(s.slurkeIAlt, 0);
+  spil = gør(spil, 'p0', { type: 'kort-kvitter' });
+  assert.equal(spil.afventer?.slags, 'pit-placering');
+  assert.equal(afventerSpiller(spil.afventer), 'p0');
+  spil = gør(spil, 'p0', { type: 'slaa' }, [4]);
+  const a = find(spil, 'p0')!;
+  assert.equal(a.pitPlads, 4);
+  assert.equal(a.felt, 0);
+  assert.equal(a.slurkeIAlt, 4);
+  assert.equal(afventerSpiller(spil.afventer), 'p1');
+});
+
+test('Bonde: sort giver venstremanden en slurk, rød giver højremanden', () => {
+  // Turen går med uret, så venstremanden er den næste i turen.
+  for (const [kuloer, ramt] of [['spar', 'p1'], ['klor', 'p1'], ['hjerter', 'p2'], ['ruder', 'p2']] as const) {
+    let spil = opsat(['A', 'B', 'C']);
+    placer(spil, 'p0', foersteFeltAf('kort') - 1);
+    spil = gør(spil, 'p0', { type: 'slaa' }, [1]);
+    spil.bunke.unshift({ rang: 'B', kuloer });
+    spil = gør(spil, 'p0', { type: 'traek-kort' });
+    for (const s of spil.spillere) assert.equal(s.slurkeIAlt, s.id === ramt ? 1 : 0, `${kuloer}: ${s.id}`);
+    assert.equal(spil.afventer?.slags, 'kort-udfald');
+  }
+});
+
+test('Bonde: sidemanden springer over dem der er hoppet ud', () => {
+  let spil = opsat(['A', 'B', 'C']);
+  find(spil, 'p1')!.tilstand = 'ude';
+  placer(spil, 'p0', foersteFeltAf('kort') - 1);
+  spil = gør(spil, 'p0', { type: 'slaa' }, [1]);
+  spil.bunke.unshift({ rang: 'B', kuloer: 'spar' });
+  spil = gør(spil, 'p0', { type: 'traek-kort' });
+  assert.equal(find(spil, 'p2')!.slurkeIAlt, 1);
+});
+
+test('et gemt spil der venter på et regelkort, sidder ikke fast', () => {
+  const spil = opsat(['A', 'B']);
+  const kort = { rang: 'B', kuloer: 'spar' } as const;
+  spil.sidsteKort = kort;
+  (spil as unknown as { afventer: unknown }).afventer = { slags: 'ny-regel', spillerId: 'p0' };
+  (spil as unknown as { husregler: string[] }).husregler = ['kun tysk'];
+  opgraderGemt(spil);
+  assert.deepEqual(spil.afventer, { slags: 'kort-udfald', spillerId: 'p0', kort });
+  assert.equal('husregler' in spil, false);
 });
 
 test('har man linket, kan man hoppe med mens spillet kører', () => {

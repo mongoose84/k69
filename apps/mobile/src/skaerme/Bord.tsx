@@ -57,6 +57,7 @@ export function Bord({
         </div>
       </header>
 
+      <SenesteHaendelser spil={spil} kompakt />
       <div className="mobilplade">
         <Plade
           id="mb"
@@ -80,7 +81,6 @@ export function Bord({
         >
           {foelger ? 'Følger min brik' : 'Overblik'}
         </button>
-        <SenesteHaendelser spil={spil} kompakt />
       </div>
 
       <div className="ark">
@@ -148,13 +148,6 @@ export function Bord({
                   </div>
                 ))}
               </div>
-
-              {spil.husregler.length > 0 && (
-                <div>
-                  <div className="eyebrow" style={{ marginBottom: 8 }}>Husregler</div>
-                  {spil.husregler.map((r, i) => <div key={`${r}-${i}`} className="husregel">{r}</div>)}
-                </div>
-              )}
             </div>
           )}
 

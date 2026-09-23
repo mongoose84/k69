@@ -132,8 +132,10 @@ er nemt at ændre.
 
 - **Whiskyens mængde** (4 cl pr. enhed) er et gæt — `packages/rules/src/drinks.ts`.
 - **Meier koster 3 slurke** at tabe, dobbelt på en Meyer. Kan sættes i lobbyen.
-- **Maraton** (10'eren): den der trak, drikker 1 slurk, næste til venstre 2, og
-  så videre rundt. Reglerne siger bare at man drikker til man må stoppe.
+- **10'eren** sender den der trak direkte i pitten — man slår om sin plads og
+  drikker de shots der hører til, som når man bliver slået hjem.
+- **Bonden**: sort giver venstremanden (den næste i turen) 1 slurk, rød giver
+  højremanden 1 slurk. Regelkortet og husreglerne er taget helt ud af appen.
 - **Dame og Konge**: man vælger ved tilmelding om man er med damerne eller
   herrerne — det ene, ikke begge, ikke ingen. Rammer 2 slurke.
 - **3 til..?** må man også bruge på sig selv, hvis man vil være solidarisk.

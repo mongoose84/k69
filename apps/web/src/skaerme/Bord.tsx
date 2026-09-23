@@ -152,14 +152,6 @@ export function Bord({
               </div>
             </div>
 
-            {spil.husregler.length > 0 && (
-              <div style={{ marginTop: 14 }}>
-                <div className="eyebrow" style={{ marginBottom: 8 }}>Husregler</div>
-                {spil.husregler.map((r, i) => (
-                  <div key={`${r}-${i}`} className="husregel">{r}</div>
-                ))}
-              </div>
-            )}
           </section>
         </aside>
 

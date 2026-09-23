@@ -122,11 +122,6 @@ export function opgave(spil: Spil, migId: string): Opgave | null {
       };
     }
 
-    case 'ny-regel':
-      return grund('Regelkort', mig
-        ? 'Lav en regel der gælder alle — eller ophæv en af dem der står.'
-        : `${dig} laver en ny husregel.`);
-
     case 'vaelg-taber':
       return grund('Emne', mig ? a.grund : `${dig} udpeger den der gik i stå.`);
 

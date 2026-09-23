@@ -89,7 +89,6 @@ export type Afventer =
   | { slags: 'traek-kort'; spillerId: string }
   | { slags: 'kort-udfald'; spillerId: string; kort: Kort }
   | { slags: 'kaploeb'; kort: Kort; startetAf: string; ramte: string[] }
-  | { slags: 'ny-regel'; spillerId: string }
   | { slags: 'vaelg-taber'; spillerId: string; grund: string }
   | { slags: 'meier-modstander'; spillerId: string }
   | { slags: 'meier'; spillerId: string };
@@ -242,7 +241,6 @@ export interface Spil {
   bunke: Kort[];
   brugte: Kort[];
   sidsteKort: Kort | null;
-  husregler: string[];
   meier: MeierSpil | null;
   /** Sidste løftede bæger. Bliver stående indtil en ny Meier begynder. */
   meierResultat: MeierResultat | null;
@@ -281,8 +279,6 @@ export type Handling =
   | { type: 'kaploeb-tryk' }
   | { type: 'laeg-finger' }
   | { type: 'finger-tryk' }
-  | { type: 'ny-regel'; regel: string }
-  | { type: 'fjern-regel'; index: number }
   | { type: 'vaelg-taber'; spillerId: string }
   | { type: 'meier-vaelg'; spillerId: string }
   | { type: 'meier-slaa' }

@@ -1,7 +1,7 @@
 import {
   ANTAL_FELTER, FELT_INFO, PIT_PLADSER, feltInfo, feltType, ryk
 } from './board.js';
-import { HOLD_SLURKE, bland, kortNavn, kortTekst, nyBunke, virkning } from './cards.js';
+import { HOLD_SLURKE, SIDEMAND_SLURKE, bland, kortNavn, kortTekst, nyBunke, virkning } from './cards.js';
 import { formatSlurke, slurkePrEnhed, taarnCl, taarnKapacitetSlurke, tilDrik } from './drinks.js';
 import { erMeyer, trin, trinNavn } from './meier.js';
 import {
@@ -49,7 +49,6 @@ export function nytSpil(id: string, kode: string, naa: string): Spil {
     bunke: [],
     brugte: [],
     sidsteKort: null,
-    husregler: [],
     meier: null,
     meierResultat: null,
     fejring: null,
@@ -62,6 +61,23 @@ export function nytSpil(id: string, kode: string, naa: string): Spil {
     naesteHaendelseId: 1,
     opdateret: naa
   };
+}
+
+/**
+ * Retter spil der er gemt med en ældre version af reglerne. Husreglerne er
+ * væk — står et gemt spil og venter på et regelkort, gøres det til et
+ * almindeligt kort man bare trykker videre på.
+ */
+export function opgraderGemt(spil: Spil): Spil {
+  const gammelt = spil as Spil & { husregler?: unknown };
+  delete gammelt.husregler;
+  const a = spil.afventer as { slags: string; spillerId?: string } | null;
+  if (a?.slags === 'ny-regel' && a.spillerId) {
+    spil.afventer = spil.sidsteKort
+      ? { slags: 'kort-udfald', spillerId: a.spillerId, kort: spil.sidsteKort }
+      : { slags: 'slag', spillerId: a.spillerId };
+  }
+  return spil;
 }
 
 /* ----------------------------------------------------------------- hjælpere */
@@ -410,6 +426,21 @@ function givTaarnet(spil: Spil, s: Spiller, tekst: string): void {
 
 /* ------------------------------------------------------------------- kortene */
 
+/**
+ * Sidemanden ved bordet. Turen går med uret, så venstremanden er den næste i
+ * turen og højremanden den forrige. Er man alene, er der ingen.
+ */
+function sidemand(spil: Spil, s: Spiller, side: 'venstre' | 'hoejre'): Spiller | undefined {
+  const n = spil.spillere.length;
+  const i = spil.spillere.findIndex((o) => o.id === s.id);
+  const skridt = side === 'venstre' ? 1 : n - 1;
+  for (let k = 1; k < n; k++) {
+    const o = spil.spillere[(i + skridt * k) % n]!;
+    if (o.tilstand === 'aktiv' && o.id !== s.id) return o;
+  }
+  return undefined;
+}
+
 function traekKort(spil: Spil, s: Spiller, ctx: Kontekst): void {
   if (spil.bunke.length === 0) {
     spil.bunke = bland(nyBunke(), Math.random);
@@ -453,11 +484,20 @@ function traekKort(spil: Spil, s: Spiller, ctx: Kontekst): void {
     case 'vaelg-taber':
       spil.afventer = { slags: 'vaelg-taber', spillerId: s.id, grund: v.grund };
       return;
-    case 'regel':
-      spil.afventer = { slags: 'ny-regel', spillerId: s.id };
+    case 'sidemand': {
+      const o = sidemand(spil, s, v.side);
+      if (o) {
+        drik(o, SIDEMAND_SLURKE);
+        skriv(spil, 'kort', `${navn(o)} sidder til ${v.side === 'venstre' ? 'venstre' : 'højre'} og drikker ${SIDEMAND_SLURKE} slurk.`, o);
+      } else {
+        skriv(spil, 'kort', `Der er ingen ved siden af ${navn(s)} — ingen drikker.`, s);
+      }
+      spil.afventer = { slags: 'kort-udfald', spillerId: s.id, kort };
       return;
-    case 'maraton':
-      // Ingen tælling — bordet styrer selv hvor meget der ryger ned.
+    }
+    case 'pit':
+      // Kortet vises først; når det er kvitteret, slår man om sin plads i pitten.
+      if (!spil.afventerPit.includes(s.id)) spil.afventerPit.push(s.id);
       spil.afventer = { slags: 'kort-udfald', spillerId: s.id, kort };
       return;
     case 'hold': {
@@ -525,8 +565,6 @@ export function anvend(spil: Spil, handling: Handling, ctx: Kontekst): Spil {
     case 'kaploeb-tryk': return kaploebTryk(spil, s, ctx);
     case 'laeg-finger': return laegFinger(spil, s, ctx);
     case 'finger-tryk': return fingerTryk(spil, s, ctx);
-    case 'ny-regel': return nyRegel(spil, s, handling.regel, ctx);
-    case 'fjern-regel': return fjernRegel(spil, s, handling.index, ctx);
     case 'vaelg-taber': return vaelgTaber(spil, s, handling.spillerId, ctx);
     case 'meier-vaelg': return meierVaelg(spil, s, handling.spillerId, ctx);
     case 'meier-slaa':
@@ -609,8 +647,8 @@ function saetDrik(spil: Spil, valg: DrikValg, ctx: Kontekst): Spil {
 }
 
 function saetIndstilling(spil: Spil, h: Extract<Handling, { type: 'saet-indstilling' }>, ctx: Kontekst): Spil {
-  if (spil.vaertId !== ctx.spillerId) fejl('Kun værten kan ændre husreglerne.');
-  if (spil.fase !== 'lobby') fejl('Husreglerne skal aftales inden spillet går i gang.');
+  if (spil.vaertId !== ctx.spillerId) fejl('Kun værten kan ændre indstillingerne.');
+  if (spil.fase !== 'lobby') fejl('Indstillingerne skal aftales inden spillet går i gang.');
   if (h.hardcore !== undefined) spil.indstillinger.hardcore = h.hardcore;
   return spil;
 }
@@ -914,24 +952,7 @@ function afgoerFinger(spil: Spil): void {
   spil.finger = null;
 }
 
-function nyRegel(spil: Spil, s: Spiller, regel: string, ctx: Kontekst): Spil {
-  kraevAfventer(spil, 'ny-regel', s);
-  const tekst = regel.trim().slice(0, 140);
-  if (!tekst) fejl('Skriv en regel.');
-  spil.husregler.push(tekst);
-  skriv(spil, 'regel', `Ny husregel fra ${navn(s)}: ${tekst}`, s);
-  afslutFelt(spil, ctx);
-  return spil;
-}
 
-function fjernRegel(spil: Spil, s: Spiller, index: number, ctx: Kontekst): Spil {
-  kraevAfventer(spil, 'ny-regel', s);
-  const [fjernet] = spil.husregler.splice(index, 1);
-  if (!fjernet) fejl('Den regel findes ikke.');
-  skriv(spil, 'regel', `${navn(s)} ophævede reglen: ${fjernet}`, s);
-  afslutFelt(spil, ctx);
-  return spil;
-}
 
 function vaelgTaber(spil: Spil, s: Spiller, taberId: string, ctx: Kontekst): Spil {
   kraevAfventer(spil, 'vaelg-taber', s);

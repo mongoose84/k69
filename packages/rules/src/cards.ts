@@ -46,8 +46,8 @@ export function bland<T>(liste: T[], tilfaeldig: () => number): T[] {
  *   'kaploeb'    — sidste mand drikker (fingeren på næsen)
  *   'behold'     — 7'eren: man beholder kortet og lægger fingeren på bordkanten når man vil
  *   'vaelg-taber'— trækkeren udpeger den der gik i stå
- *   'maraton'    — alle drikker samtidig; appen tæller ikke
- *   'regel'      — trækkeren laver eller ophæver en husregel
+ *   'sidemand'   — Bonden: sort giver venstremanden en slurk, rød giver højremanden
+ *   'pit'        — 10'eren: trækkeren ryger direkte i pitten og slår om sin plads
  *   'hold'       — alle på et hold drikker HOLD_SLURKE
  */
 export type KortVirkning =
@@ -57,14 +57,17 @@ export type KortVirkning =
   | { slags: 'kaploeb'; hvor: 'bordkant' | 'naese' }
   | { slags: 'behold' }
   | { slags: 'vaelg-taber'; grund: string }
-  | { slags: 'maraton' }
-  | { slags: 'regel' }
+  | { slags: 'sidemand'; side: 'venstre' | 'hoejre' }
+  | { slags: 'pit' }
   | { slags: 'hold'; hold: 'dame' | 'konge' };
 
 const TAL: Partial<Record<Rang, number>> = { A: 1, '2': 2, '3': 3, '4': 4, '5': 5 };
 
 /** Dame og Konge: så meget drikker holdet. Husregel, Jeppe 2026-09-15. */
 export const HOLD_SLURKE = 3;
+
+/** Bonden: så meget drikker sidemanden. */
+export const SIDEMAND_SLURKE = 1;
 
 export function virkning(k: Kort): KortVirkning {
   const n = TAL[k.rang];
@@ -76,8 +79,8 @@ export function virkning(k: Kort): KortVirkning {
     case '7': return { slags: 'behold' };
     case '8': return { slags: 'kaploeb', hvor: 'naese' };
     case '9': return { slags: 'vaelg-taber', grund: 'Emne — den der gik i stå eller gentog sig selv' };
-    case '10': return { slags: 'maraton' };
-    case 'B': return { slags: 'regel' };
+    case '10': return { slags: 'pit' };
+    case 'B': return { slags: 'sidemand', side: erSort(k) ? 'venstre' : 'hoejre' };
     case 'D': return { slags: 'hold', hold: 'dame' };
     default: return { slags: 'hold', hold: 'konge' };
   }
@@ -123,16 +126,12 @@ export function kortTekst(k: Kort): KortTekst {
         titel: 'Emne',
         tekst: 'Sig et emne. Alle nævner noget nyt på skift indtil en går i stå eller gentager sig selv. Udpeg taberen her.'
       };
-    case 'maraton':
-      return {
-        titel: 'Maraton',
-        tekst: 'Alle tager øllen til munden og drikker samtidig. Du må stoppe først, så din venstremand, og så videre rundt.'
-      };
-    case 'regel':
-      return {
-        titel: 'Regelkort',
-        tekst: 'Lav en regel der gælder alle — eller ophæv en eksisterende. Den sidste regel gælder.'
-      };
+    case 'sidemand':
+      return v.side === 'venstre'
+        ? { titel: 'Drik til venstre', tekst: `${KULOER_NAVN[k.kuloer]} er sort — din venstremand drikker ${SIDEMAND_SLURKE} slurk.` }
+        : { titel: 'Drik til højre', tekst: `${KULOER_NAVN[k.kuloer]} er rød — din højremand drikker ${SIDEMAND_SLURKE} slurk.` };
+    case 'pit':
+      return { titel: 'Direkte i pitten', tekst: 'Du ryger direkte i pitten. Slå om din plads og drik de shots der hører til.' };
     case 'hold':
       return v.hold === 'dame'
         ? { titel: 'Damerne drikker', tekst: `Alle kvinder ved bordet drikker ${HOLD_SLURKE} slurke.` }
