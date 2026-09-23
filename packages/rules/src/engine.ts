@@ -2,12 +2,12 @@ import {
   ANTAL_FELTER, FELT_INFO, PIT_PLADSER, feltInfo, feltType, ryk
 } from './board.js';
 import { HOLD_SLURKE, bland, kortNavn, kortTekst, nyBunke, virkning } from './cards.js';
-import { SLURKE_PR_ENHED, formatSlurke, taarnCl, taarnKapacitetSlurke, tilDrik } from './drinks.js';
+import { formatSlurke, slurkePrEnhed, taarnCl, taarnKapacitetSlurke, tilDrik } from './drinks.js';
 import { erMeyer, trin, trinNavn } from './meier.js';
 import {
   RegelFejl,
   type Afventer, type DrikValg, type Handling, type Haendelse, type Kontekst,
-  type Fejring, type Kort, type KortHold, type Spil, type Spiller
+  type Fejring, type Kort, type KortHold, type Spil, type Spiller, type Udraab
 } from './types.js';
 
 export const BRIKFARVER = [
@@ -16,9 +16,11 @@ export const BRIKFARVER = [
 
 export const STANDARD_INDSTILLINGER = {
   hardcore: false,
-  meierSlurke: 3,
   taarnKapacitetCl: 50
 };
+
+/** Slurke til taberen af en Meier-runde — også i hardcore. Dobbelt hvis der tabes på en Meyer. */
+export const MEIER_SLURKE = 3;
 
 const KORT_HOLD: KortHold[] = ['dame', 'konge'];
 
@@ -51,6 +53,7 @@ export function nytSpil(id: string, kode: string, naa: string): Spil {
     meier: null,
     meierResultat: null,
     fejring: null,
+    udraab: null,
     syver: null,
     finger: null,
     afventer: null,
@@ -98,9 +101,15 @@ function skriv(spil: Spil, slags: string, tekst: string, spiller?: Spiller): voi
   if (spil.log.length > 120) spil.log.length = 120;
 }
 
+/** Slurke holdes på én decimal, så 16,7-slurks-øller ikke samler afrundingsstøv. */
+function rund(v: number): number {
+  return Math.round(v * 10) / 10;
+}
+
 /**
- * Tildel slurke. Én enhed er 11 slurke; er den tømt, hentes en ny og tælleren
- * går forfra — det er sådan spillet holder regnskab på tværs af øl, vin og whisky.
+ * Tildel slurke. En slurk er den samme mængde alkohol uanset drik, så en enhed
+ * har slurkePrEnhed(drik) slurke; er den tømt, hentes en ny og tælleren går
+ * forfra — det er sådan spillet holder regnskab på tværs af øl, vin og whisky.
  */
 function drik(spiller: Spiller, antal: number): void {
   if (antal <= 0) return;
@@ -108,19 +117,37 @@ function drik(spiller: Spiller, antal: number): void {
   let rest = antal;
   while (rest > 0) {
     if (rest < spiller.slurkeTilbage) {
-      spiller.slurkeTilbage -= rest;
+      spiller.slurkeTilbage = rund(spiller.slurkeTilbage - rest);
       rest = 0;
     } else {
-      rest -= spiller.slurkeTilbage;
+      rest = rund(rest - spiller.slurkeTilbage);
       spiller.enheder += 1;
-      spiller.slurkeTilbage = SLURKE_PR_ENHED;
-      if (rest === 0) break;
+      spiller.slurkeTilbage = slurkePrEnhed(spiller.drik);
     }
   }
 }
 
+/**
+ * Skift drik. Har man ikke rørt den man har, får man en fuld af den nye; ellers
+ * beholder man det man mangler, dog højst en fuld enhed af den nye.
+ */
+function skiftDrik(spiller: Spiller, valg: DrikValg): void {
+  const urørt = spiller.slurkeTilbage >= slurkePrEnhed(spiller.drik);
+  spiller.drik = tilDrik(valg);
+  const fuld = slurkePrEnhed(spiller.drik);
+  spiller.slurkeTilbage = urørt ? fuld : Math.min(spiller.slurkeTilbage, fuld);
+}
+
 function navn(s: Spiller): string {
   return s.navn;
+}
+
+/** Råb det ud over pladen. Kaldes efter skriv(), så id'et altid er nyt. */
+function raab(
+  spil: Spil, art: Udraab['art'], s: Spiller, titel: string, tekst: string,
+  fordeling?: Udraab['fordeling']
+): void {
+  spil.udraab = { id: spil.naesteHaendelseId, art, spillerId: s.id, titel, tekst, ...(fordeling ? { fordeling } : {}) };
 }
 
 /** Ét terningkast på pladen. Tælleren er dét klienten bruger til at lade terningen rulle. */
@@ -257,12 +284,14 @@ function landPaa(spil: Spil, s: Spiller, ctx: Kontekst): void {
 
   switch (type) {
     case 'fri':
+      raab(spil, type, s, 'Frifelt', `${navn(s)} står frit. Der sker ingenting.`);
       afslutFelt(spil, ctx);
       return;
 
     case 'skaal': {
       for (const o of aktive(spil)) drik(o, 1);
       skriv(spil, 'skaal', 'SKÅL! Alle ved bordet tager en fællesskål.', s);
+      raab(spil, type, s, 'SKÅL!', 'Alle ved bordet tager en slurk.');
       afslutFelt(spil, ctx);
       return;
     }
@@ -270,6 +299,7 @@ function landPaa(spil: Spil, s: Spiller, ctx: Kontekst): void {
     case 'bm': {
       spil.bierMeisterId = s.id;
       skriv(spil, 'bm', `${navn(s)} er den nye Bier Meister. Find noget grimt til hovedet.`, s);
+      raab(spil, type, s, 'Bier Meister', `${navn(s)} er den nye Bier Meister. Find noget grimt til hovedet.`);
       afslutFelt(spil, ctx);
       return;
     }
@@ -285,11 +315,16 @@ function landPaa(spil: Spil, s: Spiller, ctx: Kontekst): void {
           : `Go! Bier Meister — der er ingen Bier Meister, så ${navn(s)} drikker selv 3 slurke.`,
         offer
       );
+      raab(
+        spil, type, offer, 'Go! Bier Meister',
+        offer.id === s.id ? `Der er ingen Bier Meister — ${navn(s)} drikker selv 3 slurke.` : `${navn(offer)} drikker 3 slurke.`
+      );
       afslutFelt(spil, ctx);
       return;
     }
 
     case 'tre':
+      raab(spil, type, s, '3 til..?', `${navn(s)} deler 3 slurke ud.`);
       spil.afventer = { slags: 'giv-slurke', spillerId: s.id, antal: 3 };
       return;
 
@@ -299,28 +334,44 @@ function landPaa(spil: Spil, s: Spiller, ctx: Kontekst): void {
       if (t && t.id !== s.id) {
         skriv(spil, 'raab', `ØL I TÅRNET! ${navn(t)} må stille tårnet fra sig med det samme.`, s);
       }
+      raab(
+        spil, type, s, 'Øl i tårnet',
+        t && t.id !== s.id
+          ? `ØL I TÅRNET! ${navn(t)} stiller tårnet fra sig — ${navn(s)} hælder i.`
+          : `${navn(s)} hælder øl i tårnet.`
+      );
       spil.afventer = { slags: 'fyld-taarn', spillerId: s.id };
       return;
     }
 
     case 'kort':
+      raab(spil, type, s, 'Træk et kort', `${navn(s)} trækker et kort fra bunken.`);
       spil.afventer = { slags: 'traek-kort', spillerId: s.id };
       return;
 
     case 'krone':
+      raab(spil, type, s, '2-krone', `${navn(s)} har ét forsøg på at få 2-kronen i tårnet.`);
       spil.afventer = { slags: 'krone-kast', spillerId: s.id };
       return;
 
     case 'meier':
       if (aktive(spil).length < 2) {
         skriv(spil, 'meier', 'Meier kræver en modstander — der er ingen at udfordre.', s);
+        raab(spil, type, s, 'Meier', 'Der er ingen at udfordre.');
         afslutFelt(spil, ctx);
         return;
       }
+      raab(spil, type, s, 'Meier', `${navn(s)} udfordrer en til Meier.`);
       spil.afventer = { slags: 'meier-modstander', spillerId: s.id };
       return;
 
     case 'drik':
+      raab(
+        spil, type, s, 'DRIK!',
+        spil.taarn.slurke > 0
+          ? `${navn(s)} skal bunde tårnet — ${formatSlurke(spil.taarn.slurke)}.`
+          : `${navn(s)} skulle bunde tårnet, men det er tomt.`
+      );
       givTaarnet(spil, s, `DRIK! ${navn(s)} skal bunde tårnet — ${formatSlurke(spil.taarn.slurke)}.`);
       afslutFelt(spil, ctx);
       return;
@@ -489,7 +540,7 @@ function join(spil: Spil, h: Extract<Handling, { type: 'join' }>, ctx: Kontekst)
 
   if (findes) {
     findes.navn = navnet;
-    findes.drik = drikken;
+    skiftDrik(findes, h.drik);
     findes.kortHold = h.kortHold;
     findes.tilsluttet = true;
     return spil;
@@ -512,7 +563,7 @@ function join(spil: Spil, h: Extract<Handling, { type: 'join' }>, ctx: Kontekst)
     kortHold: h.kortHold,
     felt: 0,
     pitPlads: 0,
-    slurkeTilbage: SLURKE_PR_ENHED,
+    slurkeTilbage: slurkePrEnhed(drikken),
     enheder: 0,
     slurkeIAlt: 0,
     tilstand: 'aktiv',
@@ -536,7 +587,7 @@ function join(spil: Spil, h: Extract<Handling, { type: 'join' }>, ctx: Kontekst)
 
 function saetDrik(spil: Spil, valg: DrikValg, ctx: Kontekst): Spil {
   const s = kraev(spil, ctx.spillerId);
-  s.drik = tilDrik(valg);
+  skiftDrik(s, valg);
   return spil;
 }
 
@@ -544,9 +595,6 @@ function saetIndstilling(spil: Spil, h: Extract<Handling, { type: 'saet-indstill
   if (spil.vaertId !== ctx.spillerId) fejl('Kun værten kan ændre husreglerne.');
   if (spil.fase !== 'lobby') fejl('Husreglerne skal aftales inden spillet går i gang.');
   if (h.hardcore !== undefined) spil.indstillinger.hardcore = h.hardcore;
-  if (h.meierSlurke !== undefined) {
-    spil.indstillinger.meierSlurke = Math.max(1, Math.min(10, Math.round(h.meierSlurke)));
-  }
   return spil;
 }
 
@@ -627,6 +675,7 @@ function givSlurke(
   if (sum !== a.antal) fejl(`Du skal dele præcis ${a.antal} slurke ud.`);
 
   const navne: string[] = [];
+  const fik: Array<{ spillerId: string; antal: number }> = [];
   for (const f of fordeling) {
     const antal = Math.max(0, Math.round(f.antal));
     if (antal === 0) continue;
@@ -634,8 +683,10 @@ function givSlurke(
     if (!o || o.tilstand !== 'aktiv') fejl('Den spiller er ikke med længere.');
     drik(o, antal);
     navne.push(`${navn(o)} ${antal}`);
+    fik.push({ spillerId: o.id, antal });
   }
   skriv(spil, 'giv', `${navn(s)} delte ${a.antal} slurke ud: ${navne.join(', ')}.`, s);
+  raab(spil, 'giv', s, `${navn(s)} deler ud`, `${a.antal} slurke: ${navne.join(', ')}.`, fik);
   afslutFelt(spil, ctx);
   return spil;
 }
@@ -921,6 +972,7 @@ function meierMeld(spil: Spil, s: Spiller, melding: number, _ctx: Kontekst): Spi
 function meierBlindt(spil: Spil, s: Spiller, ctx: Kontekst): Spil {
   const m = kraevMeier(spil, s);
   if (m.melding === null) fejl('Der er ingen melding at slå op imod endnu.');
+  if (m.slagAf === s.id && !m.blindt) fejl('Du har selv slået — nu skal du melde.');
   m.slag = [ctx.terning(), ctx.terning()];
   m.slagAf = s.id;
   m.blindt = true;
@@ -935,6 +987,7 @@ function meierBlindt(spil: Spil, s: Spiller, ctx: Kontekst): Spil {
 function meierLoeft(spil: Spil, s: Spiller, ctx: Kontekst): Spil {
   const m = kraevMeier(spil, s);
   if (m.melding === null || !m.meldtAf || !m.slag) fejl('Der er ikke noget at løfte endnu.');
+  if (m.slagAf === s.id && !m.blindt) fejl('Du har selv slået — nu skal du melde.');
 
   const faktisk = trin(m.slag[0], m.slag[1]);
   const meldt = m.melding;
@@ -943,7 +996,7 @@ function meierLoeft(spil: Spil, s: Spiller, ctx: Kontekst): Spil {
   const loej = faktisk < meldt;
   const taber = loej ? meldende : loefter;
   const dobbelt = erMeyer(meldt);
-  const antal = spil.indstillinger.meierSlurke * (dobbelt ? 2 : 1);
+  const antal = MEIER_SLURKE * (dobbelt ? 2 : 1);
 
   if (taber) drik(taber, antal);
   skriv(

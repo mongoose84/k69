@@ -470,6 +470,9 @@ function SyverVedBrik({ kort }: { kort: KortHos }): JSX.Element {
   );
 }
 
+/** Så længe glider brikken hen til sit nye felt. Råbet over pladen venter på den. */
+export const BRIK_RYKKER_MS = 950;
+
 export interface BraetProps {
   id: string;
   brikker: BrikPaaPladen[];
@@ -572,7 +575,7 @@ export function BraetPlade({
         <g
           key={b.id}
           transform={`translate(${b.x}, ${b.y})`}
-          style={{ transition: 'transform 480ms cubic-bezier(0.33, 1.08, 0.45, 1)' }}
+          style={{ transition: `transform ${BRIK_RYKKER_MS}ms cubic-bezier(0.33, 1.08, 0.45, 1)` }}
         >
           <circle cx="0" cy="3" r="17" fill="#0B100D" opacity="0.55" />
           {b.erPaaTur && <circle cx="0" cy="0" r="22" fill="none" stroke="#C9A227" strokeWidth="2" opacity="0.75" />}

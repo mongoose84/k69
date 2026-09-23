@@ -5,9 +5,9 @@ import {
   ANTAL_FELTER, FELT_RAEKKE, PIT_PLADSER, feltType
 } from '../src/board.js';
 import { nyBunke, virkning } from '../src/cards.js';
-import { DRIKKE, SLURKE_PR_ENHED, iCl, tilDrik } from '../src/drinks.js';
+import { DRIKKE, clPrSlurk, iCl, slurkePrEnhed, tilDrik } from '../src/drinks.js';
 import { STIGE, kode, trin, trinNavn } from '../src/meier.js';
-import { afventerSpiller, anvend, find, nytSpil, taarnLoeberOver } from '../src/engine.js';
+import { MEIER_SLURKE, afventerSpiller, anvend, find, nytSpil, taarnLoeberOver } from '../src/engine.js';
 import { RegelFejl, type FeltType, type Handling, type Kontekst, type Spil } from '../src/types.js';
 
 /* --------------------------------------------------------------- værktøj */
@@ -69,20 +69,32 @@ test('kortbunken er 52 kort uden jokere', () => {
 
 /* ------------------------------------------------------------------ slurke */
 
-test('slurke omregnes til den drik man selv har valgt', () => {
-  assert.equal(iCl(SLURKE_PR_ENHED, DRIKKE.ol), 33);
-  assert.equal(iCl(SLURKE_PR_ENHED, DRIKKE.vin), 15);
-  assert.equal(iCl(SLURKE_PR_ENHED, DRIKKE.whisky), 4);
+test('en slurk er den samme mængde alkohol uanset drik', () => {
+  assert.equal(clPrSlurk(DRIKKE.ol), 3);
+  assert.equal(slurkePrEnhed(DRIKKE.ol), 11);
+  assert.equal(slurkePrEnhed(DRIKKE.vin), 13);
+  assert.equal(slurkePrEnhed(DRIKKE.whisky), 11.6);
+  // Alkoholen i én slurk er den samme: cl × procent.
+  for (const d of [DRIKKE.ol, DRIKKE.vin, DRIKKE.whisky]) {
+    assert.ok(Math.abs(clPrSlurk(d) * d.procent - 3 * 4.6) < 1e-9);
+  }
   assert.equal(iCl(1, DRIKKE.ol), 3);
+  assert.equal(iCl(slurkePrEnhed(DRIKKE.ol), DRIKKE.ol), 33);
+});
+
+test('en større øl har flere slurke end en lille', () => {
+  const stor = tilDrik({ navn: 'Stor fadøl', enhedCl: 50, procent: 4.6 });
+  assert.equal(slurkePrEnhed(stor), 16.7);
+  assert.equal(clPrSlurk(stor), 3);
 });
 
 test('man kan skrive sin egen drik ind — navn, størrelse og procent', () => {
   const d = tilDrik({ navn: ' Classic ', enhedCl: 50, procent: 4.6 });
   assert.deepEqual(d, { id: 'egen', navn: 'Classic', procent: 4.6, enhedCl: 50 });
-  assert.equal(iCl(SLURKE_PR_ENHED, d), 50);
   assert.throws(() => tilDrik({ navn: '', enhedCl: 50, procent: 4.6 }), RegelFejl);
   assert.throws(() => tilDrik({ navn: 'X', enhedCl: 0, procent: 4.6 }), RegelFejl);
   assert.throws(() => tilDrik({ navn: 'X', enhedCl: 33, procent: 120 }), RegelFejl);
+  assert.throws(() => tilDrik({ navn: 'X', enhedCl: 33, procent: 0 }), RegelFejl);
   assert.throws(() => tilDrik('egen'), RegelFejl);
 
   let spil = nytSpil('spil', 'TEST', 'nu');
@@ -100,8 +112,47 @@ test('en tømt enhed erstattes af en ny', () => {
   spil = gør(spil, 'p0', { type: 'slaa' }, [3]);
   const efter = find(spil, 'p0')!;
   assert.equal(efter.enheder, 1);
-  assert.equal(efter.slurkeTilbage, SLURKE_PR_ENHED);
+  assert.equal(efter.slurkeTilbage, slurkePrEnhed(DRIKKE.ol));
   assert.equal(efter.slurkeIAlt, 1);
+});
+
+test('tælleren følger drikkens egne slurke — også med halve', () => {
+  let spil = nytSpil('spil', 'TEST', 'nu');
+  spil = gør(spil, 'p0', {
+    type: 'join', navn: 'A', farve: '#D8A93F', drik: { navn: 'Stor', enhedCl: 50, procent: 4.6 }, kortHold: 'konge'
+  });
+  spil = gør(spil, 'p1', { type: 'join', navn: 'B', farve: '#8FAF74', drik: 'ol', kortHold: 'dame' });
+  assert.equal(find(spil, 'p0')!.slurkeTilbage, 16.7);
+
+  // Skifter man drik før man har rørt den, får man en fuld af den nye.
+  spil = gør(spil, 'p0', { type: 'saet-drik', drik: 'vin' });
+  assert.equal(find(spil, 'p0')!.slurkeTilbage, 13);
+  spil = gør(spil, 'p0', { type: 'saet-drik', drik: { navn: 'Stor', enhedCl: 50, procent: 4.6 } });
+
+  spil = gør(spil, 'p0', { type: 'start' });
+  placer(spil, 'p0', foersteFeltAf('skaal') - 3);
+  const a = find(spil, 'p0')!;
+  a.slurkeTilbage = 0.7;
+  spil = gør(spil, 'p0', { type: 'slaa' }, [3]);
+  const efter = find(spil, 'p0')!;
+  assert.equal(efter.enheder, 1);
+  assert.equal(efter.slurkeTilbage, 16.4);
+});
+
+test('Meier koster de samme slurke i hardcore', () => {
+  let spil = nytSpil('spil', 'TEST', 'nu');
+  spil = gør(spil, 'p0', { type: 'join', navn: 'A', farve: '#D8A93F', drik: 'ol', kortHold: 'konge' });
+  spil = gør(spil, 'p1', { type: 'join', navn: 'B', farve: '#8FAF74', drik: 'ol', kortHold: 'dame' });
+  spil = gør(spil, 'p0', { type: 'saet-indstilling', hardcore: true });
+  spil = gør(spil, 'p0', { type: 'start' });
+  placer(spil, 'p0', foersteFeltAf('meier') - 1);
+  spil = gør(spil, 'p0', { type: 'slaa' }, [1]);
+  spil = gør(spil, 'p0', { type: 'meier-vaelg', spillerId: 'p1' });
+  spil = gør(spil, 'p0', { type: 'meier-slaa' }, [3, 2]);
+  spil = gør(spil, 'p0', { type: 'meier-meld', melding: trin(6, 5) });
+  spil = gør(spil, 'p1', { type: 'meier-loeft' });
+  assert.equal(MEIER_SLURKE, 3);
+  assert.equal(find(spil, 'p0')!.slurkeIAlt, 3);
 });
 
 /* ------------------------------------------------------------- håndhævelse */
@@ -125,6 +176,27 @@ test('man kan ikke springe det spillet venter på over', () => {
   spil = gør(spil, 'p0', { type: 'giv-slurke', fordeling: [{ spillerId: 'p1', antal: 3 }] });
   assert.equal(find(spil, 'p1')!.slurkeIAlt, 3);
   assert.equal(afventerSpiller(spil.afventer), 'p1');
+});
+
+test('landing og uddeling bliver råbt ud over pladen', () => {
+  let spil = opsat(['A', 'B']);
+  placer(spil, 'p0', foersteFeltAf('skaal') - 3);
+  spil = gør(spil, 'p0', { type: 'slaa' }, [3]);
+  assert.equal(spil.udraab?.art, 'skaal');
+  assert.equal(spil.udraab?.titel, 'SKÅL!');
+  const skaalId = spil.udraab!.id;
+
+  placer(spil, 'p1', foersteFeltAf('tre') - 2);
+  spil = gør(spil, 'p1', { type: 'slaa' }, [2]);
+  assert.equal(spil.udraab?.art, 'tre');
+  assert.ok(spil.udraab!.id > skaalId);
+
+  spil = gør(spil, 'p1', {
+    type: 'giv-slurke', fordeling: [{ spillerId: 'p0', antal: 2 }, { spillerId: 'p1', antal: 1 }]
+  });
+  assert.equal(spil.udraab?.art, 'giv');
+  assert.equal(spil.udraab?.spillerId, 'p1');
+  assert.deepEqual(spil.udraab?.fordeling, [{ spillerId: 'p0', antal: 2 }, { spillerId: 'p1', antal: 1 }]);
 });
 
 test('turen går med uret', () => {
@@ -356,6 +428,22 @@ test('Meyer-stigen går fra 32 op til Meyer', () => {
   assert.ok(trin(1, 1) > trin(6, 5));
 });
 
+test('har man selv slået, kan man ikke løfte — man skal melde', () => {
+  let spil = opsat(['A', 'B']);
+  placer(spil, 'p0', foersteFeltAf('meier') - 1);
+  spil = gør(spil, 'p0', { type: 'slaa' }, [1]);
+  spil = gør(spil, 'p0', { type: 'meier-vaelg', spillerId: 'p1' });
+  spil = gør(spil, 'p0', { type: 'meier-slaa' }, [4, 2]);
+  spil = gør(spil, 'p0', { type: 'meier-meld', melding: trin(4, 2) });
+
+  // B tror på det og slår selv — så er løft og blindt væk.
+  spil = gør(spil, 'p1', { type: 'meier-slaa' }, [5, 3]);
+  assert.throws(() => gør(spil, 'p1', { type: 'meier-loeft' }), RegelFejl);
+  assert.throws(() => gør(spil, 'p1', { type: 'meier-blindt' }, [6, 6]), RegelFejl);
+  spil = gør(spil, 'p1', { type: 'meier-meld', melding: trin(5, 3) });
+  assert.equal(spil.meier?.holderId, 'p0');
+});
+
 test('løfter man en bluf, drikker den der løj', () => {
   let spil = opsat(['A', 'B']);
   placer(spil, 'p0', foersteFeltAf('meier') - 1);
@@ -367,7 +455,7 @@ test('løfter man en bluf, drikker den der løj', () => {
   assert.equal(spil.meier?.holderId, 'p1');
 
   spil = gør(spil, 'p1', { type: 'meier-loeft' });
-  assert.equal(find(spil, 'p0')!.slurkeIAlt, spil.indstillinger.meierSlurke);
+  assert.equal(find(spil, 'p0')!.slurkeIAlt, MEIER_SLURKE);
   assert.equal(find(spil, 'p1')!.slurkeIAlt, 0);
   assert.equal(spil.meier, null);
 });
@@ -380,7 +468,7 @@ test('løfter man en sand melding, drikker man selv', () => {
   spil = gør(spil, 'p0', { type: 'meier-slaa' }, [6, 5]);
   spil = gør(spil, 'p0', { type: 'meier-meld', melding: trin(6, 5) });
   spil = gør(spil, 'p1', { type: 'meier-loeft' });
-  assert.equal(find(spil, 'p1')!.slurkeIAlt, spil.indstillinger.meierSlurke);
+  assert.equal(find(spil, 'p1')!.slurkeIAlt, MEIER_SLURKE);
 });
 
 test('løftet bægeret giver hele bordet et resultat at fejre', async () => {
@@ -402,7 +490,7 @@ test('løftet bægeret giver hele bordet et resultat at fejre', async () => {
   assert.equal(r.melding, trin(6, 5));
   assert.equal(r.loej, true);
   assert.equal(r.dobbelt, false);
-  assert.equal(r.slurke, spil.indstillinger.meierSlurke);
+  assert.equal(r.slurke, MEIER_SLURKE);
   // Terningerne er offentlige nu — det er dét fejringen viser.
   assert.deepEqual(forSpiller(spil, 'p0').meierResultat?.slag, [3, 2]);
 });
@@ -433,7 +521,7 @@ test('taber man på en Meyer, drikker man dobbelt', () => {
   spil = gør(spil, 'p0', { type: 'meier-slaa' }, [2, 1]); // faktisk Meyer
   spil = gør(spil, 'p0', { type: 'meier-meld', melding: trin(2, 1) });
   spil = gør(spil, 'p1', { type: 'meier-loeft' });
-  assert.equal(find(spil, 'p1')!.slurkeIAlt, spil.indstillinger.meierSlurke * 2);
+  assert.equal(find(spil, 'p1')!.slurkeIAlt, MEIER_SLURKE * 2);
 });
 
 test('kun den der selv slog, må se slaget', async () => {
@@ -473,7 +561,8 @@ test('træk et kort venter på at kortet bliver kvitteret', () => {
   spil = gør(spil, 'p0', { type: 'slaa' }, [1]);
   assert.equal(spil.afventer?.slags, 'traek-kort');
   spil = gør(spil, 'p0', { type: 'traek-kort' });
-  assert.ok(spil.sidsteKort);
+  // Et kort er trukket — en 7'er ryger på hånden i stedet for bordet, så sidsteKort kan være tom.
+  assert.equal(spil.brugte.length, 1);
   assert.notEqual(spil.afventer?.slags, 'traek-kort');
 });
 

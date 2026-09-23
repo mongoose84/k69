@@ -95,7 +95,7 @@ export function Tilmeld({
             </div>
           )}
           <div className="note" style={{ marginTop: 8 }}>
-            Én enhed er 11 slurke uanset hvad du drikker.
+            En slurk er den samme mængde alkohol uanset hvad du drikker — 33 cl pilsner er 11 slurke.
           </div>
         </div>
 

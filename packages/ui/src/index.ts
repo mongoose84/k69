@@ -8,3 +8,4 @@ export * from './Plade.js';
 export * from './useBordet.js';
 export * from './Fejring.js';
 export * from './Syver.js';
+export * from './Udraab.js';

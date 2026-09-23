@@ -70,7 +70,7 @@ export function Lobby({
 
         <div className="blok">
           <div className="eyebrow" style={{ marginBottom: 12 }}>Husregler</div>
-          <div className="valg-r">
+          <div className="valg-r" style={{ borderBottom: 'none' }}>
             <div>
               <div className="valg-t">Hardcore</div>
               <div className="valg-d">Kun ud fra et blankt felt. Aftal det fra start.</div>
@@ -83,21 +83,6 @@ export function Lobby({
             >
               <span />
             </button>
-          </div>
-          <div className="valg-r" style={{ borderBottom: 'none' }}>
-            <div>
-              <div className="valg-t">Slurke for at tabe en Meier</div>
-              <div className="valg-d">Dobbelt hvis der tabes på en Meyer.</div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <button className="knap" style={{ minHeight: 40, width: 40, padding: 0 }} disabled={!erVaert}
-                onClick={() => send({ type: 'saet-indstilling', meierSlurke: spil.indstillinger.meierSlurke - 1 })}>−</button>
-              <span style={{ fontFamily: 'var(--serif)', fontSize: 20, width: 22, textAlign: 'center' }}>
-                {spil.indstillinger.meierSlurke}
-              </span>
-              <button className="knap" style={{ minHeight: 40, width: 40, padding: 0 }} disabled={!erVaert}
-                onClick={() => send({ type: 'saet-indstilling', meierSlurke: spil.indstillinger.meierSlurke + 1 })}>+</button>
-            </div>
           </div>
         </div>
       </div>

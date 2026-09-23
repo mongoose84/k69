@@ -1,9 +1,9 @@
 import type { JSX } from 'react';
 import {
   Brik, FejringKort, Glas, Handlingskort, Maerkat, MeierKort, Plade, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
-  kortPaaBordet, opgave, spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, type SpilUdsyn
+  kortPaaBordet, opgave, spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, UdraabKort, type SpilUdsyn
 } from '@k69/ui';
-import { SLURKE_PR_ENHED, formatCl, formatSlurke, taarnCl, type DrikInfo, type Handling } from '@k69/rules';
+import { formatAntal, formatCl, slurkePrEnhed, formatSlurke, taarnCl, type DrikInfo, type Handling } from '@k69/rules';
 
 /** Ordet under tælleren: "pilsnere tømt", "glas vin tømt", "Classic tømt". */
 function enhederOrd(antal: number, drik: DrikInfo): string {
@@ -81,11 +81,11 @@ export function Bord({
                     </div>
                     <div className="note" style={{ fontSize: 11 }}>{spillerStatus(s)}</div>
                     <div style={{ marginTop: 5, display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <Slurkemaaler tilbage={s.slurkeTilbage} bredde={9} />
-                      <span className="note" style={{ fontSize: 10 }}>{s.slurkeTilbage}/{SLURKE_PR_ENHED}</span>
+                      <Slurkemaaler tilbage={s.slurkeTilbage} ialt={slurkePrEnhed(s.drik)} bredde={9} />
+                      <span className="note" style={{ fontSize: 10 }}>{formatAntal(s.slurkeTilbage)}/{formatAntal(slurkePrEnhed(s.drik))}</span>
                     </div>
                   </div>
-                  <div style={{ textAlign: 'right', flex: '0 0 62px' }} title={`${s.enheder} tømt · ${s.slurkeIAlt} slurke i alt`}>
+                  <div style={{ textAlign: 'right', flex: '0 0 62px' }} title={`${s.enheder} tømt · ${formatSlurke(s.slurkeIAlt)} i alt`}>
                     <div style={{ fontFamily: 'var(--serif)', fontSize: 22, lineHeight: 1, color: s.enheder > 0 ? 'var(--amber)' : 'var(--ink-dim)' }}>
                       {s.enheder}
                     </div>
@@ -176,6 +176,7 @@ export function Bord({
           />
           <div className="plade-hint">Træk for at flytte pladen · rul for at zoome</div>
           <MeierKort spil={spil} migId={migId} send={send} />
+          <UdraabKort spil={spil} />
           <FejringKort spil={spil} />
         </main>
 

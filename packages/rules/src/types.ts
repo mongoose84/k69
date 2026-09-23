@@ -17,7 +17,7 @@ export type DrikId = 'ol' | 'vin' | 'whisky' | 'egen';
 export interface DrikInfo {
   id: DrikId;
   navn: string;
-  /** Alkoholprocent — kun til visning, slurken er den samme uanset. */
+  /** Alkoholprocent — afgør sammen med størrelsen hvor mange slurke der er i drikken. */
   procent: number;
   /** Mængden i én enhed, i cl. */
   enhedCl: number;
@@ -47,7 +47,7 @@ export interface Spiller {
   felt: number;
   /** 0 = ikke i pitten, ellers pladsen 1–6. */
   pitPlads: number;
-  /** Slurke tilbage i den enhed man er i gang med (0–11). */
+  /** Slurke tilbage i den enhed man er i gang med — op til slurkePrEnhed(drik). */
   slurkeTilbage: number;
   /** Hvor mange hele enheder man har lagt bag sig. */
   enheder: number;
@@ -162,6 +162,21 @@ export interface Fejring {
 }
 
 /**
+ * Råbet hen over pladen når nogen lander på et felt eller deler slurke ud, så
+ * hele bordet kan se hvad der sker — ikke kun den der står i loggen.
+ */
+export interface Udraab {
+  id: number;
+  /** Feltet der blev landet på — eller 'giv' når slurkene er delt ud. */
+  art: FeltType | 'giv';
+  spillerId: string;
+  titel: string;
+  tekst: string;
+  /** Kun ved 'giv': hvem der fik hvor mange. */
+  fordeling?: Array<{ spillerId: string; antal: number }>;
+}
+
+/**
  * 7'eren på hånden: den der trak den beholder kortet, indtil han lægger
  * fingeren — eller til der kommer en 7'er mere, så drikker han selv.
  */
@@ -193,8 +208,6 @@ export interface Haendelse {
 
 export interface Indstillinger {
   hardcore: boolean;
-  /** Slurke til taberen af en Meier-runde. Dobbelt hvis der tabes på en Meyer. */
-  meierSlurke: number;
   /** Glasset i midten — reglerne siger mindst en halv liter. Løber over derover. */
   taarnKapacitetCl: number;
 }
@@ -225,6 +238,8 @@ export interface Spil {
   meierResultat: MeierResultat | null;
   /** Sidste øjeblik der skal fejres. Bliver stående indtil det næste. */
   fejring: Fejring | null;
+  /** Sidste råb over pladen — et landingsfelt eller en uddeling. Mangler i gamle gemte spil. */
+  udraab?: Udraab | null;
   /** 7'eren nogen har på hånden. */
   syver: Syver | null;
   /** Fingeren der ligger på bordkanten lige nu. */
@@ -241,7 +256,7 @@ export interface Spil {
 export type Handling =
   | { type: 'join'; navn: string; farve: string; drik: DrikValg; kortHold: KortHold }
   | { type: 'saet-drik'; drik: DrikValg }
-  | { type: 'saet-indstilling'; hardcore?: boolean; meierSlurke?: number }
+  | { type: 'saet-indstilling'; hardcore?: boolean }
   | { type: 'start' }
   | { type: 'slaa' }
   | { type: 'giv-slurke'; fordeling: Array<{ spillerId: string; antal: number }> }
