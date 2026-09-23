@@ -1,6 +1,6 @@
 import { useState, type JSX } from 'react';
 import {
-  Brik, FejringKort, Glas, Handlingskort, Maerkat, MeierKort, Plade, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
+  Brik, FejringKort, Glas, Handlingskort, KroneKort, Maerkat, MeierKort, Plade, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
   kortPaaBordet, opgave, spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, UdraabKort, type SpilUdsyn
 } from '@k69/ui';
 import { formatAntal, formatSlurke, slurkePrEnhed, taarnCl, type Handling } from '@k69/rules';
@@ -181,6 +181,7 @@ export function Bord({
         )}
       </div>
       <MeierKort spil={spil} migId={migId} send={send} kompakt />
+      <KroneKort spil={spil} migId={migId} send={send} kompakt />
       <UdraabKort spil={spil} kompakt />
       <FejringKort spil={spil} kompakt />
     </div>

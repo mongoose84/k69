@@ -4,6 +4,7 @@ export * from './useSpil.js';
 export * from './tekst.js';
 export * from './Handlinger.js';
 export * from './Meier.js';
+export * from './Krone.js';
 export * from './Plade.js';
 export * from './useBordet.js';
 export * from './Fejring.js';
