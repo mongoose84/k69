@@ -199,6 +199,15 @@ test('landing og uddeling bliver råbt ud over pladen', () => {
   assert.deepEqual(spil.udraab?.fordeling, [{ spillerId: 'p0', antal: 2 }, { spillerId: 'p1', antal: 1 }]);
 });
 
+test('lander Bier Meisteren selv på Go!, drikker han — og råbet siger det', () => {
+  let spil = opsat(['A', 'B']);
+  spil.bierMeisterId = 'p0';
+  placer(spil, 'p0', foersteFeltAf('gobm') - 1);
+  spil = gør(spil, 'p0', { type: 'slaa' }, [1]);
+  assert.equal(find(spil, 'p0')!.slurkeIAlt, 3);
+  assert.equal(spil.udraab?.tekst, 'Bier Meisteren A drikker 3 slurke.');
+});
+
 test('turen går med uret', () => {
   let spil = opsat(['A', 'B', 'C']);
   placer(spil, 'p0', 2);

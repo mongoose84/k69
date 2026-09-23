@@ -95,7 +95,7 @@ export function opgave(spil: Spil, migId: string): Opgave | null {
 
     case 'krone-kast':
       return grund('2-krone', mig
-        ? 'Ét forsøg. Den skal ramme bordet før den ryger i. Sig selv om den røg i.'
+        ? 'Ét forsøg. Træk baglæns fra mønten og slip — den skal hoppe på bordet før den ryger i.'
         : `${dig} kaster med 2-kronen.`);
 
     case 'krone-udpeg':

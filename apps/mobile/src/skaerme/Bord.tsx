@@ -1,7 +1,7 @@
 import { useState, type JSX } from 'react';
 import {
-  Brik, FejringKort, Glas, Handlingskort, Maerkat, MeierKort, Plade, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
-  kortPaaBordet, opgave, spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, UdraabKort, type SpilUdsyn
+  Brik, FejringKort, Glas, Handlingskort, KroneKort, Maerkat, MeierKort, Plade, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
+  kortPaaBordet, LydKnap, opgave, spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, useLyde, UdraabKort, type SpilUdsyn
 } from '@k69/ui';
 import { formatAntal, formatSlurke, slurkePrEnhed, taarnCl, type Handling } from '@k69/rules';
 
@@ -17,6 +17,7 @@ export function Bord({
 
   // Mens terningen ruller, står alt stille på det gamle spil — se useForsinketSpil.
   const { vist: spil, ruller } = useForsinketSpil(live);
+  useLyde(live, spil, migId);
   const jeg = spil.spillere.find((s) => s.id === migId);
   const o = opgave(spil, migId);
   const paaTur = spil.spillere[spil.turIdx];
@@ -40,6 +41,7 @@ export function Bord({
       <header className="mobilbar">
         <div className="mark" style={{ fontSize: 24 }}>K69</div>
         <div className="kode-lille">{spil.kode}</div>
+        <LydKnap />
         <SyverKort spil={spil} migId={migId} send={send} kompakt />
         <div style={{ flexGrow: 1 }} />
         <div className="avatarer">
@@ -181,6 +183,7 @@ export function Bord({
         )}
       </div>
       <MeierKort spil={spil} migId={migId} send={send} kompakt />
+      <KroneKort spil={spil} migId={migId} send={send} kompakt />
       <UdraabKort spil={spil} kompakt />
       <FejringKort spil={spil} kompakt />
     </div>

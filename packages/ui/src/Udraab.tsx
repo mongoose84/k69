@@ -60,7 +60,7 @@ export function UdraabKort({ spil, kompakt = false }: { spil: Spil; kompakt?: bo
     <div className={`udraab${kompakt ? ' udraab-mobil' : ''}`} role="status" aria-live="polite">
       <div
         key={u.id}
-        className={`udraab-kort udraab-${u.art}`}
+        className={`udraab-kort udraab-art-${u.art}`}
         style={{ '--udraab': farve } as CSSProperties}
         onClick={() => {
           saetSynligt(null);

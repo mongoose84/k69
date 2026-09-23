@@ -16,7 +16,6 @@ export interface HandlingProps {
   ruller?: boolean;
 }
 
-const raekke: React.CSSProperties = { display: 'flex', gap: 8, flexWrap: 'wrap' };
 const kolonne: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 10 };
 
 function aktive(spil: Spil): Spiller[] {
@@ -278,16 +277,8 @@ export function Handlingskort({ spil, migId, send, kompakt, ruller = false }: Ha
   } else if (a.slags === 'fyld-taarn' && paaMig) {
     styring = <FyldTaarn spil={spil} migId={migId} send={send} />;
   } else if (a.slags === 'krone-kast' && paaMig) {
-    styring = (
-      <div style={raekke}>
-        <button className="knap knap-primaer" style={{ flexGrow: 1 }} onClick={() => send({ type: 'krone-resultat', ramte: true })}>
-          Den røg i
-        </button>
-        <button className="knap" style={{ flexGrow: 1 }} onClick={() => send({ type: 'krone-resultat', ramte: false })}>
-          Ved siden af
-        </button>
-      </div>
-    );
+    // Selve kastet sker på KroneKort hen over pladen — det melder resultatet.
+    styring = <div className="note">Kast mønten på bordet. Den melder selv om den røg i.</div>;
   } else if (a.slags === 'krone-udpeg' && paaMig) {
     styring = <SpillerValg spil={spil} migId={migId} medMigSelv onVaelg={(id) => send({ type: 'krone-udpeg', spillerId: id })} knaptekst="Bunder tårnet" />;
   } else if (a.slags === 'traek-kort' && paaMig) {
