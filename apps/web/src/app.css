@@ -431,15 +431,6 @@
   background: rgba(201, 162, 39, 0.1);
 }
 
-.husregel {
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--ink-dim);
-  padding: 7px 0 7px 12px;
-  border-left: 2px solid rgba(201, 162, 39, 0.4);
-  margin-bottom: 6px;
-}
-
 .scene {
   flex-grow: 1;
   min-width: 0;
@@ -493,7 +484,7 @@
 .minimap {
   position: absolute;
   right: 12px;
-  top: 12px;
+  top: 46px; /* under Breaking News-bjælken */
   width: 118px;
   height: 66px;
   border: 1px solid var(--line-2);

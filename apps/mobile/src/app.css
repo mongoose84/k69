@@ -349,15 +349,6 @@
   background: rgba(20, 29, 24, 0.6);
 }
 
-.husregel {
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--ink-dim);
-  padding: 7px 0 7px 12px;
-  border-left: 2px solid rgba(201, 162, 39, 0.4);
-  margin-bottom: 6px;
-}
-
 .log { display: flex; flex-direction: column; }
 .log-linje {
   display: flex;

@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { nytSpil, type Spil } from '@k69/rules';
+import { nytSpil, opgraderGemt, type Spil } from '@k69/rules';
 import { pool } from './db.js';
 
 /**
@@ -75,7 +75,7 @@ export async function hentSpil(kode: string): Promise<Spil | null> {
   if (!raekke) return null;
 
   const post: Post = {
-    spil: raekke.tilstand,
+    spil: opgraderGemt(raekke.tilstand),
     version: raekke.version,
     snavset: false,
     gemmer: null,
