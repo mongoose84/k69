@@ -367,12 +367,11 @@ export function MeierKort({ spil, migId, send, kompakt = false }: MeierKortProps
             )}
 
             {m.melding !== null && (
-              // Har man selv slået, er valget truffet: man tror på meldingen og skal melde videre.
+              // Har man selv slået, kan man ikke løfte sit eget — men man kan stadig slå om blindt.
               <div className="meier-to">
                 <button
                   className="knap knap-tom"
-                  disabled={Boolean(slag)}
-                  title={slag ? 'Du har selv slået — meld nu' : undefined}
+                  title={slag ? 'Slå igen uden at kigge og send det videre' : undefined}
                   onClick={() => send({ type: 'meier-blindt' })}
                 >
                   Det samme eller derover

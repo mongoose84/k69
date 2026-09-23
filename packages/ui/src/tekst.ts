@@ -90,7 +90,7 @@ export function opgave(spil: Spil, migId: string): Opgave | null {
 
     case 'fyld-taarn':
       return grund('Øl i tårnet', mig
-        ? 'Hold knappen nede og hæld i. Løber det over, bunder du det selv.'
+        ? 'Hold knappen nede og hæld i. Løber det over, bunder du det selv — men aldrig mere end et fuldt glas.'
         : `${dig} hælder i tårnet — der står ${formatSlurke(spil.taarn.slurke)}.`);
 
     case 'krone-kast':

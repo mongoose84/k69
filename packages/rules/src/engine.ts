@@ -366,27 +366,42 @@ function landPaa(spil: Spil, s: Spiller, ctx: Kontekst): void {
       spil.afventer = { slags: 'meier-modstander', spillerId: s.id };
       return;
 
-    case 'drik':
+    case 'drik': {
+      const t = taarnetDrikkesAf(spil);
       raab(
         spil, type, s, 'DRIK!',
-        spil.taarn.slurke > 0
-          ? `${navn(s)} skal bunde tårnet — ${formatSlurke(spil.taarn.slurke)}.`
-          : `${navn(s)} skulle bunde tårnet, men det er tomt.`
+        spil.taarn.slurke === 0
+          ? `${navn(s)} skulle bunde tårnet, men det er tomt.`
+          : t && t.id !== s.id
+            ? `${navn(s)} skulle bunde tårnet, men ${navn(t)} er allerede i gang med det.`
+            : `${navn(s)} skal bunde tårnet — ${formatSlurke(spil.taarn.slurke)}.`
       );
       givTaarnet(spil, s, `DRIK! ${navn(s)} skal bunde tårnet — ${formatSlurke(spil.taarn.slurke)}.`);
       afslutFelt(spil, ctx);
       return;
+    }
   }
+}
+
+/** Den der er i gang med at bunde tårnet lige nu, hvis nogen. */
+function taarnetDrikkesAf(spil: Spil): Spiller | undefined {
+  return spil.taarn.toemmesAfId ? find(spil, spil.taarn.toemmesAfId) : undefined;
 }
 
 /**
  * Sæt tårnet hos en spiller. Spillet kører videre imens — han får en knap til
  * at sige når det er tomt, og lander en anden på "Øl i tårnet" inden da, må
- * der hældes mere i. Er tårnet tomt, er der ikke noget at bunde.
+ * der hældes mere i. Er tårnet tomt, er der ikke noget at bunde. Er en anden
+ * allerede i gang med at drikke det, bliver det hos ham.
  */
 function givTaarnet(spil: Spil, s: Spiller, tekst: string): void {
   if (spil.taarn.slurke === 0) {
     skriv(spil, 'drik', `${tekst} Men tårnet er tomt — der er ikke noget at drikke.`, s);
+    return;
+  }
+  const t = taarnetDrikkesAf(spil);
+  if (t && t.id !== s.id) {
+    skriv(spil, 'drik', `${tekst} Men ${navn(t)} er i gang med at drikke tårnet — det bliver hos ${navn(t)}.`, s);
     return;
   }
   spil.taarn.toemmesAfId = s.id;
@@ -502,6 +517,7 @@ export function anvend(spil: Spil, handling: Handling, ctx: Kontekst): Spil {
     case 'fyld-taarn': return fyldTaarn(spil, s, handling.slurke, ctx);
     case 'taarn-faerdig': return taarnFaerdig(spil, s, ctx);
     case 'toem-taarn-faerdig': return toemTaarnFaerdig(spil, s, ctx);
+    case 'krone-kast': return kroneKast(spil, s, handling.x, handling.y);
     case 'krone-resultat': return kroneResultat(spil, s, handling.ramte, ctx);
     case 'krone-udpeg': return kroneUdpeg(spil, s, handling.spillerId, ctx);
     case 'traek-kort': return traekHandling(spil, s, ctx);
@@ -645,9 +661,11 @@ function slaa(spil: Spil, s: Spiller, ctx: Kontekst): Spil {
 
   if (s.pitPlads > 0) {
     if (v >= s.pitPlads) {
+      // Øjnene man har til overs, rykker man videre med: plads 2 og en 4'er
+      // er to skridt ud til felt 1 og så to mere, ud på felt 3.
       skriv(spil, 'slag', `${navn(s)} slog ${v} og er ude af pitten.`, s);
+      s.felt = ryk(1, v - s.pitPlads);
       s.pitPlads = 0;
-      s.felt = 1;
       landPaa(spil, s, ctx);
     } else {
       s.pitPlads -= v;
@@ -716,13 +734,20 @@ function taarnFaerdig(spil: Spil, s: Spiller, ctx: Kontekst): Spil {
   );
 
   if (taarnLoeberOver(spil)) {
+    // Det der løber over, ryger på bordet — man drikker aldrig mere end glasset kan rumme.
+    const haeldt = taarnCl(spil.taarn.slurke);
+    spil.taarn.slurke = taarnKapacitetSlurke(spil.indstillinger.taarnKapacitetCl);
     givTaarnet(spil, s, `Tårnet løb over ${spil.indstillinger.taarnKapacitetCl} cl — ${navn(s)} bunder det selv.`);
+    // Står en anden allerede med tårnet, bliver det hos ham — nu bare fyldt til kanten.
+    const drikker = taarnetDrikkesAf(spil) ?? s;
     fejr(spil, {
       art: 'overloeb',
       vinderId: null,
-      taberId: s.id,
+      taberId: drikker.id,
       titel: 'Tårnet løb over',
-      tekst: `${navn(s)} hældte ${taarnCl(spil.taarn.slurke)} cl i et glas på ${spil.indstillinger.taarnKapacitetCl}. Det bunder man selv.`,
+      tekst: drikker.id === s.id
+        ? `${navn(s)} hældte ${haeldt} cl i et glas på ${spil.indstillinger.taarnKapacitetCl}. Det bunder man selv.`
+        : `${navn(s)} hældte ${haeldt} cl i et glas på ${spil.indstillinger.taarnKapacitetCl}. ${navn(drikker)} har stadig tårnet og bunder det fulde glas.`,
       slurke: Math.round(spil.taarn.slurke),
       naaedeIds: []
     });
@@ -746,6 +771,15 @@ function toemTaarnFaerdig(spil: Spil, s: Spiller, _ctx: Kontekst): Spil {
   return spil;
 }
 
+/** Kastet selv. Resultatet melder kasteren bagefter — her gemmes kun trækket, så bordet kan se med. */
+function kroneKast(spil: Spil, s: Spiller, x: number, y: number): Spil {
+  const a = kraevAfventer(spil, 'krone-kast', s);
+  if (a.kast) fejl('Du har allerede kastet.');
+  if (!Number.isFinite(x) || !Number.isFinite(y) || Math.hypot(x, y) > 200) fejl('Ugyldigt kast.');
+  a.kast = { x, y };
+  return spil;
+}
+
 function kroneResultat(spil: Spil, s: Spiller, ramte: boolean, ctx: Kontekst): Spil {
   kraevAfventer(spil, 'krone-kast', s);
   if (!ramte) {
@@ -755,6 +789,12 @@ function kroneResultat(spil: Spil, s: Spiller, ramte: boolean, ctx: Kontekst): S
   }
   if (spil.taarn.slurke === 0) {
     skriv(spil, 'krone', `${navn(s)} ramte i — men tårnet er tomt, så der er ingen at udpege.`, s);
+    afslutFelt(spil, ctx);
+    return spil;
+  }
+  const t = taarnetDrikkesAf(spil);
+  if (t) {
+    skriv(spil, 'krone', `${navn(s)} ramte i — men ${navn(t)} er i gang med at drikke tårnet, så det kan ikke gives videre.`, s);
     afslutFelt(spil, ctx);
     return spil;
   }
@@ -973,8 +1013,9 @@ function meierMeld(spil: Spil, s: Spiller, melding: number, _ctx: Kontekst): Spi
 function meierBlindt(spil: Spil, s: Spiller, ctx: Kontekst): Spil {
   const m = kraevMeier(spil, s);
   if (m.melding === null) fejl('Der er ingen melding at slå op imod endnu.');
-  if (m.slagAf === s.id && !m.blindt) fejl('Du har selv slået — nu skal du melde.');
-  m.slag = [ctx.terning(), ctx.terning()];
+  // Også efter man selv har slået og kigget: kan man ikke lide det man så,
+  // ryster man igen uden at kigge og sender det videre.
+  m.slag =[ctx.terning(), ctx.terning()];
   m.slagAf = s.id;
   m.blindt = true;
   m.meldtAf = s.id;

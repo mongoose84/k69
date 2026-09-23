@@ -63,7 +63,7 @@ export const FELT_INFO: Record<FeltType, FeltInfo> = {
   },
   taarn: {
     navn: 'Øl i tårnet', linjer: ['Øl i', 'tårnet'], farve: '#E0A03C', fyld: '#27231A', vaegt: 600, str: 11,
-    regel: 'Hæld så meget i tårnet du har lyst til. Løber det over, bunder du det selv.'
+    regel: 'Hæld så meget i tårnet du har lyst til. Løber det over, bunder du det selv — men aldrig mere end et fuldt glas.'
   },
   kort: {
     navn: 'Træk et kort', linjer: ['Træk et', 'kort'], farve: '#88A2C2', fyld: '#1B222B', vaegt: 600, str: 11,

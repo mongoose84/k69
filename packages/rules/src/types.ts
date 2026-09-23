@@ -23,8 +23,14 @@ export interface DrikInfo {
   enhedCl: number;
 }
 
-/** Sådan vælger man sin drik ved tilmelding: en af de faste, eller sin egen. */
-export type DrikValg = DrikId | { navn: string; enhedCl: number; procent: number };
+/**
+ * Sådan vælger man sin drik ved tilmelding: en af de faste (evt. i en anden
+ * størrelse, fx en 44 cl pilsner), eller sin egen.
+ */
+export type DrikValg =
+  | DrikId
+  | { id: Exclude<DrikId, 'egen'>; enhedCl: number }
+  | { navn: string; enhedCl: number; procent: number };
 
 /** Hvem man drikker med når Dame- eller Kongekortet bliver trukket. Man er det ene. */
 export type KortHold = 'dame' | 'konge';
@@ -74,7 +80,11 @@ export type Afventer =
   | { slags: 'pit-placering'; spillerId: string; kaede: string[] }
   | { slags: 'giv-slurke'; spillerId: string; antal: number }
   | { slags: 'fyld-taarn'; spillerId: string }
-  | { slags: 'krone-kast'; spillerId: string }
+  /**
+   * `kast` er trækket fra mønten, sat i det øjeblik der bliver sluppet — så
+   * resten af bordet kan afspille det samme kast på deres egen skærm.
+   */
+  | { slags: 'krone-kast'; spillerId: string; kast?: { x: number; y: number } }
   | { slags: 'krone-udpeg'; spillerId: string }
   | { slags: 'traek-kort'; spillerId: string }
   | { slags: 'kort-udfald'; spillerId: string; kort: Kort }
@@ -263,6 +273,7 @@ export type Handling =
   | { type: 'fyld-taarn'; slurke: number }
   | { type: 'taarn-faerdig' }
   | { type: 'toem-taarn-faerdig' }
+  | { type: 'krone-kast'; x: number; y: number }
   | { type: 'krone-resultat'; ramte: boolean }
   | { type: 'krone-udpeg'; spillerId: string }
   | { type: 'traek-kort' }

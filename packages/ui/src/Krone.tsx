@@ -149,7 +149,26 @@ function forudsig(fra: Punkt, p: Punkt): (Punkt & { o: number })[] {
   return ud.slice(0, n).map((q, j) => ({ ...q, o: 0.75 * (1 - j / (n + 2)) }));
 }
 
-function KroneKast({ fyld, onResultat }: { fyld: number; onResultat: (ramte: boolean) => void }): JSX.Element {
+/*
+ * Fast tidsskridt, så kastet flyver præcis ens på alle skærme: kasteren sender
+ * kun trækket, og resten af bordet afspiller det selv.
+ */
+const TRIN = 1 / 360;
+
+interface KroneKastProps {
+  fyld: number;
+  /** Trækket fra serveren, når kastet er sluppet. */
+  kast: Punkt | undefined;
+  /** Kun kasteren kan trække i mønten og melde resultatet. */
+  minTur: boolean;
+  kasterNavn: string;
+  /** Hvorfor der ikke er nogen at udpege, selvom den røg i — eller null. */
+  ingenUdpegning: string | null;
+  onKast: (traek: Punkt) => void;
+  onResultat: (ramte: boolean) => void;
+}
+
+function KroneKast({ fyld, kast, minTur, kasterNavn, ingenUdpegning, onKast, onResultat }: KroneKastProps): JSX.Element {
   const sim = useRef<KroneSim>(nyKroneSim());
   const spor = useRef<Punkt[]>([]);
   const traek = useRef<{ ned: Punkt; nu: Punkt } | null>(null);
@@ -159,6 +178,15 @@ function KroneKast({ fyld, onResultat }: { fyld: number; onResultat: (ramte: boo
 
   useEffect(() => () => { if (raf.current !== null) cancelAnimationFrame(raf.current); }, []);
 
+  // Tilskuerne (og kasteren efter en genindlæsning) afspiller kastet når det kommer fra serveren.
+  useEffect(() => {
+    const s = sim.current;
+    if (!kast || (s.fase !== 'sigte' && s.fase !== 'traekker')) return;
+    traek.current = null;
+    kastKrone(s, kast);
+    loop();
+  }, [kast]);
+
   const tilScene = (e: React.PointerEvent<SVGSVGElement>): Punkt => {
     const r = e.currentTarget.getBoundingClientRect();
     return { x: (e.clientX - r.left) * W / r.width, y: (e.clientY - r.top) * H / r.height };
@@ -166,12 +194,16 @@ function KroneKast({ fyld, onResultat }: { fyld: number; onResultat: (ramte: boo
 
   const loop = (): void => {
     let sidst: number | null = null;
+    let rest = 0;
     const f = (ts: number): void => {
       if (sidst === null) sidst = ts;
-      const dt = Math.min(1 / 30, (ts - sidst) / 1000);
+      rest += Math.min(1 / 30, (ts - sidst) / 1000);
       sidst = ts;
       const s = sim.current;
-      for (let i = 0; i < 6; i++) kroneTrin(s, dt / 6);
+      while (rest >= TRIN && (s.fase === 'flyver' || s.fase === 'synker')) {
+        kroneTrin(s, TRIN);
+        rest -= TRIN;
+      }
       spor.current.push({ x: s.x, y: s.y });
       if (spor.current.length > 9) spor.current.shift();
       if (s.fase === 'flyver' || s.fase === 'synker') raf.current = requestAnimationFrame(f);
@@ -182,7 +214,7 @@ function KroneKast({ fyld, onResultat }: { fyld: number; onResultat: (ramte: boo
   };
 
   const ned = (e: React.PointerEvent<SVGSVGElement>): void => {
-    if (sim.current.fase !== 'sigte') return;
+    if (!minTur || sim.current.fase !== 'sigte') return;
     try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* ældre browsere */ }
     const q = tilScene(e);
     traek.current = { ned: q, nu: q };
@@ -200,8 +232,10 @@ function KroneKast({ fyld, onResultat }: { fyld: number; onResultat: (ramte: boo
     const p = begraens(traek.current.ned, traek.current.nu);
     traek.current = null;
     if (p.l < 14) { s.fase = 'sigte'; tegn(performance.now()); return; }
-    kastKrone(s, p);
+    const kastet = { x: p.x, y: p.y };
+    kastKrone(s, kastet);
     loop();
+    onKast(kastet);
   };
 
   const s = sim.current;
@@ -229,7 +263,7 @@ function KroneKast({ fyld, onResultat }: { fyld: number; onResultat: (ramte: boo
       <div className="krone-scene">
         <svg
           viewBox={`0 0 ${W} ${H}`}
-          style={{ cursor: s.fase === 'traekker' ? 'grabbing' : s.fase === 'sigte' ? 'grab' : 'default' }}
+          style={{ cursor: !minTur ? 'default' : s.fase === 'traekker' ? 'grabbing' : s.fase === 'sigte' ? 'grab' : 'default' }}
           onPointerDown={ned}
           onPointerMove={flyt}
           onPointerUp={op}
@@ -280,7 +314,7 @@ function KroneKast({ fyld, onResultat }: { fyld: number; onResultat: (ramte: boo
           {s.fase === 'sigte' && (
             <>
               <circle cx={s.x} cy={s.y} r={24} fill="none" stroke="#E8CE7E" opacity={0.6} strokeWidth={1.2} strokeDasharray="3 5" />
-              <text x={s.x} y={s.y - 34} fill="#97A398" className="krone-svg-tekst" textAnchor="middle">TRÆK HERFRA</text>
+              <text x={s.x} y={s.y - 34} fill="#97A398" className="krone-svg-tekst" textAnchor="middle">{minTur ? 'TRÆK HERFRA' : 'SIGTER …'}</text>
             </>
           )}
 
@@ -296,7 +330,14 @@ function KroneKast({ fyld, onResultat }: { fyld: number; onResultat: (ramte: boo
       </div>
 
       <div className="krone-fod">
-        {sigter && (
+        {sigter && !minTur && (
+          <div className="krone-forklaring">
+            <div>{kasterNavn} sigter efter tårnet.</div>
+            <div className="note">Den skal hoppe på bordet mindst én gang, før den ryger i tårnet.</div>
+          </div>
+        )}
+
+        {sigter && minTur && (
           <>
             <div className="krone-forklaring">
               <div>Træk baglæns fra mønten og slip. Jo længere du trækker, jo hårdere kaster du.</div>
@@ -319,9 +360,13 @@ function KroneKast({ fyld, onResultat }: { fyld: number; onResultat: (ramte: boo
           <>
             <div className="krone-resultat">
               <div className="eyebrow" style={{ color: 'var(--amber)' }}>Den røg i!</div>
-              <div className="krone-resultat-t">Plask. Du udpeger hvem der bunder tårnet.</div>
+              <div className="krone-resultat-t">
+                {ingenUdpegning
+                  ? `Plask. ${ingenUdpegning}`
+                  : minTur ? 'Plask. Du udpeger hvem der bunder tårnet.' : `Plask. ${kasterNavn} udpeger hvem der bunder tårnet.`}
+              </div>
             </div>
-            <button className="knap knap-primaer" disabled={sendt} onClick={() => svar(true)}>Udpeg hvem der bunder</button>
+            {minTur && <button className="knap knap-primaer" disabled={sendt} onClick={() => svar(true)}>{ingenUdpegning ? 'Videre' : 'Udpeg hvem der bunder'}</button>}
           </>
         )}
 
@@ -337,7 +382,7 @@ function KroneKast({ fyld, onResultat }: { fyld: number; onResultat: (ramte: boo
                   : s.hvorfor === 'over' ? 'Den fløj over tårnet. Turen går videre.' : 'Ingen plask. Turen går videre.'}
               </div>
             </div>
-            <button className="knap" disabled={sendt} onClick={() => svar(false)}>Videre</button>
+            {minTur && <button className="knap" disabled={sendt} onClick={() => svar(false)}>Videre</button>}
           </>
         )}
       </div>
@@ -354,12 +399,18 @@ export interface KroneKortProps {
 }
 
 /**
- * 2-kronen som et kort hen over spillepladen — kun for den der kaster.
- * Resten af bordet følger med i handlingskortet.
+ * 2-kronen som et kort hen over spillepladen. Hele bordet ser det; kun den
+ * der kaster kan trække i mønten.
  */
 export function KroneKort({ spil, migId, send, kompakt = false }: KroneKortProps): JSX.Element | null {
   const a = spil.afventer;
-  if (!a || a.slags !== 'krone-kast' || a.spillerId !== migId) return null;
+  if (!a || a.slags !== 'krone-kast') return null;
+  const minTur = a.spillerId === migId;
+  const kasterNavn = spil.spillere.find((s) => s.id === a.spillerId)?.navn ?? 'Kasteren';
+  const drikker = spil.spillere.find((s) => s.id === spil.taarn.toemmesAfId);
+  const ingenUdpegning = spil.taarn.slurke === 0
+    ? 'Men tårnet er tomt, så der er ingen at udpege.'
+    : drikker ? `Men ${drikker.navn} er i gang med at drikke tårnet, så det kan ikke gives videre.` : null;
 
   return (
     <div className={`meier-kort krone-kort${kompakt ? ' meier-kort-mobil' : ''}`}>
@@ -370,10 +421,15 @@ export function KroneKort({ spil, migId, send, kompakt = false }: KroneKortProps
         <span className="meier-band-h">Ét forsøg</span>
       </div>
       <div className="krone-krop">
-        <h2 style={{ fontSize: kompakt ? 22 : 28 }}>Ram bordet, så tårnet.</h2>
+        <h2 style={{ fontSize: kompakt ? 22 : 28 }}>{minTur ? 'Ram bordet, så tårnet.' : `${kasterNavn} kaster 2-kronen.`}</h2>
         {/* Kortet forsvinder når kastet er meldt, så næste 2-krone starter forfra af sig selv. */}
         <KroneKast
           fyld={Math.min(1, taarnAndel(spil))}
+          kast={a.kast}
+          minTur={minTur}
+          kasterNavn={kasterNavn}
+          ingenUdpegning={ingenUdpegning}
+          onKast={(p) => send({ type: 'krone-kast', x: p.x, y: p.y })}
           onResultat={(ramte) => send({ type: 'krone-resultat', ramte })}
         />
       </div>
