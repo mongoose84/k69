@@ -1,7 +1,7 @@
 import type { JSX } from 'react';
 import {
   Brik, FejringKort, Glas, Handlingskort, KroneKort, Maerkat, MeierKort, Plade, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
-  kortPaaBordet, opgave, spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, UdraabKort, type SpilUdsyn
+  kortPaaBordet, LydKnap, opgave, spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, useLyde, UdraabKort, type SpilUdsyn
 } from '@k69/ui';
 import { formatAntal, formatCl, slurkePrEnhed, formatSlurke, taarnCl, type DrikInfo, type Handling } from '@k69/rules';
 
@@ -20,6 +20,7 @@ export function Bord({
 }): JSX.Element {
   // Mens terningen ruller, står alt stille på det gamle spil — se useForsinketSpil.
   const { vist: spil, ruller } = useForsinketSpil(live);
+  useLyde(live, spil, migId);
   const jeg = spil.spillere.find((s) => s.id === migId);
   const o = opgave(spil, migId);
   const paaTur = spil.spillere[spil.turIdx];
@@ -56,6 +57,7 @@ export function Bord({
         <SyverKort spil={spil} migId={migId} send={send} />
         <div style={{ flexGrow: 1 }} />
         <div className="note">Runde {spil.runde} · turen går med uret</div>
+        <LydKnap />
       </header>
 
       <div className="bord-krop">

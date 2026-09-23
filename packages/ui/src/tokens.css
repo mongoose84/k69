@@ -951,3 +951,20 @@ input[type='text']:focus {
 .krone-flyver { font-family: var(--serif); font-size: 21px; font-style: italic; color: var(--brass-lt); }
 .krone-resultat { display: flex; flex-direction: column; gap: 4px; flex: 1 1 260px; }
 .krone-resultat-t { font-family: var(--serif); font-size: 21px; line-height: 1.2; }
+
+/* Lyd til/fra */
+.lyd-knap {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 30px;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 1px solid var(--line-2);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--brass-lt);
+  cursor: pointer;
+}
+.lyd-knap:hover { border-color: rgba(201, 162, 39, 0.5); }
+.lyd-fra { color: var(--ink-faint); }

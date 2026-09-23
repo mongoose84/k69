@@ -10,3 +10,4 @@ export * from './useBordet.js';
 export * from './Fejring.js';
 export * from './Syver.js';
 export * from './Udraab.js';
+export * from './Lyd.js';
