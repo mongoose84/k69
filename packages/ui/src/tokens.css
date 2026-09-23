@@ -806,7 +806,7 @@ input[type='text']:focus {
   border-radius: 4px;
   border: 1px solid color-mix(in srgb, var(--udraab) 70%, transparent);
   border-top: 4px solid var(--udraab);
-  background: linear-gradient(180deg, rgba(26, 36, 30, 0.97) 0%, rgba(18, 27, 22, 0.97) 100%);
+  background: linear-gradient(180deg, #1A241E 0%, #121B16 100%);
   box-shadow: 0 26px 60px rgba(0, 0, 0, 0.6);
   pointer-events: auto;
   cursor: pointer;
@@ -828,8 +828,8 @@ input[type='text']:focus {
   text-align: center;
   color: var(--udraab);
 }
-.udraab-skaal .udraab-titel,
-.udraab-drik .udraab-titel {
+.udraab-art-skaal .udraab-titel,
+.udraab-art-drik .udraab-titel {
   font-size: 72px;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -840,8 +840,8 @@ input[type='text']:focus {
   50% { transform: scale(1.08); }
 }
 .udraab-mobil .udraab-titel { font-size: 34px; }
-.udraab-mobil.udraab .udraab-skaal .udraab-titel,
-.udraab-mobil.udraab .udraab-drik .udraab-titel { font-size: 54px; }
+.udraab-mobil.udraab .udraab-art-skaal .udraab-titel,
+.udraab-mobil.udraab .udraab-art-drik .udraab-titel { font-size: 54px; }
 
 .udraab-tekst {
   position: relative;
@@ -866,6 +866,6 @@ input[type='text']:focus {
 
 @media (prefers-reduced-motion: reduce) {
   .udraab-kort,
-  .udraab-skaal .udraab-titel,
-  .udraab-drik .udraab-titel { animation: none; }
+  .udraab-art-skaal .udraab-titel,
+  .udraab-art-drik .udraab-titel { animation: none; }
 }

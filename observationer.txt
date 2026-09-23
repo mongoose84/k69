@@ -1,9 +1,3 @@
-Animation når man rykker skal være lidt langsommere.
+Vi skal have flere festlige lyde
 
-Terningen skal blive liggende til den næste slår
 
-Det skal være mere tydeligt når man lander på et felt. Det skal være tydeligt hvad der sker, fx med skål skal vises, der "SKÅL" og konfetti. Når man deler ud må det også stå tydeligt
-
-Ved meier skal det være tydeligt hvad man melder
-
-Og ved meier, så skal Løft knappen disables når man vælger at slå

@@ -306,18 +306,19 @@ function landPaa(spil: Spil, s: Spiller, ctx: Kontekst): void {
 
     case 'gobm': {
       const bm = spil.bierMeisterId ? find(spil, spil.bierMeisterId) : undefined;
-      const offer = bm && bm.tilstand === 'aktiv' ? bm : s;
+      const harBm = Boolean(bm && bm.tilstand === 'aktiv');
+      const offer = harBm ? bm! : s;
       drik(offer, 3);
       skriv(
         spil, 'gobm',
-        bm && bm.tilstand === 'aktiv'
+        harBm
           ? `Go! Bier Meister — ${navn(offer)} drikker 3 slurke.`
           : `Go! Bier Meister — der er ingen Bier Meister, så ${navn(s)} drikker selv 3 slurke.`,
         offer
       );
       raab(
         spil, type, offer, 'Go! Bier Meister',
-        offer.id === s.id ? `Der er ingen Bier Meister — ${navn(s)} drikker selv 3 slurke.` : `${navn(offer)} drikker 3 slurke.`
+        harBm ? `Bier Meisteren ${navn(offer)} drikker 3 slurke.` : `Der er ingen Bier Meister — ${navn(s)} drikker selv 3 slurke.`
       );
       afslutFelt(spil, ctx);
       return;
