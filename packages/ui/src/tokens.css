@@ -1,19 +1,19 @@
-/* K69 — mørk kro-luksus. Filtgrøn, messing og ravgul øl-glød. */
+/* K69 — lyst blågråt tema. Messing og ravgul øl-glød. */
 
 @import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,700&family=Karla:wght@400;500;600;700&display=swap');
 
 :root {
-  --bg: #0e1512;
-  --panel: #141d18;
-  --panel-2: #1a241e;
-  --raise: #1f2c25;
-  --line: #26332b;
-  --line-2: #364739;
-  --ink: #ede7da;
-  --ink-dim: #97a398;
-  --ink-faint: #6b796d;
+  --bg: #bcc6d0;
+  --panel: #c6ced7;
+  --panel-2: #d0d6dd;
+  --raise: #d9dee4;
+  --line: #a4b0bc;
+  --line-2: #8d9aa8;
+  --ink: #232b33;
+  --ink-dim: #515e6b;
+  --ink-faint: #737f8c;
   --brass: #c9a227;
-  --brass-lt: #e8ce7e;
+  --brass-lt: #a5861d;
   --amber: #e0a03c;
   --rust: #b4483f;
   --sage: #93ae7c;
@@ -21,7 +21,7 @@
   --plum: #b084a0;
   --serif: 'Bodoni Moda', Georgia, 'Times New Roman', serif;
   --sans: Karla, 'Helvetica Neue', Arial, sans-serif;
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; }
@@ -46,8 +46,8 @@ h1, h2, h3 {
   letter-spacing: 0.01em;
 }
 
-a { color: var(--brass-lt); text-decoration: none; }
-a:hover { color: var(--brass); }
+a { color: #9a7a18; text-decoration: none; }
+a:hover { color: #7e6413; }
 
 button { font: inherit; color: inherit; }
 
@@ -63,7 +63,7 @@ button { font: inherit; color: inherit; }
   font-family: var(--serif);
   font-weight: 700;
   letter-spacing: 0.02em;
-  background: linear-gradient(180deg, #f0dca0 0%, #c9a227 55%, #9a7a18 100%);
+  background: linear-gradient(180deg, #d4af4e 0%, #c9a227 55%, #9a7a18 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -98,7 +98,7 @@ button { font: inherit; color: inherit; }
 }
 .knap-primaer:hover:not(:disabled) { color: #14180c; filter: brightness(1.06); }
 .knap-tom { background: transparent; }
-.knap-fare { color: #d4877f; border-color: rgba(180, 72, 63, 0.5); }
+.knap-fare { color: #b4483f; border-color: rgba(180, 72, 63, 0.5); }
 
 .kort-flade {
   background: var(--panel);
@@ -255,8 +255,8 @@ input[type='text']:focus {
   overflow: hidden;
   border: 1px solid rgba(176, 132, 160, 0.55);
   border-radius: 3px;
-  background: linear-gradient(180deg, #17221c 0%, #101815 100%);
-  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(0, 0, 0, 0.5);
+  background: linear-gradient(180deg, #cdd4db 0%, #c2cad3 100%);
+  box-shadow: 0 40px 100px rgba(35, 43, 51, 0.4), 0 0 0 1px rgba(35, 43, 51, 0.3);
   transition: border-color 300ms;
 }
 .meier-kort-mobil {
@@ -343,7 +343,7 @@ input[type='text']:focus {
   overflow: hidden;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-  background: radial-gradient(58% 62% at 50% 52%, #1b2620 0%, #101812 74%);
+  background: radial-gradient(58% 62% at 50% 52%, #c9d1d9 0%, #b7c1cb 74%);
 }
 .meier-mat-glans {
   position: absolute;
@@ -435,7 +435,7 @@ input[type='text']:focus {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--plum);
-  background: rgba(20, 16, 22, 0.6);
+  background: rgba(214, 220, 226, 0.72);
 }
 .meier-segl { left: 12px; border: 1px solid rgba(176, 132, 160, 0.4); }
 .meier-set { right: 12px; border: 1px dashed rgba(176, 132, 160, 0.45); letter-spacing: 0.08em; }
@@ -502,7 +502,7 @@ input[type='text']:focus {
   padding: 10px 11px;
   border: 1px solid var(--line);
   border-radius: 2px;
-  background: rgba(20, 29, 24, 0.7);
+  background: rgba(205, 213, 220, 0.7);
 }
 .meier-linje-ny { border-color: rgba(176, 132, 160, 0.45); background: rgba(176, 132, 160, 0.08); }
 .meier-linje-t { font-size: 12.5px; line-height: 1.4; }
@@ -521,8 +521,8 @@ input[type='text']:focus {
   text-align: center;
   overflow: auto;
   background:
-    radial-gradient(72% 44% at 50% 32%, rgba(201, 162, 39, 0.2), rgba(9, 13, 11, 0.96) 70%),
-    #0a0e0c;
+    radial-gradient(72% 44% at 50% 32%, rgba(201, 162, 39, 0.25), rgba(211, 218, 225, 0.96) 70%),
+    #d3dae1;
   /* Vent til bægeret er oppe, så man når at se slaget ligge på filten. */
   animation: meier-ind 320ms ease 520ms both;
 }
@@ -549,7 +549,7 @@ input[type='text']:focus {
   font-family: var(--serif);
   font-size: 38px;
   line-height: 1.06;
-  background: linear-gradient(180deg, #f4e3ae 0%, #c9a227 58%, #94750f 100%);
+  background: linear-gradient(180deg, #d9b95c 0%, #c9a227 58%, #94750f 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -562,9 +562,9 @@ input[type='text']:focus {
   padding: 9px 13px;
   border: 1px solid var(--line);
   border-radius: 2px;
-  background: rgba(20, 29, 24, 0.85);
+  background: rgba(205, 213, 220, 0.85);
 }
-.meier-fej-straf { font-size: 11px; color: #d4877f; }
+.meier-fej-straf { font-size: 11px; color: #a4372e; }
 .meier-fej-alle {
   font-size: 10px;
   letter-spacing: 0.14em;
@@ -615,7 +615,7 @@ input[type='text']:focus {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(8, 12, 10, 0.45);
+  background: rgba(35, 43, 51, 0.35);
   cursor: pointer;
 }
 .fejring-mobil { padding: 16px; }
@@ -631,8 +631,8 @@ input[type='text']:focus {
   padding: 34px 36px 26px;
   border-radius: 4px;
   border: 1px solid rgba(180, 72, 63, 0.6);
-  background: linear-gradient(180deg, #1A241E 0%, #121B16 100%);
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(0, 0, 0, 0.5);
+  background: linear-gradient(180deg, #d0d6dd 0%, #c6ced7 100%);
+  box-shadow: 0 30px 70px rgba(35, 43, 51, 0.35), 0 0 0 1px rgba(35, 43, 51, 0.25);
   animation: fejring-ind 600ms cubic-bezier(0.2, 1.1, 0.3, 1) both;
 }
 .fejring-mobil .fejring-kort { padding: 26px 22px 20px; gap: 12px; }
@@ -645,7 +645,7 @@ input[type='text']:focus {
 .fejring-band { display: flex; align-items: center; gap: 10px; align-self: stretch; }
 .fejring-prik { width: 8px; height: 8px; border-radius: 50%; background: #B4483F; }
 .fejring-vundet .fejring-prik { background: var(--brass); }
-.fejring-band .eyebrow { color: #D98279; }
+.fejring-band .eyebrow { color: #b4483f; }
 .fejring-vundet .fejring-band .eyebrow { color: var(--brass-lt); }
 .fejring-band-h {
   margin-left: auto;
@@ -705,7 +705,7 @@ input[type='text']:focus {
   font-family: var(--serif);
   font-size: 54px;
   line-height: 1;
-  color: #D98279;
+  color: #b4483f;
 }
 .fejring-vundet .fejring-tal { color: var(--brass-lt); }
 .fejring-tal span {
@@ -786,7 +786,7 @@ input[type='text']:focus {
   position: absolute;
   inset: 2px;
   border-radius: 50%;
-  background: #121a16;
+  background: #c6ced7;
 }
 .syver svg { margin-left: 12px; }
 .syver-tekst {
@@ -826,7 +826,7 @@ input[type='text']:focus {
   display: flex;
   align-items: stretch;
   height: 34px;
-  background: rgba(11, 17, 14, 0.92);
+  background: rgba(226, 231, 235, 0.92);
   border-bottom: 1px solid var(--rust);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
   pointer-events: none;
@@ -904,7 +904,7 @@ input[type='text']:focus {
 .nyhed-prik { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; }
 /* Den nyeste lyser kort op når den kommer ind. */
 .nyheder-kopi:first-child .nyhed:first-child { animation: nyhed-ny 1.4s ease-out; }
-@keyframes nyhed-ny { from { color: #fff; text-shadow: 0 0 8px rgba(196, 99, 91, 0.9); } }
+@keyframes nyhed-ny { from { color: #a4372e; text-shadow: 0 0 8px rgba(196, 99, 91, 0.55); } }
 
 @media (prefers-reduced-motion: reduce) {
   .nyheder-baand { animation: none; }
@@ -941,8 +941,8 @@ input[type='text']:focus {
   border-radius: 4px;
   border: 1px solid color-mix(in srgb, var(--udraab) 70%, transparent);
   border-top: 4px solid var(--udraab);
-  background: linear-gradient(180deg, #1A241E 0%, #121B16 100%);
-  box-shadow: 0 26px 60px rgba(0, 0, 0, 0.6);
+  background: linear-gradient(180deg, #d0d6dd 0%, #c6ced7 100%);
+  box-shadow: 0 26px 60px rgba(35, 43, 51, 0.3);
   pointer-events: auto;
   cursor: pointer;
   animation: udraab-ind 420ms cubic-bezier(0.2, 1.2, 0.3, 1) both;
@@ -1039,7 +1039,7 @@ input[type='text']:focus {
   border: 1px solid var(--line);
   border-radius: 2px;
   overflow: hidden;
-  background: #0f1814;
+  background: #b7c1cb;
 }
 .krone-scene svg {
   display: block;

@@ -7,7 +7,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: radial-gradient(120% 70% at 50% 0%, #1b2821 0%, #0d1310 62%);
+  background: radial-gradient(120% 70% at 50% 0%, #cfd6dd 0%, #bcc6d0 62%);
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -21,7 +21,7 @@
   gap: 16px;
   padding: 24px;
   text-align: center;
-  background: radial-gradient(120% 70% at 50% 0%, #1b2821 0%, #0d1310 62%);
+  background: radial-gradient(120% 70% at 50% 0%, #cfd6dd 0%, #bcc6d0 62%);
 }
 
 .stribe {
@@ -137,7 +137,7 @@
 .hero-slør {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(13, 19, 16, 0.55) 0%, rgba(13, 19, 16, 0.6) 45%, #0d1310 96%);
+  background: linear-gradient(180deg, rgba(232, 236, 240, 0.55) 0%, rgba(232, 236, 240, 0.6) 45%, #bcc6d0 96%);
 }
 .hero-tekst {
   position: absolute;
@@ -225,7 +225,7 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #0e1512;
+  background: #eef1f4;
   transition: left 140ms;
 }
 .kontakt-paa { background: var(--brass); }
@@ -258,7 +258,7 @@
   justify-content: center;
   border: 1px solid var(--line-2);
   border-radius: 2px;
-  background: rgba(14, 21, 18, 0.86);
+  background: rgba(214, 220, 226, 0.86);
   color: var(--ink-dim);
   font-size: 15px;
 }
@@ -270,7 +270,7 @@
   height: 58px;
   border: 1px solid var(--line-2);
   border-radius: 2px;
-  background: rgba(11, 17, 14, 0.86);
+  background: rgba(214, 220, 226, 0.86);
   padding: 3px;
   pointer-events: none;
 }
@@ -283,7 +283,7 @@
   padding: 0 12px;
   border: 1px solid var(--line-2);
   border-radius: 2px;
-  background: rgba(11, 17, 14, 0.86);
+  background: rgba(214, 220, 226, 0.86);
   color: var(--ink-dim);
   font-size: 11px;
   font-weight: 600;
@@ -346,7 +346,7 @@
   padding: 10px 13px;
   border: 1px solid var(--line);
   border-radius: 2px;
-  background: rgba(20, 29, 24, 0.6);
+  background: rgba(205, 213, 220, 0.6);
 }
 
 .log { display: flex; flex-direction: column; }
