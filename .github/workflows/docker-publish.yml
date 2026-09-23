@@ -94,7 +94,7 @@ jobs:
 
   affyr-spindkrog:
     name: Affyr Spindkrog
-    needs: bug
+    needs: byg
     runs-on: ubuntu-latest
 
     steps:
