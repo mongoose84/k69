@@ -40,6 +40,7 @@ export function nytSpil(id: string, kode: string, naa: string): Spil {
     indstillinger: { ...STANDARD_INDSTILLINGER },
     spillere: [],
     turIdx: 0,
+    turNr: 0,
     runde: 1,
     terning: null,
     terningAf: null,
@@ -112,6 +113,11 @@ function skriv(spil: Spil, slags: string, tekst: string, spiller?: Spiller): voi
   if (spiller) {
     h.spillerId = spiller.id;
     h.farve = spiller.farve;
+  }
+  const paaTur = spil.spillere[spil.turIdx];
+  if (spil.turNr && paaTur) {
+    h.tur = spil.turNr;
+    h.turAf = paaTur.id;
   }
   spil.log.unshift(h);
   if (spil.log.length > 120) spil.log.length = 120;
@@ -229,6 +235,7 @@ function pitPlacer(spil: Spil, s: Spiller, kaede: string[], ctx: Kontekst): void
 
 function saetTur(spil: Spil, idx: number): void {
   spil.turIdx = idx;
+  spil.turNr = (spil.turNr ?? 0) + 1;
   const s = spil.spillere[idx];
   if (!s) return;
   spil.afventer = { slags: s.pitPlads > 0 ? 'pit-slag' : 'slag', spillerId: s.id };

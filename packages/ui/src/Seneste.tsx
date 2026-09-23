@@ -1,60 +1,56 @@
-import type { CSSProperties, JSX } from 'react';
+import type { JSX } from 'react';
 import type { Haendelse, Spil } from '@k69/rules';
-import { Elefant } from './Elefant.js';
+
+export interface Tur {
+  tur: number;
+  /** Hvis tur det var. */
+  spillerId: string;
+  /** Turens hændelser, ældste først. */
+  linjer: Haendelse[];
+}
 
 /**
- * De sidste tre ting der er sket. Et rent terningslag der straks efterfølges
+ * De sidste ture, den nyeste først. Et rent terningslag der straks efterfølges
  * af en landing fra samme spiller, springes over — landingen siger det samme.
  */
-export function seneste(log: Haendelse[], antal = 3): Haendelse[] {
-  const ud: Haendelse[] = [];
-  for (let i = 0; i < log.length && ud.length < antal; i++) {
+export function senesteTure(log: Haendelse[], antal = 3): Tur[] {
+  const ud: Tur[] = [];
+  for (let i = 0; i < log.length; i++) {
     const h = log[i]!;
+    if (h.tur === undefined || h.turAf === undefined) continue;
     const nyere = log[i - 1];
     if (h.slags === 'slag' && nyere?.slags === 'landing' && nyere.spillerId === h.spillerId) continue;
-    ud.push(h);
+
+    let tur = ud[ud.length - 1];
+    if (tur?.tur !== h.tur) {
+      if (ud.length === antal) break;
+      tur = { tur: h.tur, spillerId: h.turAf, linjer: [] };
+      ud.push(tur);
+    }
+    tur.linjer.unshift(h);
   }
   return ud;
 }
 
-function Linjer({ linjer }: { linjer: Haendelse[] }): JSX.Element {
-  return (
-    <>
-      {linjer.map((h) => (
-        <span key={h.id} className="nyhed">
-          <span className="nyhed-prik" style={{ background: h.farve ?? 'var(--line-2)' }} />
-          {h.tekst}
-        </span>
-      ))}
-    </>
-  );
-}
-
-/**
- * Breaking News hen over toppen af pladen: de sidste tre hændelser ruller
- * forbi, den nyeste først. Teksten ligger to gange efter hinanden, så rullet
- * kan køre i ring uden hop. Når der sker noget nyt, starter den forfra.
- */
-export function SenesteHaendelser({ spil, kompakt = false }: { spil: Spil; kompakt?: boolean }): JSX.Element | null {
-  const linjer = seneste(spil.log);
-  if (!linjer.length) return null;
-  const tegn = linjer.reduce((n, h) => n + h.tekst.length, 0);
-  // Omtrent samme læsefart uanset hvor meget der står.
-  const fart = { '--nyhed-tid': `${Math.max(12, Math.round(tegn / 7))}s` } as CSSProperties;
+/** Hvad der er sket de sidste tre ture, én linje pr. tur. */
+export function SenesteTure({ spil }: { spil: Spil }): JSX.Element | null {
+  const ture = senesteTure(spil.log);
+  if (!ture.length) return null;
 
   return (
-    <div className={`nyheder${kompakt ? ' nyheder-mobil' : ''}`} role="marquee" aria-live="polite" aria-label="Seneste nyt">
-      <div className="nyheder-maerke">
-        <Elefant str={kompakt ? 30 : 34} />
-        <span className="nyheder-live" />
-        {kompakt ? 'Breaking' : 'Breaking News'}
-      </div>
-      <div className="nyheder-vindue">
-        <div key={linjer[0]!.id} className="nyheder-baand" style={fart}>
-          <div className="nyheder-kopi"><Linjer linjer={linjer} /></div>
-          <div className="nyheder-kopi" aria-hidden="true"><Linjer linjer={linjer} /></div>
-        </div>
-      </div>
+    <div className="ture" aria-live="polite" aria-label="Seneste ture">
+      {ture.map((t) => {
+        const s = spil.spillere.find((o) => o.id === t.spillerId);
+        return (
+          <div key={t.tur} className="tur">
+            <span className="tur-prik" style={{ background: s?.farve ?? 'var(--line-2)' }} />
+            <div>
+              <div className="tur-navn">{s?.navn ?? 'Ukendt'}</div>
+              <div className="tur-tekst">{t.linjer.map((h) => h.tekst).join(' ')}</div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

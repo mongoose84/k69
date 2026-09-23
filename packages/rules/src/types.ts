@@ -213,6 +213,9 @@ export interface Haendelse {
   tekst: string;
   spillerId?: string;
   farve?: string;
+  /** Hvilken tur det skete i, og hvis tur det var. Mangler før første tur og i gamle gemte spil. */
+  tur?: number;
+  turAf?: string;
 }
 
 export interface Indstillinger {
@@ -230,6 +233,8 @@ export interface Spil {
   spillere: Spiller[];
   /** Indeks i spillere[] — turen går med uret. */
   turIdx: number;
+  /** Tæller op hver gang turen skifter hænder. Mangler i gamle gemte spil. */
+  turNr?: number;
   runde: number;
   terning: number | null;
   /** Hvem der slog det viste slag. */
