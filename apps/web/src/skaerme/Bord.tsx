@@ -1,6 +1,6 @@
 import type { JSX } from 'react';
 import {
-  Brik, FejringKort, Glas, Handlingskort, KroneKort, Maerkat, MeierKort, Plade, SenesteHaendelser, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
+  Brik, FejringKort, Glas, Handlingskort, KroneKort, Maerkat, MeierKort, Plade, SenesteTure, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
   kortPaaBordet, LydKnap, opgave, spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, useLyde, UdraabKort, type SpilUdsyn
 } from '@k69/ui';
 import { formatAntal, formatCl, slurkePrEnhed, formatSlurke, taarnCl, type DrikInfo, type Handling } from '@k69/rules';
@@ -56,7 +56,7 @@ export function Bord({
         )}
         <SyverKort spil={spil} migId={migId} send={send} />
         <div style={{ flexGrow: 1 }} />
-        <div className="note">Runde {spil.runde} · turen går med uret</div>
+        <div className="note">Runde {spil.runde}</div>
         <LydKnap />
       </header>
 
@@ -169,7 +169,6 @@ export function Bord({
             kortHos={kortHos(spil)}
           />
           <div className="plade-hint">Træk for at flytte pladen · rul for at zoome</div>
-          <SenesteHaendelser spil={spil} />
           <MeierKort spil={spil} migId={migId} send={send} />
           <KroneKort spil={spil} migId={migId} send={send} />
           <UdraabKort spil={spil} />
@@ -182,6 +181,11 @@ export function Bord({
             style={o ? ({ '--sp': o.farve } as React.CSSProperties) : undefined}
           >
             <Handlingskort spil={spil} migId={migId} send={send} ruller={ruller} />
+          </section>
+
+          <section className="rail-sek">
+            <div className="rail-hoved"><span className="eyebrow">Seneste ture</span></div>
+            <SenesteTure spil={spil} />
           </section>
 
           <section className="rail-sek" style={{ flexGrow: 1, minHeight: 0, overflow: 'auto', borderBottom: 'none' }}>

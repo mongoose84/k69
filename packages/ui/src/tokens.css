@@ -814,103 +814,24 @@ input[type='text']:focus {
 .elefant-fyld { fill: var(--elefant-fyld); }
 .elefant-oeje { fill: var(--elefant-oeje); }
 
-/* ------------------------------------------------------------ nyhederne */
-/* Breaking News hen over toppen af pladen. Rød mærkat til venstre, de sidste
-   tre hændelser ruller forbi. Båndet har teksten to gange, så -50 % er én runde. */
-.nyheder {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 5;
+/* ---------------------------------------------------------- seneste ture */
+/* De sidste tre ture, én linje pr. tur. Står stille — den nyeste øverst,
+   de ældre lidt nedtonede. */
+.ture { display: flex; flex-direction: column; }
+.tur {
   display: flex;
-  align-items: stretch;
-  height: 34px;
-  background: rgba(11, 17, 14, 0.92);
-  border-bottom: 1px solid var(--rust);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
-  pointer-events: none;
-  overflow: hidden;
-}
-/* På mobilen ligger den i flowet over pladen, så den ikke dækker knapperne. */
-.nyheder-mobil { position: relative; flex: 0 0 auto; height: 30px; }
-
-.nyheder-maerke {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 14px 0 12px;
-  background: var(--rust);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
-  padding-right: 22px;
-}
-.nyheder-mobil .nyheder-maerke { font-size: 10px; padding-left: 8px; padding-right: 18px; gap: 6px; }
-/* Krunk læser nyhederne op — han kigger lige ud fra mærkaten. */
-.nyheder-maerke .elefant { margin: -2px 0; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35)); }
-.nyheder-live {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #fff;
-  animation: nyheder-blink 1.2s ease-in-out infinite;
-}
-@keyframes nyheder-blink { 50% { opacity: 0.25; } }
-
-.nyheder-vindue {
-  position: relative;
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  mask-image: linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
-}
-.nyheder-baand {
-  display: flex;
-  width: max-content;
-  animation: nyheder-rul var(--nyhed-tid, 20s) linear infinite;
-}
-@keyframes nyheder-rul {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-.nyheder-kopi { display: flex; flex: 0 0 auto; }
-.nyhed {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  padding: 0 28px 0 0;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
   font-size: 12.5px;
-  color: var(--ink);
-  white-space: nowrap;
+  line-height: 1.5;
 }
-/* Skillelinje mellem nyhederne, som på en rigtig nyhedskanal. */
-.nyhed::after {
-  content: '';
-  width: 5px;
-  height: 5px;
-  margin-left: 19px;
-  background: var(--rust);
-  transform: rotate(45deg);
-}
-.nyheder-mobil .nyhed { font-size: 11.5px; }
-.nyhed-prik { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; }
-/* Den nyeste lyser kort op når den kommer ind. */
-.nyheder-kopi:first-child .nyhed:first-child { animation: nyhed-ny 1.4s ease-out; }
-@keyframes nyhed-ny { from { color: #fff; text-shadow: 0 0 8px rgba(196, 99, 91, 0.9); } }
-
-@media (prefers-reduced-motion: reduce) {
-  .nyheder-baand { animation: none; }
-  .nyheder-kopi[aria-hidden='true'] { display: none; }
-  .nyheder-live, .nyheder-kopi:first-child .nyhed:first-child { animation: none; }
-}
+.tur:last-child { border-bottom: none; }
+.tur + .tur { opacity: 0.7; }
+.tur + .tur + .tur { opacity: 0.5; }
+.tur-prik { width: 9px; height: 9px; flex: 0 0 9px; border-radius: 50%; margin-top: 5px; }
+.tur-navn { font-weight: 600; color: var(--ink); }
+.tur-tekst { color: var(--ink-dim); }
 
 /* --------------------------------------------------------------- råbet */
 /* Hvad der skete på feltet — eller hvem der fik slurkene. Ligger over pladen

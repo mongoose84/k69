@@ -1,6 +1,6 @@
 import { useState, type JSX } from 'react';
 import {
-  Brik, FejringKort, Glas, Handlingskort, KroneKort, Maerkat, MeierKort, Plade, SenesteHaendelser, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
+  Brik, FejringKort, Glas, Handlingskort, KroneKort, Maerkat, MeierKort, Plade, SenesteTure, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
   kortPaaBordet, LydKnap, opgave, spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, useLyde, UdraabKort, type SpilUdsyn
 } from '@k69/ui';
 import { formatAntal, formatSlurke, slurkePrEnhed, taarnCl, type Handling } from '@k69/rules';
@@ -57,7 +57,6 @@ export function Bord({
         </div>
       </header>
 
-      <SenesteHaendelser spil={spil} kompakt />
       <div className="mobilplade">
         <Plade
           id="mb"
@@ -152,14 +151,19 @@ export function Bord({
           )}
 
           {fane === 'log' && (
-            <div className="log">
-              {spil.log.slice(0, 40).map((h) => (
-                <div key={h.id} className="log-linje">
-                  <span className="log-prik" style={{ background: h.farve ?? 'var(--line-2)' }} />
-                  <span>{h.tekst}</span>
-                </div>
-              ))}
-            </div>
+            <>
+              <div className="eyebrow">Seneste ture</div>
+              <SenesteTure spil={spil} />
+              <div className="eyebrow" style={{ marginTop: 16 }}>Hele loggen</div>
+              <div className="log">
+                {spil.log.slice(0, 40).map((h) => (
+                  <div key={h.id} className="log-linje">
+                    <span className="log-prik" style={{ background: h.farve ?? 'var(--line-2)' }} />
+                    <span>{h.tekst}</span>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
 

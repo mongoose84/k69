@@ -916,3 +916,19 @@ test('ligger fingeren allerede, kan den ikke lægges igen', () => {
   spil = traekSyver(spil, 'p1');
   assert.throws(() => gør(spil, 'p1', { type: 'laeg-finger' }), /allerede/);
 });
+
+test('hændelserne ved hvilken tur de hører til, og hvis tur det var', () => {
+  let spil = opsat(['A', 'B']);
+  placer(spil, 'p0', 2);
+  spil = gør(spil, 'p0', { type: 'slaa' }, [2]);
+  const foerste = spil.log.filter((h) => h.turAf === 'p0');
+  assert.ok(foerste.length > 0);
+  const tur = foerste[0]!.tur!;
+  assert.ok(foerste.every((h) => h.tur === tur));
+
+  placer(spil, 'p1', 20);
+  spil = gør(spil, 'p1', { type: 'slaa' }, [2]);
+  const anden = spil.log.filter((h) => h.turAf === 'p1');
+  assert.ok(anden.length > 0);
+  assert.ok(anden.every((h) => h.tur === tur + 1));
+});

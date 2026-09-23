@@ -484,7 +484,7 @@
 .minimap {
   position: absolute;
   right: 12px;
-  top: 46px; /* under Breaking News-bjælken */
+  top: 12px;
   width: 118px;
   height: 66px;
   border: 1px solid var(--line-2);
