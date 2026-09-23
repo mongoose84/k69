@@ -5,7 +5,7 @@ import {
   ANTAL_FELTER, FELT_RAEKKE, PIT_PLADSER, feltType
 } from '../src/board.js';
 import { nyBunke, virkning } from '../src/cards.js';
-import { DRIKKE, clPrSlurk, iCl, slurkePrEnhed, tilDrik } from '../src/drinks.js';
+import { DRIKKE, clPrSlurk, iCl, slurkePrEnhed, taarnCl, tilDrik } from '../src/drinks.js';
 import { STIGE, kode, trin, trinNavn } from '../src/meier.js';
 import { MEIER_SLURKE, afventerSpiller, anvend, find, nytSpil, taarnLoeberOver } from '../src/engine.js';
 import { RegelFejl, type FeltType, type Handling, type Kontekst, type Spil } from '../src/types.js';
@@ -86,6 +86,20 @@ test('en større øl har flere slurke end en lille', () => {
   const stor = tilDrik({ navn: 'Stor fadøl', enhedCl: 50, procent: 4.6 });
   assert.equal(slurkePrEnhed(stor), 16.7);
   assert.equal(clPrSlurk(stor), 3);
+});
+
+test('en pilsner på 44 cl har flere slurke end en på 33 cl', () => {
+  const stor = tilDrik({ id: 'ol', enhedCl: 44 });
+  assert.deepEqual(stor, { id: 'ol', navn: 'Pilsner', procent: 4.6, enhedCl: 44 });
+  assert.equal(slurkePrEnhed(stor), 14.7);
+  assert.equal(slurkePrEnhed(tilDrik('ol')), 11);
+  assert.throws(() => tilDrik({ id: 'ol', enhedCl: 0 }), RegelFejl);
+
+  let spil = nytSpil('spil', 'TEST', 'nu');
+  spil = gør(spil, 'p0', { type: 'join', navn: 'A', farve: '#D8A93F', drik: { id: 'ol', enhedCl: 44 }, kortHold: 'konge' });
+  spil = gør(spil, 'p1', { type: 'join', navn: 'B', farve: '#8FAF74', drik: 'ol', kortHold: 'dame' });
+  assert.equal(find(spil, 'p0')!.slurkeTilbage, 14.7);
+  assert.equal(find(spil, 'p1')!.slurkeTilbage, 11);
 });
 
 test('man kan skrive sin egen drik ind — navn, størrelse og procent', () => {
@@ -287,6 +301,21 @@ test('slår man nok, kommer man ud af pitten og ind på felt 1', () => {
   assert.equal(spil.afventer?.slags, 'giv-slurke');
 });
 
+test('slår man mere end nok ud af pitten, rykker man videre med resten', () => {
+  let spil = opsat(['A', 'B']);
+  const b = find(spil, 'p1')!;
+  b.felt = 0;
+  b.pitPlads = 2;
+  placer(spil, 'p0', 2);
+  spil = gør(spil, 'p0', { type: 'slaa' }, [2]);
+  spil = gør(spil, 'p1', { type: 'slaa' }, [4]);
+  const efter = find(spil, 'p1')!;
+  assert.equal(efter.pitPlads, 0);
+  assert.equal(efter.felt, 3);
+  // Felt 3 er "Øl i tårnet".
+  assert.equal(spil.afventer?.slags, 'fyld-taarn');
+});
+
 test('pitten har seks pladser', () => {
   assert.equal(PIT_PLADSER, 6);
 });
@@ -317,6 +346,48 @@ test('tårnet er en halv liter og løber over derover', () => {
   assert.equal(spil.taarn.toemmesAfId, null);
   assert.equal(find(spil, 'p0')!.slurkeIAlt, 17);
   assert.equal(afventerSpiller(spil.afventer), 'p1');
+});
+
+test('hælder man alt for meget i, drikker man stadig aldrig mere end et fuldt glas', () => {
+  let spil = opsat(['A', 'B']);
+  placer(spil, 'p0', foersteFeltAf('taarn') - 1);
+  spil = gør(spil, 'p0', { type: 'slaa' }, [1]);
+  for (let i = 0; i < 10; i++) spil = gør(spil, 'p0', { type: 'fyld-taarn', slurke: 4 });
+  spil = gør(spil, 'p0', { type: 'taarn-faerdig' });
+  assert.equal(taarnCl(spil.taarn.slurke), 50);
+  spil = gør(spil, 'p0', { type: 'toem-taarn-faerdig' });
+  assert.equal(find(spil, 'p0')!.slurkeIAlt, 17);
+});
+
+test('tårnet kan ikke gå videre til en anden mens det bliver drukket', () => {
+  // Løber det over mens B drikker, bliver det hos B — fyldt til kanten.
+  let spil = opsat(['A', 'B']);
+  spil.taarn.slurke = 10;
+  spil.taarn.toemmesAfId = 'p1';
+  placer(spil, 'p0', foersteFeltAf('taarn') - 1);
+  spil = gør(spil, 'p0', { type: 'slaa' }, [1]);
+  for (let i = 0; i < 3; i++) spil = gør(spil, 'p0', { type: 'fyld-taarn', slurke: 4 });
+  spil = gør(spil, 'p0', { type: 'taarn-faerdig' });
+  assert.equal(spil.taarn.toemmesAfId, 'p1');
+  assert.equal(taarnCl(spil.taarn.slurke), 50);
+
+  // DRIK! tager det heller ikke fra B.
+  spil = opsat(['A', 'B']);
+  spil.taarn.slurke = 4;
+  spil.taarn.toemmesAfId = 'p1';
+  placer(spil, 'p0', foersteFeltAf('drik') - 1);
+  spil = gør(spil, 'p0', { type: 'slaa' }, [1]);
+  assert.equal(spil.taarn.toemmesAfId, 'p1');
+
+  // Og 2-kronen kan ikke udpege en ny.
+  spil = opsat(['A', 'B', 'C']);
+  spil.taarn.slurke = 4;
+  spil.taarn.toemmesAfId = 'p1';
+  placer(spil, 'p0', foersteFeltAf('krone') - 1);
+  spil = gør(spil, 'p0', { type: 'slaa' }, [1]);
+  spil = gør(spil, 'p0', { type: 'krone-resultat', ramte: true });
+  assert.notEqual(spil.afventer?.slags, 'krone-udpeg');
+  assert.equal(spil.taarn.toemmesAfId, 'p1');
 });
 
 test('DRIK! sætter tårnet på den der lander — og han spiller med imens', () => {
@@ -458,12 +529,27 @@ test('har man selv slået, kan man ikke løfte — man skal melde', () => {
   spil = gør(spil, 'p0', { type: 'meier-slaa' }, [4, 2]);
   spil = gør(spil, 'p0', { type: 'meier-meld', melding: trin(4, 2) });
 
-  // B tror på det og slår selv — så er løft og blindt væk.
+  // B tror på det og slår selv — så er løftet væk.
   spil = gør(spil, 'p1', { type: 'meier-slaa' }, [5, 3]);
   assert.throws(() => gør(spil, 'p1', { type: 'meier-loeft' }), RegelFejl);
-  assert.throws(() => gør(spil, 'p1', { type: 'meier-blindt' }, [6, 6]), RegelFejl);
   spil = gør(spil, 'p1', { type: 'meier-meld', melding: trin(5, 3) });
   assert.equal(spil.meier?.holderId, 'p0');
+});
+
+test('har man selv slået og kigget, kan man stadig slå om blindt og sende videre', () => {
+  let spil = opsat(['A', 'B']);
+  placer(spil, 'p0', foersteFeltAf('meier') - 1);
+  spil = gør(spil, 'p0', { type: 'slaa' }, [1]);
+  spil = gør(spil, 'p0', { type: 'meier-vaelg', spillerId: 'p1' });
+  spil = gør(spil, 'p0', { type: 'meier-slaa' }, [4, 2]);
+  spil = gør(spil, 'p0', { type: 'meier-meld', melding: trin(4, 2) });
+
+  spil = gør(spil, 'p1', { type: 'meier-slaa' }, [3, 2]);
+  spil = gør(spil, 'p1', { type: 'meier-blindt' }, [6, 6]);
+  assert.equal(spil.meier?.holderId, 'p0');
+  assert.equal(spil.meier?.blindt, true);
+  assert.deepEqual(spil.meier?.slag, [6, 6]);
+  assert.equal(spil.meier?.melding, trin(4, 2));
 });
 
 test('løfter man en bluf, drikker den der løj', () => {

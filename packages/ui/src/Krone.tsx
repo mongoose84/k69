@@ -162,11 +162,13 @@ interface KroneKastProps {
   /** Kun kasteren kan trække i mønten og melde resultatet. */
   minTur: boolean;
   kasterNavn: string;
+  /** Hvorfor der ikke er nogen at udpege, selvom den røg i — eller null. */
+  ingenUdpegning: string | null;
   onKast: (traek: Punkt) => void;
   onResultat: (ramte: boolean) => void;
 }
 
-function KroneKast({ fyld, kast, minTur, kasterNavn, onKast, onResultat }: KroneKastProps): JSX.Element {
+function KroneKast({ fyld, kast, minTur, kasterNavn, ingenUdpegning, onKast, onResultat }: KroneKastProps): JSX.Element {
   const sim = useRef<KroneSim>(nyKroneSim());
   const spor = useRef<Punkt[]>([]);
   const traek = useRef<{ ned: Punkt; nu: Punkt } | null>(null);
@@ -359,10 +361,12 @@ function KroneKast({ fyld, kast, minTur, kasterNavn, onKast, onResultat }: Krone
             <div className="krone-resultat">
               <div className="eyebrow" style={{ color: 'var(--amber)' }}>Den røg i!</div>
               <div className="krone-resultat-t">
-                {minTur ? 'Plask. Du udpeger hvem der bunder tårnet.' : `Plask. ${kasterNavn} udpeger hvem der bunder tårnet.`}
+                {ingenUdpegning
+                  ? `Plask. ${ingenUdpegning}`
+                  : minTur ? 'Plask. Du udpeger hvem der bunder tårnet.' : `Plask. ${kasterNavn} udpeger hvem der bunder tårnet.`}
               </div>
             </div>
-            {minTur && <button className="knap knap-primaer" disabled={sendt} onClick={() => svar(true)}>Udpeg hvem der bunder</button>}
+            {minTur && <button className="knap knap-primaer" disabled={sendt} onClick={() => svar(true)}>{ingenUdpegning ? 'Videre' : 'Udpeg hvem der bunder'}</button>}
           </>
         )}
 
@@ -403,6 +407,10 @@ export function KroneKort({ spil, migId, send, kompakt = false }: KroneKortProps
   if (!a || a.slags !== 'krone-kast') return null;
   const minTur = a.spillerId === migId;
   const kasterNavn = spil.spillere.find((s) => s.id === a.spillerId)?.navn ?? 'Kasteren';
+  const drikker = spil.spillere.find((s) => s.id === spil.taarn.toemmesAfId);
+  const ingenUdpegning = spil.taarn.slurke === 0
+    ? 'Men tårnet er tomt, så der er ingen at udpege.'
+    : drikker ? `Men ${drikker.navn} er i gang med at drikke tårnet, så det kan ikke gives videre.` : null;
 
   return (
     <div className={`meier-kort krone-kort${kompakt ? ' meier-kort-mobil' : ''}`}>
@@ -420,6 +428,7 @@ export function KroneKort({ spil, migId, send, kompakt = false }: KroneKortProps
           kast={a.kast}
           minTur={minTur}
           kasterNavn={kasterNavn}
+          ingenUdpegning={ingenUdpegning}
           onKast={(p) => send({ type: 'krone-kast', x: p.x, y: p.y })}
           onResultat={(ramte) => send({ type: 'krone-resultat', ramte })}
         />

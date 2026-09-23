@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type JSX, type ReactNode } from 'react';
-import { EGEN_DRIK } from '@k69/rules';
+import {
+  DRIKKE, DRIK_STOERRELSER, EGEN_DRIK, formatSlurke, slurkePrEnhed, type DrikId, type DrikInfo, type DrikValg
+} from '@k69/rules';
 
 /** Det man skriver ind når man drikker noget andet end de faste. Tal som tekst, indtil de sendes. */
 export interface EgenDrik {
@@ -65,6 +67,38 @@ export function EgenDrikFelter({
       </label>
     </div>
   );
+}
+
+/**
+ * Størrelsen på en af de faste drikke — en 44 cl pilsner har flere slurke
+ * end en 33 cl, så hver knap viser hvor mange man får.
+ */
+export function StoerrelseValg({
+  drik, valgt, onVaelg
+}: { drik: DrikInfo; valgt: number; onVaelg: (cl: number) => void }): JSX.Element | null {
+  if (drik.id === 'egen') return null;
+  const muligheder = [...DRIK_STOERRELSER[drik.id]].sort((a, b) => a - b);
+  return (
+    <div className="stoerrelser" role="radiogroup" aria-label={`Størrelse på din ${drik.navn.toLowerCase()}`}>
+      {muligheder.map((cl) => (
+        <button
+          key={cl}
+          role="radio"
+          aria-checked={valgt === cl}
+          className={valgt === cl ? 'stoerrelse stoerrelse-paa' : 'stoerrelse'}
+          onClick={() => onVaelg(cl)}
+        >
+          <b>{cl} cl</b>
+          <span>{formatSlurke(slurkePrEnhed({ ...drik, enhedCl: cl }))}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Valget der sendes til serveren: bare id'et når det er standardstørrelsen. */
+export function fastDrikValg(id: Exclude<DrikId, 'egen'>, cl: number): DrikValg {
+  return cl === DRIKKE[id].enhedCl ? id : { id, enhedCl: cl };
 }
 
 const PIPS: Record<number, Array<[number, number]>> = {

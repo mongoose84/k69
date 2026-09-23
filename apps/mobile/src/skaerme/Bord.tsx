@@ -1,6 +1,6 @@
 import { useState, type JSX } from 'react';
 import {
-  Brik, FejringKort, Glas, Handlingskort, KroneKort, Maerkat, MeierKort, Plade, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
+  Brik, FejringKort, Glas, Handlingskort, KroneKort, Maerkat, MeierKort, Plade, SenesteHaendelser, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
   kortPaaBordet, LydKnap, opgave, spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, useLyde, UdraabKort, type SpilUdsyn
 } from '@k69/ui';
 import { formatAntal, formatSlurke, slurkePrEnhed, taarnCl, type Handling } from '@k69/rules';
@@ -80,6 +80,7 @@ export function Bord({
         >
           {foelger ? 'Følger min brik' : 'Overblik'}
         </button>
+        <SenesteHaendelser spil={spil} kompakt />
       </div>
 
       <div className="ark">

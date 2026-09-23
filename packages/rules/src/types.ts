@@ -23,8 +23,14 @@ export interface DrikInfo {
   enhedCl: number;
 }
 
-/** Sådan vælger man sin drik ved tilmelding: en af de faste, eller sin egen. */
-export type DrikValg = DrikId | { navn: string; enhedCl: number; procent: number };
+/**
+ * Sådan vælger man sin drik ved tilmelding: en af de faste (evt. i en anden
+ * størrelse, fx en 44 cl pilsner), eller sin egen.
+ */
+export type DrikValg =
+  | DrikId
+  | { id: Exclude<DrikId, 'egen'>; enhedCl: number }
+  | { navn: string; enhedCl: number; procent: number };
 
 /** Hvem man drikker med når Dame- eller Kongekortet bliver trukket. Man er det ene. */
 export type KortHold = 'dame' | 'konge';

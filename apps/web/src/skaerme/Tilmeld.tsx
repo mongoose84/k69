@@ -1,7 +1,9 @@
 import { useState, type JSX } from 'react';
-import { BRAET_STR, BraetDefs, BraetPlade, Brik, EgenDrikFelter, egenDrikKlar, tomEgenDrik, type EgenDrik } from '@k69/ui';
 import {
-  BRIKFARVER, DRIK_LISTE, formatAntal, formatProcent, slurkePrEnhed, type DrikId, type DrikValg, type Handling, type KortHold, type Spil
+  BRAET_STR, BraetDefs, BraetPlade, Brik, EgenDrikFelter, StoerrelseValg, egenDrikKlar, fastDrikValg, tomEgenDrik, type EgenDrik
+} from '@k69/ui';
+import {
+  BRIKFARVER, DRIKKE, DRIK_LISTE, formatAntal, formatProcent, slurkePrEnhed, type DrikId, type DrikValg, type Handling, type KortHold, type Spil
 } from '@k69/rules';
 
 const HOLD: Array<{ id: KortHold; navn: string; forklaring: string }> = [
@@ -19,11 +21,13 @@ export function Tilmeld({
   const [farve, saetFarve] = useState(BRIKFARVER.find((f) => !taget.has(f)) ?? BRIKFARVER[0]!);
   const [drik, saetDrik] = useState<DrikId>('ol');
   const [egen, saetEgen] = useState<EgenDrik>(tomEgenDrik);
+  // Størrelsen på den faste drik — nulstilles til standarden når man skifter drik.
+  const [cl, saetCl] = useState(DRIKKE.ol.enhedCl);
   const [hold, saetHold] = useState<KortHold | null>(null);
 
   const iGang = spil.fase === 'spiller';
   const kanJoine = spil.fase !== 'slut';
-  const drikValg: DrikValg | null = drik === 'egen' ? (egenDrikKlar(egen) ? egen : null) : drik;
+  const drikValg: DrikValg | null = drik === 'egen' ? (egenDrikKlar(egen) ? egen : null) : fastDrikValg(drik, cl);
   const klar = Boolean(navn.trim()) && hold !== null && drikValg !== null && kanJoine;
 
   return (
@@ -93,10 +97,10 @@ export function Tilmeld({
               <button
                 key={d.id}
                 className={drik === d.id ? 'drik drik-paa' : 'drik'}
-                onClick={() => saetDrik(d.id)}
+                onClick={() => { saetDrik(d.id); saetCl(d.enhedCl); }}
               >
                 <b>{d.navn}</b>
-                <span>{formatProcent(d)} · {d.enhedCl} cl · {formatAntal(slurkePrEnhed(d))} slurke</span>
+                <span>{formatProcent(d)} · {drik === d.id ? cl : d.enhedCl} cl · {formatAntal(slurkePrEnhed({ ...d, enhedCl: drik === d.id ? cl : d.enhedCl }))} slurke</span>
               </button>
             ))}
             <button
@@ -107,6 +111,9 @@ export function Tilmeld({
               <span>Skriv selv navn, størrelse og procent</span>
             </button>
           </div>
+          {drik !== 'egen' && (
+            <StoerrelseValg drik={DRIKKE[drik]} valgt={cl} onVaelg={(v) => { saetCl(v); ryd(); }} />
+          )}
           {drik === 'egen' && (
             <div style={{ marginTop: 10 }}>
               <EgenDrikFelter vaerdi={egen} onSkift={(v) => { saetEgen(v); ryd(); }} />

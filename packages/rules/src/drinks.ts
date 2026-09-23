@@ -26,8 +26,23 @@ export const DRIKKE: Record<Exclude<DrikId, 'egen'>, DrikInfo> = {
 
 export const DRIK_LISTE = Object.values(DRIKKE);
 
+/** De almindelige størrelser man kan vælge mellem for de faste drikke. Den første er standard. */
+export const DRIK_STOERRELSER: Record<Exclude<DrikId, 'egen'>, number[]> = {
+  ol: [33, 44, 50],
+  vin: [15, 12, 20],
+  whisky: [4, 2, 6]
+};
+
 /** Grænserne for det man selv skriver ind. */
 export const EGEN_DRIK = { navnMax: 24, clMin: 1, clMax: 200, procentMin: 0.5, procentMax: 100 };
+
+function kraevStoerrelse(v: number): number {
+  const enhedCl = Math.round(Number(v) * 10) / 10;
+  if (!Number.isFinite(enhedCl) || enhedCl < EGEN_DRIK.clMin || enhedCl > EGEN_DRIK.clMax) {
+    throw new RegelFejl(`Størrelsen skal være mellem ${EGEN_DRIK.clMin} og ${EGEN_DRIK.clMax} cl.`);
+  }
+  return enhedCl;
+}
 
 /** Lav en drik ud fra valget ved tilmelding. Afviser det der ikke giver mening. */
 export function tilDrik(valg: DrikValg): DrikInfo {
@@ -35,13 +50,15 @@ export function tilDrik(valg: DrikValg): DrikInfo {
     if (valg === 'egen' || !(valg in DRIKKE)) throw new RegelFejl('Vælg hvad du drikker.');
     return { ...DRIKKE[valg] };
   }
+  if ('id' in valg) {
+    // En af de faste i en anden størrelse — samme navn og procent, bare flere eller færre slurke.
+    if (!(valg.id in DRIKKE)) throw new RegelFejl('Vælg hvad du drikker.');
+    return { ...DRIKKE[valg.id], enhedCl: kraevStoerrelse(valg.enhedCl) };
+  }
   const navn = String(valg.navn ?? '').trim().slice(0, EGEN_DRIK.navnMax);
-  const enhedCl = Math.round(Number(valg.enhedCl) * 10) / 10;
+  const enhedCl = kraevStoerrelse(valg.enhedCl);
   const procent = Math.round(Number(valg.procent) * 10) / 10;
   if (!navn) throw new RegelFejl('Skriv hvad din drik hedder.');
-  if (!Number.isFinite(enhedCl) || enhedCl < EGEN_DRIK.clMin || enhedCl > EGEN_DRIK.clMax) {
-    throw new RegelFejl(`Størrelsen skal være mellem ${EGEN_DRIK.clMin} og ${EGEN_DRIK.clMax} cl.`);
-  }
   if (!Number.isFinite(procent) || procent < EGEN_DRIK.procentMin || procent > EGEN_DRIK.procentMax) {
     throw new RegelFejl('Procenten skal være mellem 0,5 og 100.');
   }
