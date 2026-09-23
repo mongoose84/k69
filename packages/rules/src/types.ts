@@ -74,7 +74,11 @@ export type Afventer =
   | { slags: 'pit-placering'; spillerId: string; kaede: string[] }
   | { slags: 'giv-slurke'; spillerId: string; antal: number }
   | { slags: 'fyld-taarn'; spillerId: string }
-  | { slags: 'krone-kast'; spillerId: string }
+  /**
+   * `kast` er trækket fra mønten, sat i det øjeblik der bliver sluppet — så
+   * resten af bordet kan afspille det samme kast på deres egen skærm.
+   */
+  | { slags: 'krone-kast'; spillerId: string; kast?: { x: number; y: number } }
   | { slags: 'krone-udpeg'; spillerId: string }
   | { slags: 'traek-kort'; spillerId: string }
   | { slags: 'kort-udfald'; spillerId: string; kort: Kort }
@@ -263,6 +267,7 @@ export type Handling =
   | { type: 'fyld-taarn'; slurke: number }
   | { type: 'taarn-faerdig' }
   | { type: 'toem-taarn-faerdig' }
+  | { type: 'krone-kast'; x: number; y: number }
   | { type: 'krone-resultat'; ramte: boolean }
   | { type: 'krone-udpeg'; spillerId: string }
   | { type: 'traek-kort' }

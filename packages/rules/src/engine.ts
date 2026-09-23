@@ -502,6 +502,7 @@ export function anvend(spil: Spil, handling: Handling, ctx: Kontekst): Spil {
     case 'fyld-taarn': return fyldTaarn(spil, s, handling.slurke, ctx);
     case 'taarn-faerdig': return taarnFaerdig(spil, s, ctx);
     case 'toem-taarn-faerdig': return toemTaarnFaerdig(spil, s, ctx);
+    case 'krone-kast': return kroneKast(spil, s, handling.x, handling.y);
     case 'krone-resultat': return kroneResultat(spil, s, handling.ramte, ctx);
     case 'krone-udpeg': return kroneUdpeg(spil, s, handling.spillerId, ctx);
     case 'traek-kort': return traekHandling(spil, s, ctx);
@@ -743,6 +744,15 @@ function toemTaarnFaerdig(spil: Spil, s: Spiller, _ctx: Kontekst): Spil {
   spil.taarn.toemmesAfId = null;
   spil.taarn.fyldtAfId = null;
   skriv(spil, 'taarn', `${navn(s)} bundede tårnet — ${formatSlurke(maengde)}.`, s);
+  return spil;
+}
+
+/** Kastet selv. Resultatet melder kasteren bagefter — her gemmes kun trækket, så bordet kan se med. */
+function kroneKast(spil: Spil, s: Spiller, x: number, y: number): Spil {
+  const a = kraevAfventer(spil, 'krone-kast', s);
+  if (a.kast) fejl('Du har allerede kastet.');
+  if (!Number.isFinite(x) || !Number.isFinite(y) || Math.hypot(x, y) > 200) fejl('Ugyldigt kast.');
+  a.kast = { x, y };
   return spil;
 }
 

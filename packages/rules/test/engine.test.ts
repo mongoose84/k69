@@ -361,6 +361,19 @@ test('2-kronen: den udpegede får tårnet og kan selv sige når det er bundet', 
   assert.throws(() => gør(spil, 'p1', { type: 'toem-taarn-faerdig' }), RegelFejl);
 });
 
+test('2-kronen: kastet gemmes så hele bordet kan se det — kun én gang, og kun af kasteren', () => {
+  let spil = opsat(['A', 'B']);
+  placer(spil, 'p0', foersteFeltAf('krone') - 1);
+  spil = gør(spil, 'p0', { type: 'slaa' }, [1]);
+  assert.throws(() => gør(spil, 'p1', { type: 'krone-kast', x: 90, y: -80 }), RegelFejl);
+  assert.throws(() => gør(spil, 'p0', { type: 'krone-kast', x: 900, y: 0 }), RegelFejl);
+  spil = gør(spil, 'p0', { type: 'krone-kast', x: 90, y: -80 });
+  assert.deepEqual(spil.afventer, { slags: 'krone-kast', spillerId: 'p0', kast: { x: 90, y: -80 } });
+  assert.throws(() => gør(spil, 'p0', { type: 'krone-kast', x: 10, y: -10 }), RegelFejl);
+  spil = gør(spil, 'p0', { type: 'krone-resultat', ramte: false });
+  assert.equal(afventerSpiller(spil.afventer), 'p1');
+});
+
 test('lander man på "Øl i tårnet" mens en anden bunder det, råbes der', () => {
   let spil = opsat(['A', 'B']);
   spil.taarn.slurke = 5;
