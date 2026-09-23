@@ -262,16 +262,22 @@ export function Maerkat({ children, farve = 'var(--brass-lt)' }: { children: Rea
   );
 }
 
-/** Slurke-måler: 11 streger, fyldte er tilbage i den enhed man er i gang med. */
-export function Slurkemaaler({ tilbage, ialt = 11, bredde = 12 }: { tilbage: number; ialt?: number; bredde?: number }): JSX.Element {
+const MAALER_STREGER = 11;
+
+/**
+ * Slurke-måler: 11 streger for den enhed man er i gang med, fyldt i forhold til
+ * hvor meget der er tilbage. For en pilsner er én streg præcis én slurk.
+ */
+export function Slurkemaaler({ tilbage, ialt, bredde = 12 }: { tilbage: number; ialt: number; bredde?: number }): JSX.Element {
+  const fyldte = ialt > 0 ? Math.ceil((tilbage / ialt) * MAALER_STREGER - 1e-9) : 0;
   return (
     <div style={{ display: 'flex', gap: 3 }}>
-      {Array.from({ length: ialt }, (_, i) => (
+      {Array.from({ length: MAALER_STREGER }, (_, i) => (
         <div
           key={i}
           style={{
             width: bredde, height: 7, borderRadius: 1,
-            background: i < tilbage ? 'linear-gradient(180deg, #F2C060, #C4761A)' : '#2B382E'
+            background: i < fyldte ? 'linear-gradient(180deg, #F2C060, #C4761A)' : '#2B382E'
           }}
         />
       ))}

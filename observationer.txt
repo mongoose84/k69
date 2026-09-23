@@ -1,37 +1,9 @@
-Observationer:
+Animation når man rykker skal være lidt langsommere.
 
-Når du logger ind skal du kunne tilføje en custom drink som du drikker. Det skal være 3 frifelter, en med navn, en med størrelse og en med alkoholprocent.
+Terningen skal blive liggende til den næste slår
 
-Når du vælger dame/konge ved oprettelsen, så skal du kun kunne vælge mellem en af de to, du kan ikke vælge begge eller ingen.
+Det skal være mere tydeligt når man lander på et felt. Det skal være tydeligt hvad der sker, fx med skål skal vises, der "SKÅL" og konfetti. Når man deler ud må det også stå tydeligt
 
-Derudover kan man altid joine et spil der er i gang hvis man har linket
+Ved meier skal det være tydeligt hvad man melder
 
-Ved ingen biermeister skal man selv drikke 3. Står det i reglerne? Eller virker det bare som et Frifelt
-
-Terningeslaget skal flyttes til boardet et sted. Gerne med en animation der tager 2 sekunder. Knappen skal blive oppe til højre. Det bliver et kontrol/action area
-
-Drik! skal stå mere ud for tårnet. Eller også skal vi gøre tårnet bredere
-
-I forhold til 2-krone, så er der en bug. Hvis man får 2-krone og vinder og giver tårnet til en anden, så får den person aldrig muligheden for at sige at man har drukket tårnet. Så man kommer aldrig med i spillet igen. Så man skal ikke springes over hvis man er ved at drikke tårnet, man skal bare have en knap så man kan sige man er færdig. Hvis der er en anden der lander på øl i tårnet før man er færdig, kan vedkomne hælde mere i tårnet.
-
-Før man trykker Slå med terning, så har terningen allerede slået og man kan se hvad tallet er. 
-
-Tilføj den valgte farve som baggrund oppe til højre i action area.
-
-I venstre hjørne står der Bordet, der viser hvor meget der er i Tårnet. Der skal overskriften være Tårnet
-
-I 3 til..? skal man også kunne vælge at være solidarisk og selv tage en slurk.
-
-Tårnet skal være max 50 cl dvs en halv liter. Vi prøvede at hælde 49 cl i via knappen, men så sagde den at den løb over.
-
-Der skal være en counter til hvor mange øl man har drukket 
-
-Hvad betyder Væk som står ved den spiller der oprettede spillet?
-
-Vi skal have kortspillet liggende på bordet, og når man trækker et kort så skal man kunne se det på bordet. Et godt sted ville være at have det på linje med Tårenet men ude til venstre hvor der er en masse plads i midten. 
-
-I Pit'en - bliver man slået i pit'en skal man slå med en terning om hvilken plads man skal på. Denne regel gælder også hvis du bliver landet på af en anden spiller mens du er i pit'en
-
-Pilen fra pit'en er rigtig nok, men den tæller frifeltet med, så når man kommer ud af pit'en, så skal man direkte over på giv 3 til?
-
-Der skal generelt være mere animation når man vinder eller taber, for den går alt for hurtigt videre til næste tur.
+Og ved meier, så skal Løft knappen disables når man vælger at slå

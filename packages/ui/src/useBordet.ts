@@ -48,11 +48,15 @@ function navnPaa(spil: Spil, id: string | null): string {
   return spil.spillere.find((s) => s.id === id)?.navn.toUpperCase() ?? 'NOGEN';
 }
 
-/** Terningen som den skal stå på bordet lige nu. `live` er det nyeste spil — det er dér slaget ligger mens der rulles. */
+/**
+ * Terningen som den skal stå på bordet lige nu. `live` er det nyeste spil — det
+ * er dér slaget ligger mens der rulles. Det sidste slag bliver liggende, med
+ * ringen i slagerens farve, indtil den næste slår.
+ */
 export function terningPaaBordet(vist: Spil, live: Spil, ruller: boolean): TerningPaaBordet {
   const farve = vist.spillere.find((s) => s.id === (ruller ? live.terningAf : vist.terningAf))?.farve ?? null;
   if (ruller) return { vaerdi: null, ruller: true, farve, tekst: `${navnPaa(live, live.terningAf)} SLÅR` };
-  if (venterPaaSlag(vist)) {
+  if (venterPaaSlag(vist) && !vist.terning) {
     const paa = vist.afventer && 'spillerId' in vist.afventer ? vist.afventer.spillerId : null;
     return { vaerdi: null, ruller: false, farve: null, tekst: `${navnPaa(vist, paa)} ER PÅ` };
   }

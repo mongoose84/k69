@@ -1,6 +1,6 @@
 import { useState, type JSX } from 'react';
 import { Brik, Maerkat } from '@k69/ui';
-import { formatProcent, type Handling, type Spil } from '@k69/rules';
+import { MEIER_SLURKE, formatProcent, type Handling, type Spil } from '@k69/rules';
 import { spilUrl } from '../api.js';
 
 export function Lobby({
@@ -112,30 +112,12 @@ export function Lobby({
               <div>
                 <div className="valg-t">Slurke for at tabe en Meier</div>
                 <div className="valg-d">
-                  Reglerne siger bare “drikker” — her sætter I tallet. Dobbelt hvis der tabes på en Meyer.
+                  Taberen drikker {MEIER_SLURKE} — også i hardcore. Dobbelt hvis der tabes på en Meyer.
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <button
-                  className="knap"
-                  style={{ minHeight: 38, width: 38, padding: 0 }}
-                  disabled={!erVaert || spil.indstillinger.meierSlurke <= 1}
-                  onClick={() => send({ type: 'saet-indstilling', meierSlurke: spil.indstillinger.meierSlurke - 1 })}
-                >
-                  −
-                </button>
-                <span style={{ fontFamily: 'var(--serif)', fontSize: 22, width: 24, textAlign: 'center' }}>
-                  {spil.indstillinger.meierSlurke}
-                </span>
-                <button
-                  className="knap"
-                  style={{ minHeight: 38, width: 38, padding: 0 }}
-                  disabled={!erVaert || spil.indstillinger.meierSlurke >= 10}
-                  onClick={() => send({ type: 'saet-indstilling', meierSlurke: spil.indstillinger.meierSlurke + 1 })}
-                >
-                  +
-                </button>
-              </div>
+              <span style={{ fontFamily: 'var(--serif)', fontSize: 22, width: 24, textAlign: 'center' }}>
+                {MEIER_SLURKE}
+              </span>
             </div>
 
             <div className="valg-r" style={{ borderBottom: 'none' }}>

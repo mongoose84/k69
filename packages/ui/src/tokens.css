@@ -291,6 +291,26 @@ input[type='text']:focus {
 .meier-duel-s { font-size: 10.5px; color: var(--ink-faint); margin-top: 2px; line-height: 1.3; }
 .meier-mod { font-family: var(--serif); font-size: 15px; color: var(--ink-faint); }
 
+/* Meldingen står stort, så hele bordet kan se hvad der skal slås. */
+.meier-melding {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 16px 12px;
+  border-top: 1px solid var(--line);
+  background: rgba(176, 132, 160, 0.08);
+}
+.meier-melding .eyebrow { color: var(--plum); }
+.meier-melding-v {
+  font-family: var(--serif);
+  font-size: 34px;
+  line-height: 1.1;
+  color: var(--ink);
+}
+.meier-melding-af { font-size: 11.5px; color: var(--ink-dim); text-align: center; }
+
 .meier-mat {
   position: relative;
   flex: 0 0 264px;
@@ -755,4 +775,97 @@ input[type='text']:focus {
 
 @media (prefers-reduced-motion: reduce) {
   .finger-ring { animation: none; opacity: 0.6; }
+}
+
+/* --------------------------------------------------------------- råbet */
+/* Hvad der skete på feltet — eller hvem der fik slurkene. Ligger over pladen
+   som fejringen, men spærrer ikke: kun selve kortet kan trykkes væk. */
+.udraab {
+  position: absolute;
+  inset: 0;
+  z-index: 19;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  pointer-events: none;
+}
+.udraab-mobil { padding: 16px; align-items: flex-start; padding-top: 18%; }
+
+.udraab-kort {
+  --udraab: var(--brass);
+  position: relative;
+  overflow: hidden;
+  width: 380px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 22px 26px 24px;
+  border-radius: 4px;
+  border: 1px solid color-mix(in srgb, var(--udraab) 70%, transparent);
+  border-top: 4px solid var(--udraab);
+  background: linear-gradient(180deg, rgba(26, 36, 30, 0.97) 0%, rgba(18, 27, 22, 0.97) 100%);
+  box-shadow: 0 26px 60px rgba(0, 0, 0, 0.6);
+  pointer-events: auto;
+  cursor: pointer;
+  animation: udraab-ind 420ms cubic-bezier(0.2, 1.2, 0.3, 1) both;
+}
+@keyframes udraab-ind {
+  from { transform: translateY(18px) scale(0.86); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+.udraab-band { position: relative; display: flex; align-items: center; gap: 9px; }
+.udraab-band .eyebrow { color: var(--ink-dim); }
+
+.udraab-titel {
+  position: relative;
+  font-family: var(--serif);
+  font-size: 44px;
+  line-height: 1.05;
+  text-align: center;
+  color: var(--udraab);
+}
+.udraab-skaal .udraab-titel,
+.udraab-drik .udraab-titel {
+  font-size: 72px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  animation: udraab-pulser 900ms ease-in-out 2;
+}
+@keyframes udraab-pulser {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+.udraab-mobil .udraab-titel { font-size: 34px; }
+.udraab-mobil.udraab .udraab-skaal .udraab-titel,
+.udraab-mobil.udraab .udraab-drik .udraab-titel { font-size: 54px; }
+
+.udraab-tekst {
+  position: relative;
+  font-size: 15px;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--ink);
+  max-width: 320px;
+}
+
+.udraab-fordeling { position: relative; align-self: stretch; display: flex; flex-direction: column; gap: 8px; }
+.udraab-raekke { display: flex; align-items: center; gap: 12px; }
+.udraab-navn { flex-grow: 1; font-size: 15px; font-weight: 600; }
+.udraab-antal { font-family: var(--serif); font-size: 30px; line-height: 1; color: var(--udraab); }
+.udraab-enhed {
+  width: 44px;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .udraab-kort,
+  .udraab-skaal .udraab-titel,
+  .udraab-drik .udraab-titel { animation: none; }
 }

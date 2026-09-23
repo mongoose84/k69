@@ -75,7 +75,7 @@ const FLEK_FARVER = ['#C9A227', '#E8CE7E', '#B084A0', '#93AE7C', '#E0A03C'];
  * fejringen, tæller de med i dens scrollhøjde, og så blinker en scrollbar ind
  * og ud hele vejen op.
  */
-function Flitter(): JSX.Element {
+export function Flitter(): JSX.Element {
   return (
     <div className="meier-flitter" aria-hidden="true">
       {Array.from({ length: 16 }, (_, i) => (
@@ -209,6 +209,7 @@ export function MeierKort({ spil, migId, send, kompakt = false }: MeierKortProps
   const erHolder = Boolean(m && m.holderId === migId);
   const erMed = Boolean(m && (m.udfordrerId === migId || m.modstanderId === migId));
   const holder = m ? spil.spillere.find((s) => s.id === m.holderId) : undefined;
+  const meldtAf = m?.meldtAf ? spil.spillere.find((s) => s.id === m.meldtAf) : undefined;
   const udfordrer = m ? spil.spillere.find((s) => s.id === m.udfordrerId) : undefined;
   const modstander = m ? spil.spillere.find((s) => s.id === m.modstanderId) : undefined;
   const modpart = m && erMed
@@ -285,6 +286,17 @@ export function MeierKort({ spil, migId, send, kompakt = false }: MeierKortProps
         </div>
       )}
 
+      {m && m.melding !== null && (
+        <div className="meier-melding" aria-live="polite">
+          <div className="eyebrow">Meldingen</div>
+          <div className="meier-melding-v">{trinNavn(m.melding)}</div>
+          <div className="meier-melding-af">
+            {meldtAf ? `${meldtAf.id === migId ? 'Du' : meldtAf.navn} ${m.blindt ? 'slog blindt — det samme eller derover' : 'meldte'}` : ''}
+            {erHolder && !slag ? ' · tro på det og slå, eller løft' : ''}
+          </div>
+        </div>
+      )}
+
       <div className="meier-mat">
         <div className="meier-mat-glans" />
         <div className="meier-mat-ring" />
@@ -355,11 +367,22 @@ export function MeierKort({ spil, migId, send, kompakt = false }: MeierKortProps
             )}
 
             {m.melding !== null && (
+              // Har man selv slået, er valget truffet: man tror på meldingen og skal melde videre.
               <div className="meier-to">
-                <button className="knap knap-tom" onClick={() => send({ type: 'meier-blindt' })}>
+                <button
+                  className="knap knap-tom"
+                  disabled={Boolean(slag)}
+                  title={slag ? 'Du har selv slået — meld nu' : undefined}
+                  onClick={() => send({ type: 'meier-blindt' })}
+                >
                   Det samme eller derover
                 </button>
-                <button className="knap knap-fare" onClick={() => send({ type: 'meier-loeft' })}>
+                <button
+                  className="knap knap-fare"
+                  disabled={Boolean(slag)}
+                  title={slag ? 'Du har selv slået — meld nu' : undefined}
+                  onClick={() => send({ type: 'meier-loeft' })}
+                >
                   Løft bægeret
                 </button>
               </div>

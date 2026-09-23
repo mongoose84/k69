@@ -1,9 +1,9 @@
 import { useState, type JSX } from 'react';
 import {
   Brik, FejringKort, Glas, Handlingskort, Maerkat, MeierKort, Plade, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
-  kortPaaBordet, opgave, spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, type SpilUdsyn
+  kortPaaBordet, opgave, spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, UdraabKort, type SpilUdsyn
 } from '@k69/ui';
-import { formatSlurke, taarnCl, type Handling } from '@k69/rules';
+import { formatAntal, formatSlurke, slurkePrEnhed, taarnCl, type Handling } from '@k69/rules';
 
 type Faneblad = 'tur' | 'bord' | 'log';
 
@@ -137,9 +137,9 @@ export function Bord({
                         </span>
                         <span className="eyebrow" style={{ fontSize: 9 }}>tømt</span>
                       </div>
-                      <Slurkemaaler tilbage={s.slurkeTilbage} bredde={7} />
+                      <Slurkemaaler tilbage={s.slurkeTilbage} ialt={slurkePrEnhed(s.drik)} bredde={7} />
                       <div className="eyebrow" style={{ fontSize: 9, marginTop: 4 }}>
-                        {s.slurkeTilbage}/11 {s.drik.navn}
+                        {formatAntal(s.slurkeTilbage)}/{formatAntal(slurkePrEnhed(s.drik))} {s.drik.navn}
                       </div>
                     </div>
                   </div>
@@ -171,16 +171,17 @@ export function Bord({
           <div className="min-drik">
             <div>
               <div className="eyebrow">Din {drikNavn(jeg.drik)} · {jeg.enheder} tømt</div>
-              <div style={{ marginTop: 6 }}><Slurkemaaler tilbage={jeg.slurkeTilbage} /></div>
+              <div style={{ marginTop: 6 }}><Slurkemaaler tilbage={jeg.slurkeTilbage} ialt={slurkePrEnhed(jeg.drik)} /></div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontFamily: 'var(--serif)', fontSize: 19 }}>{jeg.slurkeTilbage}</div>
+              <div style={{ fontFamily: 'var(--serif)', fontSize: 19 }}>{formatAntal(jeg.slurkeTilbage)}</div>
               <div className="eyebrow">slurke igen</div>
             </div>
           </div>
         )}
       </div>
       <MeierKort spil={spil} migId={migId} send={send} kompakt />
+      <UdraabKort spil={spil} kompakt />
       <FejringKort spil={spil} kompakt />
     </div>
   );

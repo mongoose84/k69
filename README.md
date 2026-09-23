@@ -75,15 +75,21 @@ Meister, 3 × Go! Bier Meister, 5 × Øl i tårnet, 4 × Træk et kort, 2 × DRI
 3 × Meier og 11 frifelter. Felt 1 er det første felt efter pitten ("3 til..?"),
 og man rykker med uret.
 
-**Slurken er den fælles enhed.** Én enhed er 11 slurke uanset hvad man drikker —
-kun mængden bag en slurk skifter:
+**Slurken er den fælles enhed, og den er en fast mængde alkohol**: det der er i
+3 cl pilsner på 4,6% (11 shots à 3 cl i en øl, som reglerne selv regner) — 1/11
+genstand, ca. 0,14 cl ren alkohol. Hvor mange slurke der er i en drik, afhænger
+af både størrelse og procent (`slurkePrEnhed`):
 
 | Drik | 1 slurk | 1 enhed |
 | --- | --- | --- |
-| Pilsner 4,6% | 3 cl | 33 cl (11 shots à 3 cl, som reglerne selv regner) |
-| Vin 12% | 1,4 cl | 15 cl (5 glas pr. flaske) |
-| Whisky 40% | 0,4 cl | 4 cl |
-| Egen drik | enhed ÷ 11 | det man selv skriver ind: navn, cl og procent |
+| Pilsner 33 cl 4,6% | 3 cl | 11 slurke |
+| Pilsner 50 cl 4,6% | 3 cl | 16,7 slurke |
+| Vin 15 cl 12% | 1,15 cl | 13 slurke |
+| Whisky 4 cl 40% | 0,35 cl | 11,6 slurke |
+| Egen drik | 13,8 ÷ procent cl | størrelse ÷ slurk — navn, cl og procent skriver man selv |
+
+Taber man en Meier, drikker man altid 3 slurke — også i hardcore — og 6 hvis der
+tabes på en Meyer (`MEIER_SLURKE`).
 
 Tårnet måles derfor også i slurke og vises omregnet til hver spillers egen drik.
 Glasset er en halv liter, som reglerne siger — det løber over ved 50 cl i øl-mål

@@ -1,7 +1,7 @@
 import { useState, type JSX } from 'react';
 import { BRAET_STR, BraetDefs, BraetPlade, Brik, EgenDrikFelter, egenDrikKlar, tomEgenDrik, type EgenDrik } from '@k69/ui';
 import {
-  BRIKFARVER, DRIK_LISTE, formatProcent, type DrikId, type DrikValg, type Handling, type KortHold, type Spil
+  BRIKFARVER, DRIK_LISTE, formatAntal, formatProcent, slurkePrEnhed, type DrikId, type DrikValg, type Handling, type KortHold, type Spil
 } from '@k69/rules';
 
 const HOLD: Array<{ id: KortHold; navn: string; forklaring: string }> = [
@@ -96,7 +96,7 @@ export function Tilmeld({
                 onClick={() => saetDrik(d.id)}
               >
                 <b>{d.navn}</b>
-                <span>{formatProcent(d)} · {d.enhedCl} cl · 11 slurke</span>
+                <span>{formatProcent(d)} · {d.enhedCl} cl · {formatAntal(slurkePrEnhed(d))} slurke</span>
               </button>
             ))}
             <button
@@ -113,7 +113,8 @@ export function Tilmeld({
             </div>
           )}
           <div className="note" style={{ marginTop: 8 }}>
-            Én enhed er 11 slurke uanset hvad du drikker. Appen omregner tårnet til din egen drik.
+            En slurk er den samme mængde alkohol uanset hvad du drikker — en pilsner på 33 cl er 11
+            slurke, en på 50 cl er 16,7. Appen omregner tårnet til din egen drik.
           </div>
         </div>
 

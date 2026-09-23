@@ -1,17 +1,20 @@
 import { RegelFejl, type DrikId, type DrikInfo, type DrikValg } from './types.js';
 
 /**
- * Slurken er spillets fælles enhed. Én enhed = 11 slurke uanset hvad man
- * drikker — kun mængden bag en slurk skifter.
+ * Slurken er spillets fælles enhed, og den er en fast mængde alkohol: det der er
+ * i 3 cl pilsner på 4,6% — reglerne regner selv med 11 shots à 3 cl i én øl.
+ * Det er 1/11 genstand, ca. 0,14 cl ren alkohol. Hvor mange slurke der er i en
+ * drik, afhænger derfor af både størrelsen og procenten:
  *
- *  Pilsner 4,6%: reglerne regner selv med 11 shots à 3 cl i én øl (33 cl).
- *  Vin 12%:      11 slurke pr. glas, 5 glas på en flaske (15 cl).
- *  Whisky 40%:   4 cl pr. dram — husreglen, kan ændres her ét sted.
+ *  Pilsner 33 cl 4,6%: 11 slurke à 3 cl.
+ *  Pilsner 50 cl 4,6%: 16,7 slurke à 3 cl.
+ *  Vin 15 cl 12%:      13 slurke à 1,15 cl.
+ *  Whisky 4 cl 40%:    11,6 slurke à 0,35 cl.
  *
  * Har man noget andet med, skriver man det selv ind ved bordet: navn, størrelse
- * og procent. Procenten er kun til at kende drikken på — slurken er den samme.
+ * og procent — så regnes slurkene ud på samme måde.
  */
-export const SLURKE_PR_ENHED = 11;
+const SLURK_CL_GANGE_PROCENT = 3 * 4.6;
 
 export type { DrikInfo };
 
@@ -24,7 +27,7 @@ export const DRIKKE: Record<Exclude<DrikId, 'egen'>, DrikInfo> = {
 export const DRIK_LISTE = Object.values(DRIKKE);
 
 /** Grænserne for det man selv skriver ind. */
-export const EGEN_DRIK = { navnMax: 24, clMin: 1, clMax: 200, procentMin: 0, procentMax: 100 };
+export const EGEN_DRIK = { navnMax: 24, clMin: 1, clMax: 200, procentMin: 0.5, procentMax: 100 };
 
 /** Lav en drik ud fra valget ved tilmelding. Afviser det der ikke giver mening. */
 export function tilDrik(valg: DrikValg): DrikInfo {
@@ -40,13 +43,19 @@ export function tilDrik(valg: DrikValg): DrikInfo {
     throw new RegelFejl(`Størrelsen skal være mellem ${EGEN_DRIK.clMin} og ${EGEN_DRIK.clMax} cl.`);
   }
   if (!Number.isFinite(procent) || procent < EGEN_DRIK.procentMin || procent > EGEN_DRIK.procentMax) {
-    throw new RegelFejl('Procenten skal være mellem 0 og 100.');
+    throw new RegelFejl('Procenten skal være mellem 0,5 og 100.');
   }
   return { id: 'egen', navn, procent, enhedCl };
 }
 
+/** Hvor meget af drikken én slurk er — jo stærkere, jo mindre. */
 export function clPrSlurk(drik: DrikInfo): number {
-  return drik.enhedCl / SLURKE_PR_ENHED;
+  return SLURK_CL_GANGE_PROCENT / drik.procent;
+}
+
+/** Hvor mange slurke der er i én enhed af drikken, på én decimal. */
+export function slurkePrEnhed(drik: DrikInfo): number {
+  return Math.round((drik.enhedCl / clPrSlurk(drik)) * 10) / 10;
 }
 
 /** Hvad N slurke svarer til i den drik man selv har valgt. */
@@ -67,9 +76,14 @@ export function formatProcent(drik: DrikInfo): string {
   return `${tal(drik.procent)}%`;
 }
 
-export function formatSlurke(slurke: number): string {
+/** Et antal slurke på én decimal, med komma: 11, 16,7. */
+export function formatAntal(slurke: number): string {
   const v = Math.round(slurke * 10) / 10;
-  return (v % 1 === 0 ? String(v) : v.toFixed(1).replace('.', ',')) + ' slurke';
+  return v % 1 === 0 ? String(v) : v.toFixed(1).replace('.', ',');
+}
+
+export function formatSlurke(slurke: number): string {
+  return formatAntal(slurke) + ' slurke';
 }
 
 /**
