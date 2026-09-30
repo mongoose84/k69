@@ -10,7 +10,8 @@ const ART_TEKST: Record<Fejring['art'], string> = {
   finger: 'Fingeren på bordkanten',
   emne: 'Emne',
   overloeb: 'Øl i tårnet',
-  krone: '2-krone'
+  krone: '2-krone',
+  'hoejere-lavere': 'Højere eller lavere'
 };
 
 /**

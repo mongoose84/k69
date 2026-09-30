@@ -1,5 +1,5 @@
 import {
-  FELT_INFO, KULOER_TEGN, afventerSpiller, feltType, formatCl, formatSlurke, kortTekst,
+  FELT_INFO, KULOER_TEGN, afventerSpiller, feltType, formatCl, formatSlurke, kortNavn, kortTekst,
   type Afventer, type DrikInfo, type Kort, type Spil, type Spiller
 } from '@k69/rules';
 
@@ -109,6 +109,13 @@ export function opgave(spil: Spil, migId: string): Opgave | null {
     case 'kort-udfald': {
       const t = kortTekst(a.kort);
       return grund(t.titel, t.tekst);
+    }
+
+    case 'hoejere-lavere': {
+      const kaede = a.rigtige ? ` ${a.rigtige} rigtige i træk indtil nu.` : '';
+      return grund('Højere eller lavere', mig
+        ? `Er næste kort højere eller lavere end ${kortNavn(a.kort).toLowerCase()}? Samme værdi tæller som forkert.${kaede}`
+        : `${dig} gætter på næste kort.${kaede}`);
     }
 
     case 'kaploeb': {

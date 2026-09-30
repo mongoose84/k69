@@ -47,7 +47,7 @@ export function bland<T>(liste: T[], tilfaeldig: () => number): T[] {
  *   'behold'     — 7'eren: man beholder kortet og lægger fingeren på bordkanten når man vil
  *   'vaelg-taber'— trækkeren udpeger den der gik i stå
  *   'sidemand'   — Bonden: sort giver venstremanden en slurk, rød giver højremanden
- *   'pit'        — 10'eren: trækkeren ryger direkte i pitten og slår om sin plads
+ *   'hoejere-lavere' — 10'eren: højere eller lavere, videre til venstre til en gætter forkert
  *   'hold'       — alle på et hold drikker HOLD_SLURKE
  */
 export type KortVirkning =
@@ -58,7 +58,7 @@ export type KortVirkning =
   | { slags: 'behold' }
   | { slags: 'vaelg-taber'; grund: string }
   | { slags: 'sidemand'; side: 'venstre' | 'hoejre' }
-  | { slags: 'pit' }
+  | { slags: 'hoejere-lavere' }
   | { slags: 'hold'; hold: 'dame' | 'konge' };
 
 const TAL: Partial<Record<Rang, number>> = { A: 1, '2': 2, '3': 3, '4': 4, '5': 5 };
@@ -68,6 +68,22 @@ export const HOLD_SLURKE = 3;
 
 /** Bonden: så meget drikker sidemanden. */
 export const SIDEMAND_SLURKE = 1;
+
+/** 10'eren: så meget drikker den der gætter forkert. */
+export const HOEJERE_LAVERE_SLURKE = 3;
+
+const VAERDI: Record<Rang, number> = {
+  A: 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, B: 11, D: 12, K: 13
+};
+
+/**
+ * Højere eller lavere: es er lavest, konge højest. Samme værdi er hverken
+ * højere eller lavere — så har man gættet forkert.
+ */
+export function gaetRigtigt(foer: Kort, efter: Kort, gaet: 'hoejere' | 'lavere'): boolean {
+  const d = VAERDI[efter.rang] - VAERDI[foer.rang];
+  return gaet === 'hoejere' ? d > 0 : d < 0;
+}
 
 export function virkning(k: Kort): KortVirkning {
   const n = TAL[k.rang];
@@ -79,7 +95,7 @@ export function virkning(k: Kort): KortVirkning {
     case '7': return { slags: 'behold' };
     case '8': return { slags: 'kaploeb', hvor: 'naese' };
     case '9': return { slags: 'vaelg-taber', grund: 'Emne — den der gik i stå eller gentog sig selv' };
-    case '10': return { slags: 'pit' };
+    case '10': return { slags: 'hoejere-lavere' };
     case 'B': return { slags: 'sidemand', side: erSort(k) ? 'venstre' : 'hoejre' };
     case 'D': return { slags: 'hold', hold: 'dame' };
     default: return { slags: 'hold', hold: 'konge' };
@@ -130,8 +146,11 @@ export function kortTekst(k: Kort): KortTekst {
       return v.side === 'venstre'
         ? { titel: 'Drik til venstre', tekst: `${KULOER_NAVN[k.kuloer]} er sort — din venstremand drikker ${SIDEMAND_SLURKE} slurk.` }
         : { titel: 'Drik til højre', tekst: `${KULOER_NAVN[k.kuloer]} er rød — din højremand drikker ${SIDEMAND_SLURKE} slurk.` };
-    case 'pit':
-      return { titel: 'Direkte i pitten', tekst: 'Du ryger direkte i pitten. Slå om din plads og drik de shots der hører til.' };
+    case 'hoejere-lavere':
+      return {
+        titel: 'Højere eller lavere',
+        tekst: `Er næste kort højere eller lavere? Gætter du rigtigt, går det videre til venstre. Den første der gætter forkert, drikker ${HOEJERE_LAVERE_SLURKE} slurke.`
+      };
     case 'hold':
       return v.hold === 'dame'
         ? { titel: 'Damerne drikker', tekst: `Alle kvinder ved bordet drikker ${HOLD_SLURKE} slurke.` }

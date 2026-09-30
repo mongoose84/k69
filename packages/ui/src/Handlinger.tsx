@@ -272,11 +272,35 @@ export function Handlingskort({ spil, migId, send, kompakt, ruller = false }: Ha
           <div className="note">{RANG_NAVN[a.kort.rang]} {KULOER_TEGN[a.kort.kuloer]}</div>
           {paaMig && (
             <button className="knap knap-primaer" onClick={() => send({ type: 'kort-kvitter' })}>
-              {a.kort.rang === '7' ? 'Tag kortet' : a.kort.rang === '10' ? 'Ryk i pitten' : 'Videre'}
+              {a.kort.rang === '7' ? 'Tag kortet' : 'Videre'}
             </button>
           )}
           {paaMig && a.kort.rang === '7' && (
             <div className="note">Kortet lægger sig oppe i baren. Hold det nede når du vil lægge fingeren — ingen andre får besked.</div>
+          )}
+        </div>
+      </div>
+    );
+  } else if (a.slags === 'hoejere-lavere') {
+    styring = (
+      <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+        <Kortbillede
+          rang={a.kort.rang}
+          tegn={kuloerTegn(a.kort)}
+          roed={erRoedt(a.kort)}
+          bredde={kompakt ? 92 : 108}
+        />
+        <div style={{ ...kolonne, flexGrow: 1 }}>
+          <div className="note">{RANG_NAVN[a.kort.rang]} {KULOER_TEGN[a.kort.kuloer]}</div>
+          {paaMig && (
+            <>
+              <button className="knap knap-primaer" onClick={() => send({ type: 'hoejere-lavere', gaet: 'hoejere' })}>
+                Højere
+              </button>
+              <button className="knap knap-primaer" onClick={() => send({ type: 'hoejere-lavere', gaet: 'lavere' })}>
+                Lavere
+              </button>
+            </>
           )}
         </div>
       </div>
