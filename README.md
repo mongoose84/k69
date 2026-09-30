@@ -132,8 +132,10 @@ er nemt at ændre.
 
 - **Whiskyens mængde** (4 cl pr. enhed) er et gæt — `packages/rules/src/drinks.ts`.
 - **Meier koster 3 slurke** at tabe, dobbelt på en Meyer. Kan sættes i lobbyen.
-- **10'eren** sender den der trak direkte i pitten — man slår om sin plads og
-  drikker de shots der hører til, som når man bliver slået hjem.
+- **10'eren** er højere/lavere: den der trak, gætter om næste kort er højere
+  eller lavere. Rigtigt, og venstremanden gætter videre på det nye kort; den
+  første der gætter forkert, drikker 3 slurke. Es er lavest, konge højest, og
+  samme værdi tæller som forkert.
 - **Bonden**: sort giver venstremanden (den næste i turen) 1 slurk, rød giver
   højremanden 1 slurk. Regelkortet og husreglerne er taget helt ud af appen.
 - **Dame og Konge**: man vælger ved tilmelding om man er med damerne eller

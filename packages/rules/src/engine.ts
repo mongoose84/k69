@@ -1,7 +1,9 @@
 import {
   ANTAL_FELTER, FELT_INFO, PIT_PLADSER, feltInfo, feltType, ryk
 } from './board.js';
-import { HOLD_SLURKE, SIDEMAND_SLURKE, bland, kortNavn, kortTekst, nyBunke, virkning } from './cards.js';
+import {
+  HOEJERE_LAVERE_SLURKE, HOLD_SLURKE, SIDEMAND_SLURKE, bland, gaetRigtigt, kortNavn, kortTekst, nyBunke, virkning
+} from './cards.js';
 import { formatSlurke, slurkePrEnhed, taarnCl, taarnKapacitetSlurke, tilDrik } from './drinks.js';
 import { erMeyer, trin, trinNavn } from './meier.js';
 import {
@@ -448,7 +450,8 @@ function sidemand(spil: Spil, s: Spiller, side: 'venstre' | 'hoejre'): Spiller |
   return undefined;
 }
 
-function traekKort(spil: Spil, s: Spiller, ctx: Kontekst): void {
+/** Øverste kort fra bunken. Er den brugt op, blandes et nyt spil. */
+function tagFraBunken(spil: Spil): Kort {
   if (spil.bunke.length === 0) {
     spil.bunke = bland(nyBunke(), Math.random);
     spil.brugte = [];
@@ -457,6 +460,11 @@ function traekKort(spil: Spil, s: Spiller, ctx: Kontekst): void {
   const kort = spil.bunke.shift()!;
   spil.brugte.push(kort);
   spil.sidsteKort = kort;
+  return kort;
+}
+
+function traekKort(spil: Spil, s: Spiller, ctx: Kontekst): void {
+  const kort = tagFraBunken(spil);
   const v = virkning(kort);
   const t = kortTekst(kort);
   skriv(spil, 'kort', `${navn(s)} trak ${kortNavn(kort)} — ${t.titel}.`, s);
@@ -502,10 +510,8 @@ function traekKort(spil: Spil, s: Spiller, ctx: Kontekst): void {
       spil.afventer = { slags: 'kort-udfald', spillerId: s.id, kort };
       return;
     }
-    case 'pit':
-      // Kortet vises først; når det er kvitteret, slår man om sin plads i pitten.
-      if (!spil.afventerPit.includes(s.id)) spil.afventerPit.push(s.id);
-      spil.afventer = { slags: 'kort-udfald', spillerId: s.id, kort };
+    case 'hoejere-lavere':
+      spil.afventer = { slags: 'hoejere-lavere', spillerId: s.id, kort, startetAf: s.id, rigtige: 0 };
       return;
     case 'hold': {
       const ramt = aktive(spil).filter((o) => o.kortHold === v.hold);
@@ -570,6 +576,7 @@ export function anvend(spil: Spil, handling: Handling, ctx: Kontekst): Spil {
     case 'traek-kort': return traekHandling(spil, s, ctx);
     case 'kort-kvitter': return kortKvitter(spil, s, ctx);
     case 'kaploeb-tryk': return kaploebTryk(spil, s, ctx);
+    case 'hoejere-lavere': return hoejereLavere(spil, s, handling.gaet, ctx);
     case 'laeg-finger': return laegFinger(spil, s, ctx);
     case 'finger-tryk': return fingerTryk(spil, s, ctx);
     case 'vaelg-taber': return vaelgTaber(spil, s, handling.spillerId, ctx);
@@ -907,6 +914,41 @@ function kaploebTryk(spil: Spil, s: Spiller, ctx: Kontekst): Spil {
     }
     afslutFelt(spil, ctx);
   }
+  return spil;
+}
+
+/* ------------------------------------------------------------------ 10'eren */
+
+/**
+ * Et gæt i højere/lavere. Rigtigt: næste kort ligger nu, og venstremanden
+ * gætter videre på det. Forkert: man drikker, og turen går videre som efter
+ * et almindeligt kort.
+ */
+function hoejereLavere(spil: Spil, s: Spiller, gaet: 'hoejere' | 'lavere', ctx: Kontekst): Spil {
+  if (gaet !== 'hoejere' && gaet !== 'lavere') fejl('Gæt højere eller lavere.');
+  const a = kraevAfventer(spil, 'hoejere-lavere', s);
+  const nyt = tagFraBunken(spil);
+  const ord = gaet === 'hoejere' ? 'højere' : 'lavere';
+
+  if (gaetRigtigt(a.kort, nyt, gaet)) {
+    const naeste = sidemand(spil, s, 'venstre') ?? s;
+    skriv(spil, 'kort', `${navn(s)} gættede ${ord} og fik ${kortNavn(nyt)} — rigtigt. ${navn(naeste)} gætter videre.`, s);
+    spil.afventer = { ...a, spillerId: naeste.id, kort: nyt, rigtige: a.rigtige + 1 };
+    return spil;
+  }
+
+  drik(s, HOEJERE_LAVERE_SLURKE);
+  skriv(spil, 'kort', `${navn(s)} gættede ${ord}, men det blev ${kortNavn(nyt)} — ${navn(s)} drikker ${HOEJERE_LAVERE_SLURKE} slurke.`, s);
+  fejr(spil, {
+    art: 'hoejere-lavere',
+    vinderId: null,
+    taberId: s.id,
+    titel: `${navn(s)} gættede forkert`,
+    tekst: `${kortNavn(a.kort)} og så ${kortNavn(nyt)} — ikke ${ord}. ${a.rigtige ? `Kæden holdt i ${a.rigtige} gæt. ` : ''}${navn(s)} drikker.`,
+    slurke: HOEJERE_LAVERE_SLURKE,
+    naaedeIds: []
+  });
+  afslutFelt(spil, ctx);
   return spil;
 }
 

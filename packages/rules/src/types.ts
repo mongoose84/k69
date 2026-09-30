@@ -89,6 +89,12 @@ export type Afventer =
   | { slags: 'traek-kort'; spillerId: string }
   | { slags: 'kort-udfald'; spillerId: string; kort: Kort }
   | { slags: 'kaploeb'; kort: Kort; startetAf: string; ramte: string[] }
+  /**
+   * 10'eren: `spillerId` gætter om næste kort er højere eller lavere end
+   * `kort`. Gætter han rigtigt, går det videre til venstremanden med det nye
+   * kort — indtil en gætter forkert og drikker.
+   */
+  | { slags: 'hoejere-lavere'; spillerId: string; kort: Kort; startetAf: string; rigtige: number }
   | { slags: 'vaelg-taber'; spillerId: string; grund: string }
   | { slags: 'meier-modstander'; spillerId: string }
   | { slags: 'meier'; spillerId: string };
@@ -159,7 +165,7 @@ export interface MeierResultat {
  */
 export interface Fejring {
   id: number;
-  art: 'kaploeb' | 'finger' | 'emne' | 'overloeb' | 'krone';
+  art: 'kaploeb' | 'finger' | 'emne' | 'overloeb' | 'krone' | 'hoejere-lavere';
   /** Sat når der er en at fejre — ellers er det taberen der er hovedpersonen. */
   vinderId: string | null;
   taberId: string | null;
@@ -282,6 +288,7 @@ export type Handling =
   | { type: 'traek-kort' }
   | { type: 'kort-kvitter' }
   | { type: 'kaploeb-tryk' }
+  | { type: 'hoejere-lavere'; gaet: 'hoejere' | 'lavere' }
   | { type: 'laeg-finger' }
   | { type: 'finger-tryk' }
   | { type: 'vaelg-taber'; spillerId: string }

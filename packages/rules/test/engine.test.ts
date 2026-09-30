@@ -4,11 +4,11 @@ import test from 'node:test';
 import {
   ANTAL_FELTER, FELT_RAEKKE, PIT_PLADSER, feltType
 } from '../src/board.js';
-import { nyBunke, virkning } from '../src/cards.js';
+import { HOEJERE_LAVERE_SLURKE, nyBunke, virkning } from '../src/cards.js';
 import { DRIKKE, clPrSlurk, iCl, slurkePrEnhed, taarnCl, tilDrik } from '../src/drinks.js';
 import { STIGE, kode, trin, trinNavn } from '../src/meier.js';
 import { MEIER_SLURKE, afventerSpiller, anvend, find, nytSpil, opgraderGemt, taarnLoeberOver } from '../src/engine.js';
-import { RegelFejl, type FeltType, type Handling, type Kontekst, type Spil } from '../src/types.js';
+import { RegelFejl, type FeltType, type Handling, type Kort, type Kontekst, type Spil } from '../src/types.js';
 
 /* --------------------------------------------------------------- værktøj */
 
@@ -722,23 +722,53 @@ test('Dame-kortet rammer damerne, Konge-kortet herrerne', () => {
   assert.equal(find(spil, 'p0')!.slurkeIAlt, 0);
 });
 
-test('10: man ryger direkte i pitten og slår om sin plads', () => {
-  let spil = opsat(['A', 'B', 'C']);
+/** p0 trækker en 10'er; de næste kort i bunken er `derefter`. */
+function tier(navne: string[], derefter: Kort[]): Spil {
+  let spil = opsat(navne);
   placer(spil, 'p0', foersteFeltAf('kort') - 1);
   spil = gør(spil, 'p0', { type: 'slaa' }, [1]);
-  spil.bunke.unshift({ rang: '10', kuloer: 'hjerter' });
-  spil = gør(spil, 'p0', { type: 'traek-kort' });
-  // Kortet vises først.
-  assert.equal(spil.afventer?.slags, 'kort-udfald');
-  spil = gør(spil, 'p0', { type: 'kort-kvitter' });
-  assert.equal(spil.afventer?.slags, 'pit-placering');
+  spil.bunke.unshift({ rang: '10', kuloer: 'hjerter' }, ...derefter);
+  return gør(spil, 'p0', { type: 'traek-kort' });
+}
+
+test('10: højere/lavere går videre til venstre indtil en gætter forkert', () => {
+  let spil = tier(['A', 'B', 'C'], [
+    { rang: 'D', kuloer: 'spar' },   // p0: højere end 10 — rigtigt
+    { rang: '3', kuloer: 'ruder' },  // p1: lavere end D — rigtigt
+    { rang: '2', kuloer: 'klor' }    // p2: højere end 3 — forkert
+  ]);
+  assert.equal(spil.afventer?.slags, 'hoejere-lavere');
   assert.equal(afventerSpiller(spil.afventer), 'p0');
-  spil = gør(spil, 'p0', { type: 'slaa' }, [4]);
-  const a = find(spil, 'p0')!;
-  assert.equal(a.pitPlads, 4);
-  assert.equal(a.felt, 0);
-  assert.equal(a.slurkeIAlt, 4);
+
+  spil = gør(spil, 'p0', { type: 'hoejere-lavere', gaet: 'hoejere' });
   assert.equal(afventerSpiller(spil.afventer), 'p1');
+  assert.throws(() => gør(spil, 'p0', { type: 'hoejere-lavere', gaet: 'lavere' }), RegelFejl);
+  spil = gør(spil, 'p1', { type: 'hoejere-lavere', gaet: 'lavere' });
+  assert.equal(afventerSpiller(spil.afventer), 'p2');
+  spil = gør(spil, 'p2', { type: 'hoejere-lavere', gaet: 'hoejere' });
+
+  for (const s of spil.spillere) assert.equal(s.slurkeIAlt, s.id === 'p2' ? HOEJERE_LAVERE_SLURKE : 0, s.id);
+  assert.equal(spil.fejring?.art, 'hoejere-lavere');
+  assert.equal(spil.fejring?.taberId, 'p2');
+  // Det var p0's tur — nu er den p1's.
+  assert.equal(spil.afventer?.slags, 'slag');
+  assert.equal(afventerSpiller(spil.afventer), 'p1');
+});
+
+test('10: samme værdi er hverken højere eller lavere', () => {
+  for (const gaet of ['hoejere', 'lavere'] as const) {
+    let spil = tier(['A', 'B'], [{ rang: '10', kuloer: 'spar' }]);
+    spil = gør(spil, 'p0', { type: 'hoejere-lavere', gaet });
+    assert.equal(find(spil, 'p0')!.slurkeIAlt, HOEJERE_LAVERE_SLURKE, gaet);
+  }
+});
+
+test('10: es er lavest, konge højest', () => {
+  let spil = tier(['A', 'B'], [{ rang: 'A', kuloer: 'spar' }, { rang: 'K', kuloer: 'spar' }]);
+  spil = gør(spil, 'p0', { type: 'hoejere-lavere', gaet: 'lavere' });
+  spil = gør(spil, 'p1', { type: 'hoejere-lavere', gaet: 'hoejere' });
+  assert.equal(afventerSpiller(spil.afventer), 'p0');
+  assert.equal(spil.afventer?.slags, 'hoejere-lavere');
 });
 
 test('Bonde: sort giver venstremanden en slurk, rød giver højremanden', () => {
