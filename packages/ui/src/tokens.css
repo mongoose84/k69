@@ -4,7 +4,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Anton&family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;1,6..96,500&family=Karla:wght@400;500;600;700&display=swap');
 
 :root {
-  --bg: #5f7d9b;
+  --bg: #8199b1;
   --panel: #ced8e2;
   --panel-2: #bcc6d0;
   --raise: #dce3ea;
@@ -21,13 +21,13 @@
   --sage: #1b2733;
   --slate: #1b2733;
   --plum: #1b2733;
-  --vandmaerke: #6d8aa6;
+  --vandmaerke: #8fa5ba;
   --input: #e6ecf1;
   --serif: 'Bodoni Moda', Georgia, 'Times New Roman', serif;
   --sans: Karla, 'Helvetica Neue', Arial, sans-serif;
   --display: Anton, Impact, sans-serif;
 
-  --grund: radial-gradient(90% 75% at 28% 18%, #7b96b1 0%, #5f7d9b 52%, #48627e 100%);
+  --grund: radial-gradient(90% 75% at 28% 18%, #98adc2 0%, #8199b1 52%, #7791ac 100%);
   --papir: linear-gradient(180deg, #dce3ea 0%, #ced8e2 60%, #c6d1dc 100%);
   --papir-skygge: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 4px rgba(15, 24, 33, 0.18), 0 28px 60px rgba(15, 24, 33, 0.38);
   --lampe: radial-gradient(55% 55% at 50% 48%, rgba(242, 192, 96, 0.16) 0%, rgba(242, 192, 96, 0) 70%);
@@ -475,7 +475,7 @@ input[type='text']:focus {
   overflow: hidden;
   border-top: 2px solid #1b2733;
   border-bottom: 2px solid #1b2733;
-  background: radial-gradient(58% 62% at 50% 52%, #7894b0 0%, #5f7d9b 65%, #4c6885 100%);
+  background: radial-gradient(58% 62% at 50% 52%, #95abc1 0%, #8199b1 65%, #7791ac 100%);
 }
 .meier-mat-glans {
   position: absolute;

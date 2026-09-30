@@ -32,26 +32,27 @@ Ejerens tre farver er grundpaletten. Blæk og ravgul er de eneste tilføjelser.
 
 | Navn | Hex | Brug |
 | --- | --- | --- |
-| Stålblå | `#5f7d9b` | Grunden overalt |
+| Stålblå | `#8199b1` | Grunden overalt (lysnet fra `#5f7d9b`, så blæk-tekst når 4.5:1 overalt) |
 | Lys | `#ced8e2` | Paneler, kort, sidebjælker, lys tekst på blæk |
 | Mellem | `#bcc6d0` | Sekundære flader, valgte rækker, skillelinjer |
 | Blæk | `#1b2733` | Al tekst på lyse og blå flader, primærknapper, kanter |
 | Blæk-dyb | `#0f1821` | Brødtekst direkte på stålblå |
 | Tekst-dæmpet | `#33475b` | Brødtekst på lyse paneler |
 | Label | `#3f566d` | Små versal-labels på lyse paneler |
-| Vandmærke | `#6d8aa6` | Det store baggrundsord |
+| Vandmærke | `#8fa5ba` | Det store baggrundsord |
 | Kant-lys | `#9fb1c3` | Tynde kanter, "Øl i tårnet"-felter, dæmpet tekst på blæk |
 | Input | `#e6ecf1` | Tekstfelter, glassets inderside |
 | Øl | `#F2C060` → `#C4761A` | Kun øl. Skum `#F6EBD4` (uændret fra appens `Glas`) |
 
-**Regel:** hvid eller lys tekst på `#5f7d9b` er for svag. Tekst direkte på den
+**Regel:** hvid eller lys tekst på den blå grund er for svag. Tekst direkte på den
 blå grund er altid `#1b2733` eller `#0f1821`. Primærknapper er blæk med lys
 tekst.
 
 ### Gradienter og tekstur
 
 - **Grund (lampelys):**
-  `radial-gradient(90% 75% at 28% 18%, #7b96b1 0%, #5f7d9b 52%, #48627e 100%)`
+  `radial-gradient(90% 75% at 28% 18%, #98adc2 0%, #8199b1 52%, #7791ac 100%)`
+  Selv det mørkeste punkt (`#7791ac`) giver `#1b2733` 4.6:1.
 - **Korn:** `assets/korn.svg` som gentaget baggrund i et lag over hele skærmen:
   `opacity: 0.12; mix-blend-mode: multiply; pointer-events: none`.
 - **Paneler (papir):**
@@ -80,7 +81,7 @@ og ret derefter de hårdkodede farver.
 
 | Variabel | Ny værdi |
 | --- | --- |
-| `--bg` | `#5f7d9b` (plus grund-gradienten på skærmenes rod) |
+| `--bg` | `#8199b1` (plus grund-gradienten på skærmenes rod) |
 | `--panel` | `#ced8e2` |
 | `--panel-2` | `#bcc6d0` |
 | `--raise` | `#dce3ea` |
@@ -151,7 +152,7 @@ sidder i midten i den lyse cirkel. Kortets forside er `#ced8e2` med en 3px blæk
 radius 16px og en hård skygge `10px 12px 0 #0f1821`. Rang og kulør står i Anton,
 og røde kulører er `#a8423a`.
 
-**Vandmærke-ord.** Anton, `#6d8aa6`, 120–560px, `aria-hidden`, placeret bag
+**Vandmærke-ord.** Anton, `#8fa5ba`, 120–560px, `aria-hidden`, placeret bag
 indholdet og beskåret af skærmkanten.
 
 ## 6. Brættet
@@ -176,7 +177,7 @@ facit. Ret farverne i `Braet.tsx` sådan her:
 - Felttekster er i Anton og versaler. Felterne har en kant på `1.6px #1b2733`.
   Banens yder- og inderkant er `3px #1b2733`.
 - Banen: `linear-gradient` fra `#dfe6ed` til `#c3cfdb` (top til bund).
-- Filten indeni: `radialGradient` med `#7894b0` → `#5f7d9b` (65%) → `#4c6885`.
+- Filten indeni: `radialGradient` med `#95abc1` → `#8199b1` (65%) → `#7791ac`.
   Ovenpå ligger kornet (`feTurbulence` 0.9 / 3 oktaver, alfa-slope 0.09), klippet
   til inderkanten.
 - Skygge under banen: yderstien i `#0f1821`, opacity .45, forskudt (4, 14) og
@@ -216,7 +217,7 @@ Hovedpunkterne pr. skærm:
   er 48px, og taget brikker har opacity .25. Drik- og holdvalg er kort i
   `#bcc6d0`, og det valgte kort er blæk.
 - **Lobby:** "Del linket. Hent glassene." Link-boksen er lys med blæk-kant og en
-  blæk-knap "Kopiér". Koden står stort i Anton `#ced8e2`, og spillerne er lyse
+  blæk-knap "Kopiér". Koden står stort i Anton `#1b2733`, og spillerne er lyse
   kort i to kolonner. Husregler står i et papirpanel til højre, og knappen er
   "Start spillet".
 - **Spillepladen:**

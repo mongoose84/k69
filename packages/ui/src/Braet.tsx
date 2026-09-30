@@ -43,9 +43,9 @@ export function BraetDefs({ id }: { id: string }): JSX.Element {
   return (
     <defs>
       <radialGradient id={`${id}-felt`} cx="50%" cy="45%" r="70%">
-        <stop offset="0%" stopColor="#7894B0" />
-        <stop offset="65%" stopColor="#5F7D9B" />
-        <stop offset="100%" stopColor="#4C6885" />
+        <stop offset="0%" stopColor="#95ABC1" />
+        <stop offset="65%" stopColor="#8199B1" />
+        <stop offset="100%" stopColor="#7791AC" />
       </radialGradient>
       <linearGradient id={`${id}-bane`} x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stopColor="#DFE6ED" />
