@@ -40,7 +40,8 @@ function Spilrute({ kode, onForlad }: { kode: string; onForlad: () => void }): J
 
   if (fatal) {
     return (
-      <div className="tomskaerm">
+      <div className="tomskaerm paa-grund">
+        <div className="vandmaerke" aria-hidden="true" style={{ left: 12, top: 20, fontSize: '190px' }}>K69</div>
         <h1 style={{ fontSize: 30 }}>Det spil findes ikke</h1>
         <p className="note">{fejl ?? 'Tjek koden i linket.'}</p>
         <button className="knap knap-primaer" onClick={onForlad}>Til forsiden</button>
@@ -50,7 +51,8 @@ function Spilrute({ kode, onForlad }: { kode: string; onForlad: () => void }): J
 
   if (!spil) {
     return (
-      <div className="tomskaerm">
+      <div className="tomskaerm paa-grund">
+        <div className="vandmaerke" aria-hidden="true" style={{ left: 12, top: 20, fontSize: '190px' }}>K69</div>
         <div className="mark" style={{ fontSize: 52 }}>K69</div>
         <p className="note">{forbundet ? 'Henter bordet…' : 'Forbinder…'}</p>
       </div>

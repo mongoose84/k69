@@ -3,42 +3,39 @@ import {
   muligeMeldinger, trin, trinNavn, type Handling, type MeierResultat, type Spil, type Spiller
 } from '@k69/rules';
 import { Terning } from './Dele.js';
+import { Elefant } from './Elefant.js';
 
 /**
  * Bægeret. Tegnet med bunden i vejret som det står på bordet — terningerne
  * ligger under, og de kommer kun frem når nogen vipper det eller løfter det.
+ * Blæk med glans, og Krunk-elefanten i en lys cirkel på siden.
  */
 function Baeger({ str = 165, laast = false }: { str?: number; laast?: boolean }): JSX.Element {
   return (
     <svg width={str} height={str * 1.095} viewBox="0 0 190 208" aria-hidden="true">
       <defs>
-        <linearGradient id="baeger-laeder" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#241B14" />
-          <stop offset="0.16" stopColor="#4A3826" />
-          <stop offset="0.46" stopColor="#5E4831" />
-          <stop offset="0.78" stopColor="#382A1D" />
-          <stop offset="1" stopColor="#1F1710" />
+        <linearGradient id="baeger-blaek" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#121C26" />
+          <stop offset="0.35" stopColor="#2A3C50" />
+          <stop offset="1" stopColor="#1B2733" />
         </linearGradient>
-        <linearGradient id="baeger-messing" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#7E6413" />
-          <stop offset="0.3" stopColor="#E8CE7E" />
-          <stop offset="0.62" stopColor="#C9A227" />
-          <stop offset="1" stopColor="#6E570F" />
-        </linearGradient>
+        <radialGradient id="baeger-cirkel" cx="0.4" cy="0.35" r="0.7">
+          <stop offset="0" stopColor="#DCE3EA" />
+          <stop offset="1" stopColor="#BCC6D0" />
+        </radialGradient>
       </defs>
-      <ellipse cx="95" cy="196" rx="80" ry="12" fill="#050806" opacity="0.55" />
-      <path d="M57 24 L133 24 L149 178 Q95 194 41 178 Z" fill="url(#baeger-laeder)" />
-      <path d="M43 168 Q95 184 147 168 L149 180 Q95 196 41 180 Z" fill="url(#baeger-messing)" opacity="0.92" />
-      <path d="M50 112 Q95 124 140 112 L141 120 Q95 132 49 120 Z" fill="#1B140E" opacity="0.55" />
-      <path d="M53 140 Q95 152 137 140 L138 147 Q95 159 52 147 Z" fill="#1B140E" opacity="0.45" />
-      <ellipse cx="95" cy="24" rx="38" ry="9" fill="#3B2C1E" />
-      <ellipse cx="95" cy="24" rx="38" ry="9" fill="none" stroke="url(#baeger-messing)" strokeWidth="2.4" />
-      <path d="M73 26 L80 26 L88 184 L79 183 Z" fill="#FFFFFF" opacity="0.07" />
+      <ellipse cx="95" cy="196" rx="80" ry="12" fill="#0F1821" opacity="0.4" />
+      <path d="M57 24 L133 24 L149 178 Q95 194 41 178 Z" fill="url(#baeger-blaek)" stroke="#0F1821" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M43 168 Q95 184 147 168 L149 180 Q95 196 41 180 Z" fill="#0F1821" />
+      <ellipse cx="95" cy="24" rx="38" ry="9" fill="#2A3C50" stroke="#0F1821" strokeWidth="2" />
+      <path d="M71 28 L79 28 L86 176 L76 175 Z" fill="#FFFFFF" opacity="0.1" />
+      <circle cx="95" cy="104" r="36" fill="url(#baeger-cirkel)" stroke="#0F1821" strokeWidth="2" />
+      <Elefant x={95 - 27} y={104 - 25.4} str={54} />
       {laast && (
-        <g transform="translate(78, 78)">
-          <rect x="0" y="14" width="34" height="24" rx="4" fill="#141D18" stroke="#B084A0" strokeWidth="2" />
-          <path d="M7 14 V8 a10 10 0 0 1 20 0 v6" fill="none" stroke="#B084A0" strokeWidth="2" />
-          <circle cx="17" cy="26" r="3" fill="#B084A0" />
+        <g transform="translate(118, 136)">
+          <circle cx="12" cy="14" r="17" fill="#1B2733" stroke="#CED8E2" strokeWidth="2" />
+          <rect x="3" y="12" width="18" height="13" rx="2.5" fill="#CED8E2" />
+          <path d="M6.5 12 V8.5 a5.5 5.5 0 0 1 11 0 V12" fill="none" stroke="#CED8E2" strokeWidth="2.2" />
         </g>
       )}
     </svg>
@@ -54,21 +51,21 @@ function Laas({ str = 11 }: { str?: number }): JSX.Element {
   );
 }
 
-/** Messingstemplet der falder ned over vinderen. */
+/** Blæk-stemplet der falder ned over vinderen. */
 function Stempel(): JSX.Element {
   return (
-    <svg width="54" height="54" viewBox="0 0 60 60" fill="none" aria-hidden="true">
-      <circle cx="30" cy="30" r="27" stroke="#C9A227" strokeWidth="1.4" opacity="0.75" />
-      <circle cx="30" cy="30" r="22" stroke="#C9A227" strokeWidth="0.8" opacity="0.4" />
-      <path d="M13 34 Q17 20 22 34" stroke="#E8CE7E" strokeWidth="2" strokeLinecap="round" />
-      <path d="M26 34 V22 L33 32 L40 22 V34" stroke="#E8CE7E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M44 34 Q47 20 51 33" stroke="#E8CE7E" strokeWidth="2" strokeLinecap="round" />
-      <path d="M20 42 H40" stroke="#C9A227" strokeWidth="1" opacity="0.6" />
+    <svg width="58" height="58" viewBox="0 0 60 60" fill="none" aria-hidden="true">
+      <circle cx="30" cy="30" r="27" stroke="#1B2733" strokeWidth="2.4" />
+      <circle cx="30" cy="30" r="22" stroke="#1B2733" strokeWidth="1" opacity="0.5" />
+      <path d="M13 34 Q17 20 22 34" stroke="#1B2733" strokeWidth="2.6" strokeLinecap="round" />
+      <path d="M26 34 V22 L33 32 L40 22 V34" stroke="#1B2733" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M44 34 Q47 20 51 33" stroke="#1B2733" strokeWidth="2.6" strokeLinecap="round" />
+      <path d="M20 42 H40" stroke="#1B2733" strokeWidth="1.4" />
     </svg>
   );
 }
 
-const FLEK_FARVER = ['#C9A227', '#E8CE7E', '#B084A0', '#93AE7C', '#E0A03C'];
+const FLEK_FARVER = ['#1B2733', '#F2C060', '#CED8E2', '#5F7D9B', '#C4761A'];
 
 /**
  * Messingflitteret. Det ligger i sin egen lukkede boks — flyver de frit i

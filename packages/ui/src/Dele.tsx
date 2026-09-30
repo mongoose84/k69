@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type JSX, type ReactNode } fr
 import {
   DRIKKE, DRIK_STOERRELSER, EGEN_DRIK, formatSlurke, slurkePrEnhed, type DrikId, type DrikInfo, type DrikValg
 } from '@k69/rules';
+import { Elefant } from './Elefant.js';
 
 /** Det man skriver ind når man drikker noget andet end de faste. Tal som tekst, indtil de sendes. */
 export interface EgenDrik {
@@ -120,31 +121,42 @@ export function Terning({ vaerdi, str = 76, ruller = false }: { vaerdi: number |
       style={{ flex: `0 0 ${str}px`, transition: 'transform 260ms', transform: ruller ? 'rotate(-14deg)' : 'none' }}
       aria-label={vaerdi ? `Terningen viser ${vaerdi}` : 'Terningen er ikke slået'}
     >
-      <rect x="6" y="9" width="88" height="88" rx="17" fill="#0B100D" opacity="0.55" />
-      <rect x="4" y="4" width="88" height="88" rx="17" fill="#EFE6D4" stroke="#8E8878" strokeWidth="1.5" />
-      {pips
-        ? pips.map(([cx, cy]) => <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="7.5" fill="#1B241C" />)
-        : (
-          <text x="50" y="52" textAnchor="middle" dominantBaseline="central" fontSize="34" fill="#B3AB98" style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>
+      <rect x="8" y="10" width="88" height="88" rx="17" fill="#0F1821" opacity="0.35" />
+      {pips ? (
+        <>
+          <rect x="4" y="4" width="88" height="88" rx="17" fill="#FFFFFF" stroke="#1B2733" strokeWidth="3.5" />
+          {pips.map(([cx, cy]) => <circle key={`${cx}-${cy}`} cx={cx - 2} cy={cy - 2} r="7.5" fill="#1B2733" />)}
+        </>
+      ) : (
+        <>
+          <rect x="4" y="4" width="88" height="88" rx="17" fill="#DCE3EA" stroke="#1B2733" strokeWidth="3" strokeDasharray="7 5" />
+          <text x="48" y="50" textAnchor="middle" dominantBaseline="central" fontSize="40" fill="#1B2733" style={{ fontFamily: 'var(--display)' }}>
             ?
           </text>
-        )}
+        </>
+      )}
     </svg>
   );
 }
 
-/** Lodret ølglas som måler. `andel` er 0–1. */
-export function Glas({ andel, bredde = 46, hoejde = 74 }: { andel: number; bredde?: number; hoejde?: number }): JSX.Element {
+/**
+ * Lodret ølglas som måler. `andel` er 0–1. Løber tårnet over, bliver øllet
+ * mørkere ravgult — aldrig rødt, aldrig blåt.
+ */
+export function Glas({
+  andel, bredde = 46, hoejde = 74, over = false
+}: { andel: number; bredde?: number; hoejde?: number; over?: boolean }): JSX.Element {
   const pct = Math.max(0, Math.min(1, andel)) * 100;
+  const kant = bredde < 24 ? 2 : 2.5;
   return (
     <div
       style={{
         width: bredde,
         height: hoejde,
         flex: `0 0 ${bredde}px`,
-        border: '1.5px solid #9FB0A2',
-        borderRadius: 4,
-        background: '#0E1512',
+        border: `${kant}px solid #1B2733`,
+        borderRadius: `${Math.round(bredde / 15)}px ${Math.round(bredde / 15)}px ${Math.round(bredde / 5.5)}px ${Math.round(bredde / 5.5)}px`,
+        background: 'linear-gradient(90deg, #E6ECF1 0%, #F7F9FB 30%, #DFE6ED 100%)',
         position: 'relative',
         overflow: 'hidden'
       }}
@@ -152,14 +164,15 @@ export function Glas({ andel, bredde = 46, hoejde = 74 }: { andel: number; bredd
       <div
         style={{
           position: 'absolute', left: 0, right: 0, bottom: 0, height: `${pct}%`,
-          background: 'linear-gradient(180deg, #F2C060, #C4761A)',
+          background: over ? 'var(--oel-over)' : 'var(--oel)',
           transition: 'height 160ms linear'
         }}
       />
       {pct > 1 && (
         <div
           style={{
-            position: 'absolute', left: 0, right: 0, bottom: `${pct}%`, height: 7,
+            position: 'absolute', left: 0, right: 0, bottom: `${pct}%`, height: bredde < 24 ? 3 : 5,
+            marginBottom: bredde < 24 ? -3 : -5,
             background: '#F6EBD4', transition: 'bottom 160ms linear'
           }}
         />
@@ -180,7 +193,8 @@ export function HoldKnap({
   onSlip,
   interval = 110,
   hoejde = 68,
-  deaktiveret = false
+  deaktiveret = false,
+  over = false
 }: {
   tekst: string;
   under: string;
@@ -190,6 +204,8 @@ export function HoldKnap({
   interval?: number;
   hoejde?: number;
   deaktiveret?: boolean;
+  /** Tårnet løber over — øllet i knappen bliver mørkere ravgult. */
+  over?: boolean;
 }): JSX.Element {
   const [holder, saetHolder] = useState(false);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -216,6 +232,10 @@ export function HoldKnap({
     if (timer.current) clearInterval(timer.current);
   }, []);
 
+  const fyld = Math.max(0, Math.min(1, andel)) * 100;
+  // Teksten skifter til blæk når øllet står bag den.
+  const moerk = fyld > 55;
+
   return (
     <div
       role="button"
@@ -231,9 +251,9 @@ export function HoldKnap({
         position: 'relative',
         height: hoejde,
         borderRadius: 3,
-        border: '1px solid #7E6413',
+        border: '2px solid #CED8E2',
         overflow: 'hidden',
-        background: '#1D2118',
+        background: '#1B2733',
         cursor: deaktiveret ? 'not-allowed' : 'pointer',
         userSelect: 'none',
         touchAction: 'none',
@@ -246,54 +266,56 @@ export function HoldKnap({
       <div
         style={{
           position: 'absolute', left: 0, top: 0, bottom: 0,
-          width: `${Math.max(0, Math.min(1, andel)) * 100}%`,
-          background: 'linear-gradient(180deg, #F2C060 0%, #C4761A 100%)',
+          width: `${fyld}%`,
+          background: over ? 'linear-gradient(180deg, #E8A04A 0%, #A8561A 100%)' : 'linear-gradient(180deg, #F2C060 0%, #C4761A 100%)',
+          borderRight: fyld > 1 ? '5px solid #F6EBD4' : undefined,
           transition: 'width 140ms linear'
         }}
       />
-      <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+      <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
         <div
           style={{
-            fontSize: 11.5, fontWeight: 700, letterSpacing: '0.16em',
-            textTransform: 'uppercase', color: holder ? '#14180C' : 'var(--ink)'
+            fontFamily: 'var(--display)', fontSize: 22, letterSpacing: '0.05em', lineHeight: 1,
+            textTransform: 'uppercase', textAlign: 'center', padding: '0 10px',
+            color: moerk ? '#1B2733' : '#CED8E2', opacity: holder ? 0.85 : 1
           }}
         >
           {tekst}
         </div>
-        <div style={{ fontSize: 11, color: holder ? '#14180C' : 'var(--ink-dim)' }}>{under}</div>
+        <div style={{ fontSize: 12, fontWeight: 600, color: moerk ? '#1B2733' : '#BCC6D0' }}>{under}</div>
       </div>
     </div>
   );
 }
 
-export function Brik({ navn, farve, str = 34 }: { navn: string; farve: string; str?: number }): JSX.Element {
+/** En brik: spillerfarven med blæk-kant og dybde. Den der har turen, får ringe og glød. */
+export function Brik({
+  navn, farve, str = 34, paaTur = false
+}: { navn: string; farve: string; str?: number; paaTur?: boolean }): JSX.Element {
   return (
     <div
       style={{
         width: str, height: str, flex: `0 0 ${str}px`, borderRadius: '50%',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontFamily: 'var(--serif)', fontSize: str * 0.44, fontWeight: 700, color: '#14180C',
+        fontFamily: 'var(--display)', fontSize: str * 0.42, lineHeight: 1, color: '#1B2733',
         background: farve,
-        boxShadow: 'inset 0 -2px 5px rgba(0,0,0,0.35), 0 1px 2px rgba(0,0,0,0.5)'
+        border: `${str < 24 ? 2 : 2.5}px solid #1B2733`,
+        boxShadow: paaTur ? 'var(--brik-tur)' : 'var(--brik-dybde)'
       }}
     >
-      {navn.slice(0, 1).toUpperCase()}
+      {str >= 24 ? navn.slice(0, 1).toUpperCase() : null}
     </div>
   );
 }
 
-export function Maerkat({ children, farve = 'var(--brass-lt)' }: { children: ReactNode; farve?: string }): JSX.Element {
-  return (
-    <span
-      style={{
-        display: 'inline-flex', alignItems: 'center', height: 22, padding: '0 8px',
-        borderRadius: 2, fontSize: 10, fontWeight: 700, letterSpacing: '0.1em',
-        color: farve, border: `1px solid ${farve}55`, background: `${farve}1a`
-      }}
-    >
-      {children}
-    </span>
-  );
+/**
+ * Mærkat ved et navn. Fyldt blæk for status (BM, VÆRT), kun kant for info
+ * (DIG, PIT, ALTID). `oel` er til tårnet, `daempet` til dem der er væk.
+ */
+export function Maerkat({
+  children, art = 'kant'
+}: { children: ReactNode; art?: 'fyldt' | 'kant' | 'oel' | 'daempet' }): JSX.Element {
+  return <span className={art === 'kant' ? 'maerkat' : `maerkat maerkat-${art}`}>{children}</span>;
 }
 
 const MAALER_STREGER = 11;
@@ -311,7 +333,7 @@ export function Slurkemaaler({ tilbage, ialt, bredde = 12 }: { tilbage: number; 
           key={i}
           style={{
             width: bredde, height: 7, borderRadius: 1,
-            background: i < fyldte ? 'linear-gradient(180deg, #F2C060, #C4761A)' : '#2B382E'
+            background: i < fyldte ? 'var(--oel)' : 'rgba(27, 39, 51, 0.2)'
           }}
         />
       ))}
@@ -319,25 +341,58 @@ export function Slurkemaaler({ tilbage, ialt, bredde = 12 }: { tilbage: number; 
   );
 }
 
+/** Kortets forside: lys med blæk-kant og hård skygge. Rang og kulør i Anton, røde kulører i #a8423a. */
 export function Kortbillede({
   rang, tegn, roed, bredde = 108
 }: { rang: string; tegn: string; roed: boolean; bredde?: number }): JSX.Element {
-  const farve = roed ? '#9E3B33' : '#1B241C';
+  const farve = roed ? '#A8423A' : '#1B2733';
+  const hjoerne = (
+    <div style={{ fontFamily: 'var(--display)', fontSize: bredde * 0.2, lineHeight: 1, whiteSpace: 'nowrap' }}>
+      {rang} {tegn}
+    </div>
+  );
   return (
     <div
       style={{
-        width: bredde, height: bredde * 1.43, flex: `0 0 ${bredde}px`, borderRadius: 8,
-        padding: bredde * 0.083, background: 'linear-gradient(168deg, #F6F1E4 0%, #E4DCC8 100%)',
-        border: '1px solid #B9AE93', boxShadow: '0 14px 26px rgba(0,0,0,0.55)',
+        width: bredde, height: bredde * 1.4, flex: `0 0 ${bredde}px`, borderRadius: bredde * 0.053,
+        padding: `${bredde * 0.06}px ${bredde * 0.066}px`, background: '#CED8E2',
+        border: `${bredde < 150 ? 2.5 : 3}px solid #1B2733`,
+        boxShadow: `${Math.round(bredde * 0.033)}px ${Math.round(bredde * 0.04)}px 0 #0F1821`,
         display: 'flex', flexDirection: 'column', color: farve
       }}
     >
-      <div style={{ lineHeight: 0.95 }}>
-        <div style={{ fontFamily: 'var(--serif)', fontSize: bredde * 0.21, fontWeight: 700 }}>{rang}</div>
-        <div style={{ fontSize: bredde * 0.14 }}>{tegn}</div>
-      </div>
-      <div style={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: bredde * 0.46 }}>
+      {hjoerne}
+      <div style={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: bredde * 0.42, lineHeight: 1 }}>
         {tegn}
+      </div>
+      <div style={{ alignSelf: 'flex-end', transform: 'rotate(180deg)' }}>{hjoerne}</div>
+    </div>
+  );
+}
+
+/** Kortets bagside: blæk med små øldåser tone-i-tone og elefanten i en lys cirkel. */
+export function Kortbagside({ bredde = 108 }: { bredde?: number }): JSX.Element {
+  const cirkel = bredde * 0.66;
+  return (
+    <div
+      aria-hidden="true"
+      style={{
+        width: bredde, height: bredde * 1.4, flex: `0 0 ${bredde}px`, borderRadius: bredde * 0.053,
+        padding: bredde * 0.046, background: '#1B2733',
+        border: `${bredde < 150 ? 2.5 : 3}px solid #1B2733`,
+        boxShadow: `${Math.round(bredde * 0.033)}px ${Math.round(bredde * 0.04)}px 0 #0F1821`
+      }}
+    >
+      <div
+        style={{
+          width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          border: '2px solid #5F7D9B', borderRadius: bredde * 0.033,
+          backgroundImage: 'var(--daaser)', backgroundSize: '28px 28px', backgroundRepeat: 'repeat'
+        }}
+      >
+        <span className="elefant-cirkel" style={{ width: cirkel, height: cirkel, border: '3px solid #5F7D9B' }}>
+          <Elefant str={cirkel * 0.75} />
+        </span>
       </div>
     </div>
   );

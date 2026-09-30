@@ -1,5 +1,5 @@
 import { useState, type JSX } from 'react';
-import { Brik, Maerkat } from '@k69/ui';
+import { Brik, Elefant, Maerkat } from '@k69/ui';
 import { MEIER_SLURKE, formatProcent, type Handling, type Spil } from '@k69/rules';
 import { spilUrl } from '../api.js';
 
@@ -23,133 +23,124 @@ export function Lobby({
   };
 
   return (
-    <div className="lobby">
-      <header className="topbar">
-        <div className="mark" style={{ fontSize: 30 }}>K69</div>
-        <div className="kode-chip"><span>SPIL</span><b>{spil.kode}</b></div>
-        <div style={{ flexGrow: 1 }} />
-        <div className="note">Venter på spillere · brættet er klar</div>
+    <div className="plakat lobby">
+      <Elefant className="elefant-stor lobby-elefant" str={220} />
+
+      <header className="plakat-top">
+        <div className="mark" style={{ fontSize: 28 }}>K69</div>
+        <span className="pille">Lobby</span>
+        <span className="pille">Spil {spil.kode}</span>
       </header>
 
-      <div className="lobby-grid">
-        <section className="lobby-kol">
-          <div>
-            <div className="eyebrow">Inden I går i gang</div>
-            <h1 style={{ fontSize: 40, marginTop: 14 }}>Del linket i gruppen</h1>
-            <p className="note" style={{ fontSize: 13.5, lineHeight: 1.7, marginTop: 14, maxWidth: 460 }}>
-              Alle der åbner linket skriver bare et navn og vælger en brik. Ingen konto, ingen kode i
-              mailen. Værten starter spillet når I er klar.
-            </p>
-          </div>
+      <section className="lobby-kol">
+        <h1>Del linket.<br />Hent glassene.</h1>
+        <p className="lead">
+          Alle der åbner linket skriver bare et navn og vælger en brik. Ingen konto, ingen kode i
+          mailen. Værten starter spillet når I er klar.
+        </p>
 
-          <div className="linkboks">
-            <span>{url}</span>
-            <button className="knap" style={{ minHeight: 62, borderRadius: 0, borderWidth: '0 0 0 1px' }} onClick={() => void kopier()}>
-              {kopieret ? 'Kopieret' : 'Kopiér'}
-            </button>
-          </div>
+        <div className="linkboks">
+          <span>{url}</span>
+          <button onClick={() => void kopier()}>{kopieret ? 'Kopieret' : 'Kopiér'}</button>
+        </div>
 
-          <div className="kodekort">
+        <div className="kodekort">
+          <span className="eyebrow">Eller skriv koden på forsiden</span>
+          <span className="kodetal">{spil.kode}</span>
+        </div>
+
+        <div>
+          <div className="eyebrow" style={{ color: '#0f1821', fontSize: 12, marginBottom: 10 }}>
+            Ved bordet · {spil.spillere.length} af 8
+          </div>
+          <div className="liste-to">
+            {spil.spillere.map((s) => (
+              <div key={s.id} className="raekke">
+                <Brik navn={s.navn} farve={s.farve} str={34} />
+                <div style={{ flexGrow: 1, minWidth: 0 }}>
+                  <div className="raekke-navn">{s.navn}</div>
+                  <div className="raekke-under">{s.drik.navn} · {s.drik.enhedCl} cl · {formatProcent(s.drik)}</div>
+                </div>
+                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                  {s.id === spil.vaertId && <Maerkat art="fyldt">VÆRT</Maerkat>}
+                  {s.id === migId && <Maerkat>DIG</Maerkat>}
+                  {!s.tilsluttet && <Maerkat art="daempet">OFFLINE</Maerkat>}
+                </div>
+              </div>
+            ))}
+            {spil.spillere.length < 8 && (
+              <div className="raekke raekke-tom">
+                <div style={{ width: 34, height: 34, flex: '0 0 34px', borderRadius: '50%', border: '2px dashed #1b2733' }} />
+                <span style={{ fontSize: 15 }}>Venter på flere…</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="papir lobby-hoejre">
+        <div className="eyebrow">Husregler</div>
+        <h2>Sådan spiller I</h2>
+
+        <div className="valg">
+          <div className="valg-r">
             <div>
-              <div className="eyebrow" style={{ marginBottom: 8 }}>Eller skriv koden på forsiden</div>
-              <div className="kodetal">{spil.kode}</div>
-            </div>
-          </div>
-
-          <div>
-            <div className="eyebrow" style={{ marginBottom: 14 }}>
-              Ved bordet · {spil.spillere.length} af 8
-            </div>
-            <div className="liste">
-              {spil.spillere.map((s) => (
-                <div key={s.id} className="raekke">
-                  <Brik navn={s.navn} farve={s.farve} str={36} />
-                  <div style={{ flexGrow: 1 }}>
-                    <div style={{ fontSize: 14.5, fontWeight: 600 }}>{s.navn}</div>
-                    <div className="note">{s.drik.navn} · {s.drik.enhedCl} cl · {formatProcent(s.drik)}</div>
-                  </div>
-                  {s.id === spil.vaertId && <Maerkat>VÆRT</Maerkat>}
-                  {s.id === migId && <Maerkat farve="var(--sage)">DIG</Maerkat>}
-                  {!s.tilsluttet && <Maerkat farve="var(--ink-faint)">OFFLINE</Maerkat>}
-                </div>
-              ))}
-              {spil.spillere.length < 8 && (
-                <div className="raekke raekke-tom">
-                  <div style={{ width: 36, height: 36, borderRadius: '50%', border: '1px dashed var(--line-2)' }} />
-                  <span style={{ fontSize: 14.5 }}>Venter på flere…</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        <section className="lobby-kol lobby-hoejre">
-          <div>
-            <div className="eyebrow">Husregler</div>
-            <h2 style={{ fontSize: 32, marginTop: 14 }}>Sådan spiller I</h2>
-          </div>
-
-          <div className="valg">
-            <div className="valg-r">
-              <div>
-                <div className="valg-t">Hardcore</div>
-                <div className="valg-d">
-                  Straf for alle tegn på stivhed. Man kan kun hoppe ud fra et blankt felt. Skal
-                  aftales fra begyndelsen.
-                </div>
+              <div className="valg-t">Hardcore</div>
+              <div className="valg-d">
+                Straf for alle tegn på stivhed. Man kan kun hoppe ud fra et blankt felt. Skal
+                aftales fra begyndelsen.
               </div>
-              <button
-                className={spil.indstillinger.hardcore ? 'kontakt kontakt-paa' : 'kontakt'}
-                disabled={!erVaert}
-                aria-pressed={spil.indstillinger.hardcore}
-                onClick={() => send({ type: 'saet-indstilling', hardcore: !spil.indstillinger.hardcore })}
-              >
-                <span />
-              </button>
             </div>
-
-            <div className="valg-r">
-              <div>
-                <div className="valg-t">Slurke for at tabe en Meier</div>
-                <div className="valg-d">
-                  Taberen drikker {MEIER_SLURKE} — også i hardcore. Dobbelt hvis der tabes på en Meyer.
-                </div>
-              </div>
-              <span style={{ fontFamily: 'var(--serif)', fontSize: 22, width: 24, textAlign: 'center' }}>
-                {MEIER_SLURKE}
-              </span>
-            </div>
-
-            <div className="valg-r" style={{ borderBottom: 'none' }}>
-              <div>
-                <div className="valg-t">Reglerne håndhæves</div>
-                <div className="valg-d">
-                  Serveren holder styr på turen: du kan ikke hoppe ud som Bier Meister eller med øl i
-                  tårnet, og de ramte slår selv om deres plads i pitten. Har du tårnet, spiller du med imens.
-                </div>
-              </div>
-              <Maerkat farve="var(--sage)">ALTID</Maerkat>
-            </div>
-          </div>
-
-          <div style={{ flexGrow: 1 }} />
-
-          {erVaert ? (
             <button
-              className="knap knap-primaer"
-              style={{ minHeight: 58 }}
-              disabled={spil.spillere.length < 1}
-              onClick={() => send({ type: 'start' })}
+              className={spil.indstillinger.hardcore ? 'kontakt kontakt-paa' : 'kontakt'}
+              disabled={!erVaert}
+              aria-pressed={spil.indstillinger.hardcore}
+              aria-label="Hardcore"
+              onClick={() => send({ type: 'saet-indstilling', hardcore: !spil.indstillinger.hardcore })}
             >
-              Start spillet
+              <span />
             </button>
-          ) : (
-            <div className="note" style={{ textAlign: 'center' }}>
-              Venter på at {spil.spillere.find((s) => s.id === spil.vaertId)?.navn ?? 'værten'} starter.
+          </div>
+
+          <div className="valg-r">
+            <div>
+              <div className="valg-t">Slurke for at tabe en Meier</div>
+              <div className="valg-d">
+                Taberen drikker {MEIER_SLURKE} — også i hardcore. Dobbelt hvis der tabes på en Meyer.
+              </div>
             </div>
-          )}
-        </section>
-      </div>
+            <span className="valg-tal">{MEIER_SLURKE}</span>
+          </div>
+
+          <div className="valg-r">
+            <div>
+              <div className="valg-t">Reglerne håndhæves</div>
+              <div className="valg-d">
+                Serveren holder styr på turen: du kan ikke hoppe ud som Bier Meister eller med øl i
+                tårnet, og de ramte slår selv om deres plads i pitten. Har du tårnet, spiller du med imens.
+              </div>
+            </div>
+            <Maerkat>ALTID</Maerkat>
+          </div>
+        </div>
+
+        <div style={{ flexGrow: 1, minHeight: 16 }} />
+
+        {erVaert ? (
+          <button
+            className="knap knap-primaer"
+            style={{ minHeight: 64, fontSize: 26, flexShrink: 0 }}
+            disabled={spil.spillere.length < 1}
+            onClick={() => send({ type: 'start' })}
+          >
+            Start spillet
+          </button>
+        ) : (
+          <div className="note" style={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
+            Venter på at {spil.spillere.find((s) => s.id === spil.vaertId)?.navn ?? 'værten'} starter.
+          </div>
+        )}
+      </section>
     </div>
   );
 }

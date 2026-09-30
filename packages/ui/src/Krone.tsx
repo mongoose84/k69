@@ -273,59 +273,60 @@ function KroneKast({ fyld, kast, minTur, kasterNavn, ingenUdpegning, onKast, onR
         >
           <defs>
             <linearGradient id="krone-oel" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="#F0B453" />
-              <stop offset="1" stopColor="#B8741E" />
+              <stop offset="0" stopColor="#F2C060" />
+              <stop offset="1" stopColor="#C4761A" />
             </linearGradient>
             <radialGradient id="krone-mont" cx="0.38" cy="0.35" r="0.75">
-              <stop offset="0" stopColor="#F6E6A8" />
-              <stop offset="0.55" stopColor="#DCC684" />
-              <stop offset="1" stopColor="#9A7A18" />
+              <stop offset="0" stopColor="#F7F9FB" />
+              <stop offset="0.55" stopColor="#BCC6D0" />
+              <stop offset="1" stopColor="#6D8AA6" />
             </radialGradient>
           </defs>
 
-          <ellipse cx={GLAS_MIDT} cy={-40} rx={420} ry={220} fill="#E0A03C" opacity={0.05} />
-          <rect x={0} y={TY} width={W} height={12} fill="#244C37" />
-          <rect x={0} y={TY + 12} width={W} height={60} fill="#15241C" />
-          <rect x={0} y={TY + 12} width={W} height={1.5} fill="#C9A227" opacity={0.55} />
+          <ellipse cx={GLAS_MIDT} cy={-40} rx={420} ry={220} fill="#F2C060" opacity={0.12} />
+          <rect x={0} y={TY} width={W} height={12} fill="#DFE6ED" />
+          <rect x={0} y={TY + 12} width={W} height={60} fill="#C3CFDB" />
+          <rect x={0} y={TY - 1.5} width={W} height={3} fill="#1B2733" />
+          <rect x={0} y={TY + 11} width={W} height={2} fill="#1B2733" />
 
           {s.hopMaerker.map((h) => (
             <g key={h.n}>
-              <ellipse cx={h.x} cy={TY + 1} rx={15} ry={3.5} fill="none" stroke="#E8CE7E" strokeWidth={1.4} opacity={0.8} />
-              <text x={h.x} y={TY + 30} fill="#E8CE7E" className="krone-svg-tekst" textAnchor="middle">{h.n}. HOP</text>
+              <ellipse cx={h.x} cy={TY + 1} rx={15} ry={3.5} fill="none" stroke="#1B2733" strokeWidth={2} />
+              <text x={h.x} y={TY + 30} fill="#1B2733" className="krone-svg-tekst" textAnchor="middle">{h.n}. HOP</text>
             </g>
           ))}
 
-          <rect x={GL} y={GT} width={GLAS_B} height={TY - GT} fill="#C4D3C6" opacity={0.05} />
+          <rect x={GL} y={GT} width={GLAS_B} height={TY - GT} fill="#E6ECF1" opacity={0.35} />
 
           {spor.current.map((q, i) => (
-            <circle key={i} cx={q.x} cy={q.y} r={3 + 5 * (i + 1) / n} fill="#DCC684" opacity={0.28 * (i + 1) / n} />
+            <circle key={i} cx={q.x} cy={q.y} r={3 + 5 * (i + 1) / n} fill="#1B2733" opacity={0.28 * (i + 1) / n} />
           ))}
 
           {s.fase === 'traekker' && p.l > 4 && (
             <>
               {forudsig(s, p).map((q, i) => (
-                <circle key={i} cx={q.x} cy={q.y} r={2.4} fill="#EDE7DA" opacity={q.o} />
+                <circle key={i} cx={q.x} cy={q.y} r={2.4} fill="#1B2733" opacity={q.o} />
               ))}
-              <line x1={s.x} y1={s.y} x2={s.x - p.x} y2={s.y - p.y} stroke="#97A398" strokeWidth={1.5} strokeDasharray="4 4" />
-              <circle cx={s.x - p.x} cy={s.y - p.y} r={5} fill="none" stroke="#97A398" strokeWidth={1.5} />
+              <line x1={s.x} y1={s.y} x2={s.x - p.x} y2={s.y - p.y} stroke="#0F1821" strokeWidth={1.8} strokeDasharray="4 4" />
+              <circle cx={s.x - p.x} cy={s.y - p.y} r={5} fill="none" stroke="#0F1821" strokeWidth={1.8} />
             </>
           )}
 
           {s.fase === 'sigte' && (
             <>
-              <circle cx={s.x} cy={s.y} r={24} fill="none" stroke="#E8CE7E" opacity={0.6} strokeWidth={1.2} strokeDasharray="3 5" />
-              <text x={s.x} y={s.y - 34} fill="#97A398" className="krone-svg-tekst" textAnchor="middle">{minTur ? 'TRÆK HERFRA' : 'SIGTER …'}</text>
+              <circle cx={s.x} cy={s.y} r={24} fill="none" stroke="#1B2733" strokeWidth={1.8} strokeDasharray="3 5" />
+              <text x={s.x} y={s.y - 34} fill="#0F1821" className="krone-svg-tekst" textAnchor="middle">{minTur ? 'TRÆK HERFRA' : 'SIGTER …'}</text>
             </>
           )}
 
-          <ellipse cx={s.x} cy={s.y} rx={R} ry={mry} fill="url(#krone-mont)" stroke="#9A7A18" strokeWidth={1} />
+          <ellipse cx={s.x} cy={s.y} rx={R} ry={mry} fill="url(#krone-mont)" stroke="#1B2733" strokeWidth={2} />
 
           <rect x={GL + 1} y={oelTop} width={GLAS_B - 2} height={TY - 7 - oelTop} fill="url(#krone-oel)" opacity={0.82} />
           <rect x={GL + 1} y={oelTop - 4} width={GLAS_B - 2} height={7} rx={2} fill="#F6EBD4" opacity={0.92} />
-          <rect x={GL} y={TY - 7} width={GLAS_B} height={7} fill="#C4D3C6" opacity={0.22} />
-          <line x1={GL} y1={GT} x2={GL} y2={TY} stroke="#C4D3C6" strokeWidth={2} />
-          <line x1={GR} y1={GT} x2={GR} y2={TY} stroke="#C4D3C6" strokeWidth={2} />
-          <text x={GLAS_MIDT} y={TY + 34} fill="#D3B44E" className="krone-svg-tekst" textAnchor="middle">TÅRNET</text>
+          <rect x={GL} y={TY - 7} width={GLAS_B} height={7} fill="#E6ECF1" opacity={0.6} />
+          <line x1={GL} y1={GT} x2={GL} y2={TY} stroke="#1B2733" strokeWidth={3} />
+          <line x1={GR} y1={GT} x2={GR} y2={TY} stroke="#1B2733" strokeWidth={3} />
+          <text x={GLAS_MIDT} y={TY + 34} fill="#1B2733" className="krone-svg-tekst" textAnchor="middle">TÅRNET</text>
         </svg>
       </div>
 
@@ -344,7 +345,7 @@ function KroneKast({ fyld, kast, minTur, kasterNavn, ingenUdpegning, onKast, onR
               <div className="note">Den skal hoppe på bordet mindst én gang, før den ryger i tårnet.</div>
             </div>
             <div className="krone-kraft">
-              <div className="krone-kraft-h"><span>Kraft</span><span style={{ color: 'var(--brass-lt)' }}>{kraft} %</span></div>
+              <div className="krone-kraft-h"><span>Kraft</span><span style={{ color: 'var(--ink)' }}>{kraft} %</span></div>
               <div className="krone-kraft-bar"><div style={{ width: `${kraft}%` }} /></div>
             </div>
           </>
@@ -359,7 +360,7 @@ function KroneKast({ fyld, kast, minTur, kasterNavn, ingenUdpegning, onKast, onR
         {s.fase === 'ramte' && (
           <>
             <div className="krone-resultat">
-              <div className="eyebrow" style={{ color: 'var(--amber)' }}>Den røg i!</div>
+              <div className="eyebrow" style={{ color: 'var(--ink)' }}>Den røg i!</div>
               <div className="krone-resultat-t">
                 {ingenUdpegning
                   ? `Plask. ${ingenUdpegning}`
@@ -415,8 +416,8 @@ export function KroneKort({ spil, migId, send, kompakt = false }: KroneKortProps
   return (
     <div className={`meier-kort krone-kort${kompakt ? ' meier-kort-mobil' : ''}`}>
       <div className="meier-band krone-band">
-        <span className="meier-prik" style={{ background: 'var(--brass-lt)' }} />
-        <span className="meier-band-tekst" style={{ color: 'var(--brass-lt)' }}>2-krone</span>
+        <span className="meier-prik" />
+        <span className="meier-band-tekst">2-krone</span>
         <span style={{ flexGrow: 1 }} />
         <span className="meier-band-h">Ét forsøg</span>
       </div>

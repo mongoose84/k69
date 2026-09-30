@@ -1,5 +1,5 @@
 import { useState, type JSX } from 'react';
-import { Brik, Maerkat } from '@k69/ui';
+import { Brik, Elefant, Maerkat } from '@k69/ui';
 import { formatProcent, type Handling, type Spil } from '@k69/rules';
 import { spilUrl } from '../api.js';
 
@@ -30,47 +30,49 @@ export function Lobby({
     <div className="skaerm">
       <header className="mobilbar">
         <div className="mark" style={{ fontSize: 24 }}>K69</div>
-        <div className="kode-lille">{spil.kode}</div>
+        <span className="pille" style={{ fontSize: 11, padding: '6px 11px' }}>Lobby</span>
         <div style={{ flexGrow: 1 }} />
-        <div className="note">{spil.spillere.length} af 8</div>
+        <Elefant str={64} />
       </header>
 
       <div className="rul">
-        <div className="blok">
-          <div className="eyebrow">Inden I går i gang</div>
-          <h1 style={{ fontSize: 30, marginTop: 12 }}>Del linket i gruppen</h1>
-          <p className="note" style={{ marginTop: 10, fontSize: 13, lineHeight: 1.65 }}>
-            Alle der åbner linket skriver bare et navn og vælger en brik.
-          </p>
+        <div className="side-hoved" style={{ paddingTop: 12 }}>
+          <h1>Del linket.<br />Hent glassene.</h1>
+          <p className="lead">Alle der åbner linket skriver bare et navn og vælger en brik.</p>
         </div>
 
         <div className="blok">
-          <button className="knap knap-primaer" style={{ width: '100%', minHeight: 56 }} onClick={() => void del()}>
+          <button className="knap knap-primaer" style={{ width: '100%' }} onClick={() => void del()}>
             {kopieret ? 'Linket er kopieret' : 'Del linket'}
           </button>
           <div className="linkboks-lille">{url}</div>
+          <div style={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', gap: '4px 14px', marginTop: 14 }}>
+            <span className="eyebrow" style={{ color: '#0f1821' }}>Eller skriv koden</span>
+            <span className="kodetal">{spil.kode}</span>
+          </div>
         </div>
 
         <div className="blok">
-          <div className="eyebrow" style={{ marginBottom: 12 }}>Ved bordet</div>
+          <div className="eyebrow" style={{ color: '#0f1821', marginBottom: 10 }}>Ved bordet · {spil.spillere.length} af 8</div>
           <div className="liste">
             {spil.spillere.map((s) => (
               <div key={s.id} className="raekke">
                 <Brik navn={s.navn} farve={s.farve} str={34} />
                 <div style={{ flexGrow: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 14.5, fontWeight: 600 }}>{s.navn}</div>
-                  <div className="note">{s.drik.navn} · {s.drik.enhedCl} cl · {formatProcent(s.drik)}</div>
+                  <div className="raekke-navn">{s.navn}</div>
+                  <div className="raekke-under">{s.drik.navn} · {s.drik.enhedCl} cl · {formatProcent(s.drik)}</div>
                 </div>
-                {s.id === spil.vaertId && <Maerkat>VÆRT</Maerkat>}
-                {s.id === migId && <Maerkat farve="var(--sage)">DIG</Maerkat>}
+                {s.id === spil.vaertId && <Maerkat art="fyldt">VÆRT</Maerkat>}
+                {s.id === migId && <Maerkat>DIG</Maerkat>}
               </div>
             ))}
           </div>
         </div>
 
-        <div className="blok">
-          <div className="eyebrow" style={{ marginBottom: 12 }}>Husregler</div>
-          <div className="valg-r" style={{ borderBottom: 'none' }}>
+        <div className="papir papir-blok" style={{ gap: 4 }}>
+          <div className="eyebrow">Husregler</div>
+          <h2 style={{ fontSize: 28, marginBottom: 8 }}>Sådan spiller I</h2>
+          <div className="valg-r">
             <div>
               <div className="valg-t">Hardcore</div>
               <div className="valg-d">Kun ud fra et blankt felt. Aftal det fra start.</div>
@@ -79,6 +81,7 @@ export function Lobby({
               className={spil.indstillinger.hardcore ? 'kontakt kontakt-paa' : 'kontakt'}
               disabled={!erVaert}
               aria-pressed={spil.indstillinger.hardcore}
+              aria-label="Hardcore"
               onClick={() => send({ type: 'saet-indstilling', hardcore: !spil.indstillinger.hardcore })}
             >
               <span />
@@ -87,13 +90,13 @@ export function Lobby({
         </div>
       </div>
 
-      <div className="ark-fast">
+      <div className="ark-fast papir">
         {erVaert ? (
-          <button className="knap knap-primaer" style={{ minHeight: 56 }} onClick={() => send({ type: 'start' })}>
+          <button className="knap knap-primaer" style={{ minHeight: 60, fontSize: 24 }} onClick={() => send({ type: 'start' })}>
             Start spillet
           </button>
         ) : (
-          <div className="note" style={{ textAlign: 'center' }}>
+          <div className="note" style={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
             Venter på at {spil.spillere.find((s) => s.id === spil.vaertId)?.navn ?? 'værten'} starter.
           </div>
         )}

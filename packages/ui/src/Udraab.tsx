@@ -1,5 +1,5 @@
 import { useEffect, useState, type CSSProperties, type JSX } from 'react';
-import { FELT_INFO, type Spil, type Udraab } from '@k69/rules';
+import type { Spil, Udraab } from '@k69/rules';
 import { BRIK_RYKKER_MS } from './Braet.js';
 import { Brik } from './Dele.js';
 import { Flitter } from './Meier.js';
@@ -12,12 +12,10 @@ function visMs(art: Udraab['art']): number {
   return 2600;
 }
 
-/** Feltets egen farve, så råbet ligner det felt man landede på. */
+/** Båndet øverst på råbet: blæk, og ravgult når det handler om øl. */
 function accent(art: Udraab['art']): string {
-  if (art === 'giv') return FELT_INFO.tre.farve;
-  if (art === 'bm') return FELT_INFO.bm.fyld;
-  if (art === 'drik') return '#D98279';
-  return FELT_INFO[art].farve;
+  if (art === 'skaal' || art === 'taarn') return '#E0A03C';
+  return '#1B2733';
 }
 
 /**

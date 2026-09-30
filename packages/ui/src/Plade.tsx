@@ -164,8 +164,8 @@ export function Plade({
               width={maal.b / k.z}
               height={maal.h / k.z}
               fill="none"
-              stroke="#C9A227"
-              strokeWidth="8"
+              stroke="#1B2733"
+              strokeWidth="10"
             />
           </svg>
         </div>

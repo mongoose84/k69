@@ -1,26 +1,31 @@
-/* Web (desktop). Mobilen har sit eget ark — layoutet er for forskelligt til at dele. */
+/* Web (desktop). Mobilen har sit eget ark — layoutet er for forskelligt til at dele.
+   Plakaten: stålblå grund, papir-paneler, blæk. Se design/plakaten/SPEC.md. */
 
 .tomskaerm {
+  position: relative;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 18px;
+  overflow: hidden;
   text-align: center;
-  background: radial-gradient(120% 90% at 50% -10%, #1a2620 0%, #0e1512 62%);
+  background: var(--grund);
 }
+.tomskaerm > :not(.vandmaerke) { position: relative; z-index: 1; }
 
 .stribe {
   position: fixed;
   inset: 0 0 auto 0;
-  padding: 8px;
+  padding: 9px;
   text-align: center;
   font-size: 12px;
+  font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  background: rgba(180, 72, 63, 0.9);
-  color: #fff;
+  background: #1b2733;
+  color: #ced8e2;
   z-index: 40;
 }
 
@@ -31,26 +36,29 @@
   transform: translateX(-50%);
   max-width: 520px;
   padding: 14px 20px;
-  border: 1px solid rgba(180, 72, 63, 0.5);
-  border-radius: 3px;
-  background: #1c1614;
-  color: #d4877f;
-  font-size: 13.5px;
+  border: 2px solid #1b2733;
+  border-left: 8px solid #a8423a;
+  border-radius: 4px;
+  background: var(--papir);
+  color: #1b2733;
+  font-size: 14px;
+  font-weight: 600;
   line-height: 1.5;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--papir-skygge);
   cursor: pointer;
   z-index: 50;
 }
 
 .fejltekst {
-  font-size: 12.5px;
+  font-size: 13px;
+  font-weight: 700;
   line-height: 1.5;
-  color: #d4877f;
+  color: #8a2f28;
 }
 
 .mærke {
   display: block;
-  margin-bottom: 9px;
+  margin-bottom: 8px;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.18em;
@@ -58,244 +66,299 @@
   color: var(--ink-faint);
 }
 
+/* ------------------------------------------------------------------ fælles */
+
+.plakat {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  background: var(--grund);
+}
+.plakat > :not(.vandmaerke):not(.elefant-stor) { position: relative; z-index: 1; }
+
+.plakat-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 /* ------------------------------------------------------------------ forside */
 
 .forside {
-  height: 100%;
-  display: flex;
-  overflow: hidden;
-  background: radial-gradient(130% 100% at 20% 0%, #1b2821 0%, #0d1310 65%);
-}
-
-.hero {
-  flex: 1 1 55%;
-  position: relative;
-  overflow: hidden;
-  border-right: 1px solid var(--line);
-  min-width: 0;
-}
-
-.hero-art {
-  position: absolute;
-  left: 50%;
-  top: 52%;
-  width: min(150%, 1700px);
-  opacity: 0.5;
-  filter: saturate(0.7) brightness(0.85);
-  transform: translate(-50%, -50%) rotate(-8deg);
-}
-
-.hero-slør {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(105deg, rgba(13, 19, 16, 0.94) 8%, rgba(13, 19, 16, 0.45) 52%, rgba(13, 19, 16, 0.92) 100%);
-}
-
-.hero-tekst {
-  position: absolute;
-  left: 72px;
-  top: 92px;
-  right: 72px;
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  padding: 40px 64px 56px;
 }
+.forside-vandmaerke {
+  left: 56px;
+  top: 20px;
+  font-size: min(560px, 62vh);
+}
+.forside-elefant {
+  right: -90px;
+  bottom: -120px;
+  width: min(900px, 62vw);
+  height: auto;
+}
+.forside-top { justify-content: space-between; }
+.forside-piller { display: flex; gap: 12px; }
 
-.hero-lead {
-  margin: 0;
-  font-family: var(--serif);
-  font-size: 27px;
-  line-height: 1.34;
-  color: var(--ink);
-  max-width: 520px;
-}
-
-.hero-kicker {
-  margin: 0;
-  font-size: 13.5px;
-  line-height: 1.75;
-  color: var(--ink-dim);
-  max-width: 470px;
-}
-
-.hero-tal {
-  position: absolute;
-  left: 72px;
-  bottom: 64px;
-  display: flex;
-  gap: 46px;
-}
-.hero-tal b {
-  display: block;
-  font-family: var(--serif);
-  font-size: 34px;
-  color: var(--brass-lt);
-  line-height: 1.1;
-}
-.hero-tal span {
-  font-size: 10.5px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-
-.panel {
-  flex: 0 0 clamp(430px, 33%, 620px);
+.forside-venstre {
+  margin-top: auto;
+  width: min(560px, 100%);
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 22px;
-  padding: 40px 64px;
-  overflow: auto;
+  gap: 32px;
+}
+.forside-hoved { display: flex; flex-direction: column; gap: 18px; }
+.forside-hoved h1 { font-size: 64px; }
+.forside-hoved .lead { font-size: 23px; max-width: 470px; }
+
+.forside-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+}
+.forside-raekke { display: flex; gap: 12px; align-items: stretch; }
+.forside-raekke-bund { align-items: flex-end; }
+.forside-raekke .knap-primaer { flex-shrink: 0; padding: 0 26px; }
+
+.forside-fod {
+  position: absolute !important;
+  right: 64px;
+  bottom: 32px;
+  margin: 0;
+  max-width: 320px;
+  padding: 8px 12px;
+  border-radius: 3px;
+  background: rgba(206, 216, 226, 0.9);
+  text-align: right;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #0f1821;
 }
 
 .faner {
   display: flex;
-  border-bottom: 1px solid var(--line);
+  gap: 20px;
+  border-bottom: 1.5px solid #bcc6d0;
 }
 .fane {
-  padding: 0 4px 14px;
-  margin-right: 30px;
+  height: 44px;
+  margin-bottom: -1.5px;
+  padding: 0;
   border: none;
-  border-bottom: 2px solid transparent;
+  border-bottom: 3px solid transparent;
   background: none;
-  font-size: 12px;
+  font-family: var(--sans);
+  font-size: 14px;
   font-weight: 700;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ink-faint);
+  color: #4a6075;
   cursor: pointer;
 }
 .fane-paa {
-  color: var(--brass-lt);
-  border-bottom-color: var(--brass);
+  color: #1b2733;
+  border-bottom-color: #1b2733;
 }
 
-.drikke {
+.kode-input {
+  height: 56px !important;
+  font-family: var(--display) !important;
+  font-size: 24px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+/* ------------------------------------------------------------------ tilmeld */
+
+.tilmeld {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(460px, 600px);
+  gap: 48px;
+  padding: 40px 64px;
+}
+.tilmeld-vandmaerke { left: 40px; top: 90px; font-size: min(300px, 34vh); }
+.tilmeld-elefant { left: 150px; bottom: -150px; width: min(560px, 38vw); height: auto; }
+.tilmeld-venstre {
   display: flex;
   flex-direction: column;
+  min-height: 0;
+}
+.tilmeld-hoved {
+  margin-top: auto;
+  margin-bottom: auto;
+  padding-top: 40px;
+  max-width: 540px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.tilmeld-hoved h1 { font-size: 60px; }
+.tilmeld-hoved .lead { font-size: 23px; }
+
+.tilmeld-panel {
+  min-height: 0;
+  overflow: auto;
+  padding: 36px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.brikvalg { display: flex; gap: 12px; flex-wrap: wrap; }
+.brikvalg button {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  box-shadow: var(--brik-dybde);
+  cursor: pointer;
+}
+.brikvalg button:disabled { opacity: 0.25; cursor: not-allowed; }
+.brikvalg .brikvalg-paa {
+  border-color: #1b2733;
+  box-shadow: 0 0 0 3px #ced8e2, 0 0 0 5px #1b2733;
+}
+
+.valgkort-gitter {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
-.drik {
+.valgkort {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 3px;
-  padding: 12px 16px;
-  border: 1px solid var(--line-2);
-  border-radius: 2px;
-  background: var(--panel);
-  cursor: pointer;
+  padding: 12px 14px;
+  border: 1.5px solid #9fb1c3;
+  border-radius: 3px;
+  background: #bcc6d0;
+  color: #1b2733;
   text-align: left;
+  cursor: pointer;
 }
-.drik b { font-size: 14px; font-weight: 600; color: var(--ink); }
-.drik span { font-size: 11px; letter-spacing: 0.05em; color: var(--ink-faint); }
-.drik-paa { border-color: var(--brass); background: rgba(201, 162, 39, 0.1); }
+.valgkort b {
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.valgkort span { font-size: 12.5px; color: #33475b; }
+.valgkort:hover { background: #c6d0da; }
+.valgkort-paa,
+.valgkort-paa:hover { background: #1b2733; border-color: #1b2733; color: #ced8e2; }
+.valgkort-paa span { color: #bcc6d0; }
 
 /* -------------------------------------------------------------------- lobby */
 
-.topbar {
-  height: 74px;
-  flex: 0 0 74px;
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  padding: 0 26px;
-  border-bottom: 1px solid var(--line);
-  background: rgba(12, 18, 15, 0.72);
-}
-
-.kode-chip {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  height: 30px;
-  padding: 0 12px;
-  border: 1px solid var(--line-2);
-  border-radius: 2px;
-  font-size: 11.5px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  color: var(--ink-dim);
-}
-.kode-chip b { color: var(--brass-lt); }
-
 .lobby {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  background: radial-gradient(120% 90% at 50% -10%, #1a2620 0%, #0e1512 62%);
-}
-.lobby-grid {
-  flex-grow: 1;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  min-height: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(420px, 520px);
+  grid-template-rows: auto minmax(0, 1fr);
+  column-gap: 56px;
+  padding: 40px 64px;
 }
+.lobby-elefant { right: 44px; top: 14px; width: 220px; height: auto; }
+.lobby .plakat-top { grid-column: 1 / -1; }
 .lobby-kol {
-  padding: 48px 64px;
+  min-height: 0;
+  overflow: auto;
+  padding-top: 34px;
   display: flex;
   flex-direction: column;
-  gap: 30px;
-  overflow: auto;
+  gap: 22px;
 }
+.lobby-kol h1 { font-size: 72px; line-height: 0.95; }
+.lobby-kol .lead { font-size: 21px; line-height: 1.45; max-width: 560px; }
+
 .lobby-hoejre {
-  border-left: 1px solid var(--line);
-  background: rgba(16, 23, 19, 0.5);
+  align-self: stretch;
+  margin-top: 150px;
+  min-height: 0;
+  overflow: auto;
+  padding: 32px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
+.lobby-hoejre h2 { font-size: 36px; margin-bottom: 10px; }
 
 .linkboks {
   display: flex;
-  align-items: center;
-  border: 1px solid var(--line-2);
-  border-radius: 2px;
-  background: var(--panel);
+  align-items: stretch;
+  height: 62px;
+  flex: 0 0 62px;
+  border: 2px solid #1b2733;
+  border-radius: 4px;
+  background: #ced8e2;
   overflow: hidden;
 }
 .linkboks span {
   flex-grow: 1;
+  min-width: 0;
   padding: 0 20px;
-  height: 62px;
   display: flex;
   align-items: center;
-  font-size: 15px;
+  font-size: 17px;
+  font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.linkboks button {
+  width: 140px;
+  flex: 0 0 140px;
+  border: 0;
+  background: #1b2733;
+  color: #ced8e2;
+  font-family: var(--display);
+  font-size: 20px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.linkboks button:hover { background: #0f1821; }
 
 .kodekort {
   display: flex;
-  align-items: center;
-  gap: 22px;
-  padding: 22px 26px;
-  border: 1px solid rgba(201, 162, 39, 0.35);
-  border-radius: 3px;
-  background: linear-gradient(135deg, rgba(201, 162, 39, 0.11), rgba(201, 162, 39, 0.02));
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 18px;
 }
+.kodekort .eyebrow { color: #0f1821; font-size: 12px; }
 .kodetal {
-  font-family: var(--serif);
-  font-size: 46px;
-  letter-spacing: 0.13em;
-  color: var(--brass-lt);
+  font-family: var(--display);
+  font-size: 64px;
+  letter-spacing: 0.18em;
   line-height: 1;
+  color: #ced8e2;
 }
 
 .liste { display: flex; flex-direction: column; gap: 8px; }
+.liste-to { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .raekke {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 12px 16px;
-  border: 1px solid var(--line);
-  border-radius: 2px;
-  background: var(--panel);
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 3px;
+  background: #ced8e2;
 }
 .raekke-tom {
-  border-style: dashed;
+  border: 2px dashed #1b2733;
   background: transparent;
-  color: var(--ink-faint);
+  color: #1b2733;
+  font-weight: 600;
 }
+.raekke-navn { font-size: 15px; font-weight: 700; }
+.raekke-under { font-size: 12.5px; color: #33475b; }
 
 .valg { display: flex; flex-direction: column; }
 .valg-r {
@@ -304,24 +367,26 @@
   justify-content: space-between;
   gap: 20px;
   padding: 16px 0;
-  border-bottom: 1px solid var(--line);
+  border-top: 1.5px solid #bcc6d0;
 }
-.valg-t { font-size: 13.5px; font-weight: 600; }
+.valg-t { font-size: 16px; font-weight: 700; }
 .valg-d {
-  font-size: 11.5px;
-  color: var(--ink-faint);
-  margin-top: 4px;
+  font-size: 13px;
+  color: #33475b;
+  margin-top: 3px;
   line-height: 1.5;
-  max-width: 340px;
+  max-width: 360px;
 }
+.valg-tal { font-family: var(--display); font-size: 32px; line-height: 1; }
 
 .kontakt {
-  width: 46px;
-  height: 26px;
-  flex: 0 0 46px;
+  width: 56px;
+  height: 32px;
+  flex: 0 0 56px;
+  padding: 3px;
   border-radius: 999px;
-  border: none;
-  background: var(--line-2);
+  border: 2px solid #1b2733;
+  background: #bcc6d0;
   position: relative;
   cursor: pointer;
 }
@@ -329,15 +394,15 @@
   position: absolute;
   top: 3px;
   left: 3px;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  background: #0e1512;
+  background: #1b2733;
   transition: left 140ms;
 }
-.kontakt-paa { background: var(--brass); }
-.kontakt-paa span { left: 23px; background: #14180c; }
-.kontakt:disabled { opacity: 0.45; cursor: not-allowed; }
+.kontakt-paa { background: #1b2733; }
+.kontakt-paa span { left: 27px; background: #ced8e2; }
+.kontakt:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* --------------------------------------------------------------------- bord */
 
@@ -345,19 +410,38 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: radial-gradient(120% 90% at 50% -10%, #1a2620 0%, #0e1512 62%);
+  background: var(--grund);
+}
+
+.topbar {
+  height: 72px;
+  flex: 0 0 72px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 0 28px;
+  border-bottom: 2px solid #1b2733;
+}
+.topbar-runde {
+  color: #0f1821;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 .tur-pille {
   display: flex;
   align-items: center;
-  gap: 12px;
-  height: 44px;
-  padding: 0 18px 0 6px;
-  border: 1px solid var(--line-2);
+  gap: 10px;
+  height: 42px;
+  padding: 0 16px 0 5px;
   border-radius: 999px;
-  background: var(--panel-2);
+  background: #1b2733;
+  color: #ced8e2;
 }
+.tur-pille-label { font-size: 11px; font-weight: 700; letter-spacing: 0.16em; }
+.tur-pille-navn { font-family: var(--display); font-size: 18px; letter-spacing: 0.04em; text-transform: uppercase; }
 
 .bord-krop {
   flex-grow: 1;
@@ -366,39 +450,42 @@
 }
 
 .rail {
-  width: 340px;
-  flex: 0 0 340px;
+  width: 330px;
+  flex: 0 0 330px;
   display: flex;
   flex-direction: column;
-  background: rgba(16, 23, 19, 0.6);
+  background: #ced8e2;
   min-height: 0;
 }
-.rail-v { border-right: 1px solid var(--line); }
-.rail-h { border-left: 1px solid var(--line); }
+.rail-v { width: 300px; flex-basis: 300px; border-right: 2px solid #1b2733; }
+.rail-h { border-left: 2px solid #1b2733; }
 .rail-sek {
   padding: 18px 20px 20px;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1.5px solid #bcc6d0;
 }
+.rail-sek-skil { border-top: 2px solid #1b2733; }
 .rail-hoved {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 
-.spillere { display: flex; flex-direction: column; gap: 4px; }
+.spillere { display: flex; flex-direction: column; gap: 2px; }
 .sp {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  margin: 0 -10px;
   padding: 9px 10px;
-  border-radius: 2px;
-  border: 1px solid transparent;
+  border-radius: 3px;
 }
-.sp-paa {
-  background: linear-gradient(90deg, rgba(201, 162, 39, 0.14), rgba(201, 162, 39, 0.02));
-  border-color: rgba(201, 162, 39, 0.4);
-}
+.sp-paa { background: #bcc6d0; }
+.sp-navn { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 14px; font-weight: 700; }
+.sp-tal { font-family: var(--serif); font-size: 26px; line-height: 1; }
+.sp-tal-ord { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-dim); margin-top: 3px; }
+
+.taarn-tal { font-family: var(--serif); font-size: 36px; line-height: 1; }
 
 .omregn { display: flex; gap: 6px; margin-top: 12px; }
 .om {
@@ -407,18 +494,27 @@
   flex-direction: column;
   gap: 3px;
   padding: 8px 9px;
-  border-radius: 2px;
-  border: 1px solid var(--line);
-  background: rgba(20, 29, 24, 0.55);
+  border-radius: 3px;
+  border: 1.5px solid #9fb1c3;
+  background: #dce3ea;
 }
 .om span {
   font-size: 9.5px;
+  font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-faint);
 }
-.om b { font-family: var(--serif); font-size: 15px; font-weight: 500; }
+.om b { font-family: var(--serif); font-size: 16px; font-weight: 500; }
 
+.bm-linje {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1.5px solid #bcc6d0;
+}
 .krone-boks {
   width: 40px;
   height: 40px;
@@ -426,9 +522,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(201, 162, 39, 0.45);
-  border-radius: 2px;
-  background: rgba(201, 162, 39, 0.1);
+  border-radius: 50%;
+  background: #1b2733;
 }
 
 .scene {
@@ -436,48 +531,58 @@
   min-width: 0;
   position: relative;
   display: flex;
+  overflow: hidden;
+  background: var(--lampe);
 }
+.scene-vandmaerke { left: 24px; top: 0; font-size: min(240px, 26vh); line-height: 1; }
+.scene-elefant { right: -70px; bottom: -90px; width: 300px; height: auto; }
 
 .plade {
   flex-grow: 1;
   position: relative;
+  z-index: 1;
   overflow: hidden;
   cursor: grab;
   touch-action: none;
-  background: radial-gradient(70% 60% at 50% 42%, #223129 0%, #131c17 70%, #0c120f 100%);
+  background: transparent;
 }
 .plade:active { cursor: grabbing; }
 
+/* Oppe i hjørnet — nede til højre sidder elefanten. */
 .plade-zoom {
   position: absolute;
   right: 18px;
-  bottom: 16px;
+  top: 16px;
   display: flex;
   gap: 6px;
 }
 .zknap {
-  width: 34px;
-  height: 34px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border: 1px solid var(--line-2);
-  border-radius: 2px;
-  background: rgba(14, 21, 18, 0.82);
-  color: var(--ink-dim);
-  font-size: 15px;
+  border: 2px solid #1b2733;
+  border-radius: 3px;
+  background: #ced8e2;
+  color: #1b2733;
+  font-size: 17px;
+  font-weight: 700;
 }
-.zknap:hover { color: var(--brass-lt); border-color: var(--brass); }
+.zknap:hover { background: #dce3ea; }
 
 .plade-hint {
   position: absolute;
-  left: 18px;
-  bottom: 18px;
-  font-size: 10.5px;
-  letter-spacing: 0.14em;
-  color: var(--ink-faint);
-  text-transform: uppercase;
+  z-index: 2;
+  left: 24px;
+  bottom: 20px;
+  padding: 6px 10px;
+  border-radius: 3px;
+  background: rgba(206, 216, 226, 0.9);
+  font-size: 12px;
+  font-weight: 600;
+  color: #0f1821;
   pointer-events: none;
 }
 
@@ -487,33 +592,37 @@
   top: 12px;
   width: 118px;
   height: 66px;
-  border: 1px solid var(--line-2);
-  border-radius: 2px;
-  background: rgba(11, 17, 14, 0.86);
+  border: 2px solid #1b2733;
+  border-radius: 3px;
+  background: #ced8e2;
   padding: 4px;
 }
 
-.log { display: flex; flex-direction: column; }
+.handling { padding: 20px; }
+
+.log { display: flex; flex-direction: column; gap: 9px; }
 .log-linje {
   display: flex;
-  gap: 12px;
-  padding: 11px 0;
-  border-bottom: 1px solid var(--line);
+  gap: 10px;
   font-size: 12.5px;
-  line-height: 1.5;
-  color: var(--ink-dim);
+  line-height: 1.45;
+  color: #33475b;
 }
 .log-prik {
-  width: 7px;
-  height: 7px;
-  flex: 0 0 7px;
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
   border-radius: 50%;
   margin-top: 5px;
+  border: 1.5px solid #1b2733;
 }
 
 @media (max-width: 1280px) {
   .rail { width: 300px; flex-basis: 300px; }
-  .panel { flex-basis: 460px; padding: 32px 44px; }
-  .hero-tekst { left: 44px; right: 44px; }
-  .hero-tal { left: 44px; }
+  .rail-v { width: 270px; flex-basis: 270px; }
+  .forside, .tilmeld, .lobby { padding-left: 44px; padding-right: 44px; }
+  .tilmeld { grid-template-columns: minmax(0, 1fr) minmax(420px, 520px); }
+  .lobby-kol h1 { font-size: 60px; }
+  .tilmeld-hoved h1 { font-size: 50px; }
+  .forside-fod { right: 44px; }
 }

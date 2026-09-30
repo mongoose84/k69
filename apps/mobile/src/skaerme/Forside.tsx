@@ -1,5 +1,5 @@
 import { useState, type JSX } from 'react';
-import { BRAET_STR, BraetDefs, BraetPlade, opretSpil, slaaOpSpil } from '@k69/ui';
+import { Elefant, opretSpil, slaaOpSpil } from '@k69/ui';
 import { API } from '../api.js';
 
 export function Forside({ onSpil }: { onSpil: (kode: string) => void }): JSX.Element {
@@ -34,34 +34,36 @@ export function Forside({ onSpil }: { onSpil: (kode: string) => void }): JSX.Ele
   };
 
   return (
-    <div className="skaerm">
-      <div className="hero">
-        <svg className="hero-art" viewBox={`0 0 ${BRAET_STR.w} ${BRAET_STR.h}`} aria-hidden="true">
-          <BraetDefs id="mf" />
-          <BraetPlade id="mf" brikker={[]} taarnAndel={0.4} />
-        </svg>
-        <div className="hero-slør" />
-        <div className="hero-tekst">
-          <div className="mark" style={{ fontSize: 64, lineHeight: 0.84 }}>K69</div>
-          <p className="hero-lead">Brættet fra Tinglev.<br />38 felter og ét tårn.</p>
-        </div>
+    <div className="skaerm forside">
+      <div className="vandmaerke forside-vandmaerke" aria-hidden="true">K69</div>
+      <Elefant className="elefant-stor forside-elefant" str={380} titel="Krunk-elefanten" />
+
+      <header className="mobilbar" style={{ justifyContent: 'space-between', padding: '0 20px' }}>
+        <div className="mark" style={{ fontSize: 24 }}>K69</div>
+        <span className="pille" style={{ fontSize: 11, padding: '6px 11px' }}>1–8 spillere</span>
+      </header>
+
+      <div className="forside-hoved">
+        <h1>Ét tårn.<br />En pit der gør ondt.</h1>
+        <p className="lead">Brættet fra Tinglev.<br />38 felter og ét tårn.</p>
       </div>
 
-      <div className="ark-fast">
-        <button className="knap knap-primaer" style={{ minHeight: 58 }} disabled={travl} onClick={() => void start()}>
+      <div className="ark-fast papir">
+        <button className="knap knap-primaer" disabled={travl} onClick={() => void start()}>
           {travl ? 'Opretter…' : 'Start et spil'}
         </button>
 
-        <div className="skille"><span>eller join med en kode</span></div>
+        <div className="skille"><span>eller deltag med en kode</span></div>
 
         <input
           type="text"
+          className="kode-input"
           value={kode}
           maxLength={8}
           placeholder="K7M2Q"
+          aria-label="Spilkode"
           inputMode="text"
           autoCapitalize="characters"
-          style={{ letterSpacing: '0.3em', textTransform: 'uppercase', fontFamily: 'var(--serif)', fontSize: 22, textAlign: 'center' }}
           onChange={(e) => saetKode(e.target.value)}
         />
         <button className="knap" style={{ minHeight: 52 }} disabled={travl || !kode.trim()} onClick={() => void join()}>

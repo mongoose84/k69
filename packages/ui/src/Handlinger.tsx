@@ -3,7 +3,7 @@ import {
   KULOER_TEGN, RANG_NAVN, STIGE, afventerSpiller, afgangSpaerret, formatCl, formatSlurke, taarnCl,
   taarnKapacitetSlurke, taarnLoeberOver, type Handling, type Spil, type Spiller
 } from '@k69/rules';
-import { Brik, HoldKnap, Kortbillede, Terning } from './Dele.js';
+import { Brik, Glas, HoldKnap, Kortbagside, Kortbillede, Terning } from './Dele.js';
 import { drikNavn, erRoedt, kuloerTegn, opgave, venterPaaSlag } from './tekst.js';
 
 export interface HandlingProps {
@@ -79,7 +79,7 @@ function GivSlurke({ spil, migId, send, antal }: HandlingProps & { antal: number
             >
               −
             </button>
-            <span style={{ fontFamily: 'var(--serif)', fontSize: 20, width: 26, textAlign: 'center' }}>{n}</span>
+            <span style={{ fontFamily: 'var(--display)', fontSize: 22, width: 26, textAlign: 'center' }}>{n}</span>
             <button
               className="knap"
               style={{ minHeight: 38, width: 38, padding: 0 }}
@@ -121,6 +121,13 @@ function FyldTaarn({ spil, send, migId }: HandlingProps): JSX.Element {
 
   return (
     <div style={kolonne}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <Glas andel={andel} bredde={52} hoejde={86} over={over} />
+        <div>
+          <div style={{ fontFamily: 'var(--display)', fontSize: 40, lineHeight: 1 }}>{taarnCl(spil.taarn.slurke)} cl</div>
+          <div style={{ fontSize: 13, fontWeight: 600, marginTop: 4 }}>{formatSlurke(spil.taarn.slurke)} i alt i tårnet</div>
+        </div>
+      </div>
       <HoldKnap
         tekst={over ? 'Nu løber det over' : 'Hold for at hælde i tårnet'}
         under={
@@ -135,6 +142,7 @@ function FyldTaarn({ spil, send, migId }: HandlingProps): JSX.Element {
         }}
         onSlip={() => undefined}
         hoejde={78}
+        over={over}
       />
       <div className="note">
         Der står {taarnCl(spil.taarn.slurke)} cl ({formatSlurke(spil.taarn.slurke)})
@@ -198,15 +206,15 @@ export function Handlingskort({ spil, migId, send, kompakt, ruller = false }: Ha
   const hoved = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <span style={{ width: 9, height: 9, borderRadius: '50%', background: o.farve }} />
-        <span className="eyebrow" style={{ color: o.farve }}>
+        <span style={{ width: 12, height: 12, borderRadius: '50%', background: o.farve, border: '2px solid #CED8E2' }} />
+        <span className="eyebrow">
           {terning && spil.terningAf
             ? `${spil.spillere.find((s) => s.id === spil.terningAf)?.navn ?? 'Nogen'} slog ${terning}`
             : `Runde ${spil.runde}`}
         </span>
       </div>
-      <h2 style={{ fontSize: kompakt ? 26 : 30, lineHeight: 1.08, color: o.farve }}>{o.titel}</h2>
-      <p style={{ margin: 0, fontSize: 13, lineHeight: 1.6, color: 'var(--ink-dim)' }}>{o.tekst}</p>
+      <h2 style={{ fontSize: kompakt ? 26 : 34, lineHeight: 1 }}>{o.titel}</h2>
+      <p style={{ margin: 0, fontSize: 13, lineHeight: 1.5, color: 'var(--ink-dim)' }}>{o.tekst}</p>
     </div>
   );
 
@@ -220,7 +228,7 @@ export function Handlingskort({ spil, migId, send, kompakt, ruller = false }: Ha
           <Terning vaerdi={terning} str={kompakt ? 60 : 76} ruller={ruller} />
           <button
             className="knap knap-primaer"
-            style={{ flexGrow: 1, minHeight: 58 }}
+            style={{ flexGrow: 1, minHeight: 58, padding: '0 12px', fontSize: 18, lineHeight: 1.05 }}
             disabled={ruller}
             onClick={() => send({ type: 'slaa' })}
           >
@@ -255,9 +263,18 @@ export function Handlingskort({ spil, migId, send, kompakt, ruller = false }: Ha
     styring = <SpillerValg spil={spil} migId={migId} medMigSelv onVaelg={(id) => send({ type: 'krone-udpeg', spillerId: id })} knaptekst="Bunder tårnet" />;
   } else if (a.slags === 'traek-kort' && paaMig) {
     styring = (
-      <button className="knap knap-primaer" style={{ minHeight: 58 }} onClick={() => send({ type: 'traek-kort' })}>
-        Træk et kort
-      </button>
+      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+        <button
+          aria-label="Træk det øverste kort"
+          onClick={() => send({ type: 'traek-kort' })}
+          style={{ padding: 0, border: 0, background: 'none', cursor: 'pointer' }}
+        >
+          <Kortbagside bredde={kompakt ? 72 : 84} />
+        </button>
+        <button className="knap knap-primaer" style={{ flexGrow: 1, minHeight: 58 }} onClick={() => send({ type: 'traek-kort' })}>
+          Træk et kort
+        </button>
+      </div>
     );
   } else if (a.slags === 'kort-udfald') {
     styring = (
