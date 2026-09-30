@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<title>K69 — træk et kort</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;1,6..96,500&amp;family=Karla:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1b2733}a:hover{color:#0f1821}
+button{cursor:pointer}
+.bagside{background:#1b2733 url(../assets/daaser.svg) center/28px 28px repeat}
+.korn{position:absolute;inset:0;background-image:url(../assets/korn.svg);opacity:0.12;mix-blend-mode:multiply;pointer-events:none}
+</style>
+</helmet>
+<div style="position: relative; width: 720px; height: 900px; box-sizing: border-box; background: radial-gradient(90% 75% at 28% 18%, #7b96b1 0%, #5f7d9b 52%, #48627e 100%); color: #1b2733; font-family: Karla, 'Helvetica Neue', sans-serif; overflow: hidden; display: flex; flex-direction: column; align-items: center; padding: 56px 60px; gap: 28px">
+  <div aria-hidden="true" style="position: absolute; left: -20px; top: 460px; font-family: Anton, Impact, sans-serif; font-size: 300px; line-height: 1; color: #6d8aa6">KORT</div>
+
+  <div style="position: relative; text-align: center; display: flex; flex-direction: column; gap: 6px">
+    <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase">Felt 7 · Rasmus</div>
+    <h1 style="margin: 0; font-family: Anton, Impact, sans-serif; font-weight: 400; font-size: 56px; line-height: 1; text-transform: uppercase">Træk et kort</h1>
+  </div>
+
+  <sc-if value="{{skjult}}" hint-placeholder-val="{{ true }}">
+    <button onClick="{{traek}}" aria-label="Træk det øverste kort" style="position: relative; width: 300px; height: 420px; border: 3px solid #1b2733; border-radius: 16px; background: #1b2733; padding: 14px; box-shadow: 10px 12px 0 #0f1821">
+      <span style="display: flex; width: 100%; height: 100%; box-sizing: border-box; border: 2px solid #5f7d9b; border-radius: 10px; align-items: center; justify-content: center" class="bagside">
+        <span style="width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #dce3ea, #bcc6d0); border: 3px solid #5f7d9b; display: flex; align-items: center; justify-content: center"><img src="../assets/elefant.svg" alt="" style="width: 150px; height: 141px"></span>
+      </span>
+    </button>
+  </sc-if>
+  <sc-if value="{{vendt}}" hint-placeholder-val="{{ false }}">
+    <div style="position: relative; width: 300px; height: 420px; box-sizing: border-box; border: 3px solid #1b2733; border-radius: 16px; background: #ced8e2; padding: 18px 20px; display: flex; flex-direction: column; box-shadow: 10px 12px 0 #0f1821">
+      <div style="font-family: Anton, Impact, sans-serif; font-size: 44px; line-height: 1; color: #a8423a">4 ♦</div>
+      <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center; gap: 12px; text-align: center">
+        <div style="font-family: Anton, Impact, sans-serif; font-size: 40px; line-height: 1; text-transform: uppercase">Del ud</div>
+        <p style="margin: 0; font-size: 15px; line-height: 1.5">Ruder må du give væk. 4 slurke at fordele som du vil.</p>
+      </div>
+      <div style="align-self: flex-end; font-family: Anton, Impact, sans-serif; font-size: 44px; line-height: 1; color: #a8423a; transform: rotate(180deg)">4 ♦</div>
+    </div>
+  </sc-if>
+
+  <div style="position: relative; width: 100%; box-sizing: border-box; background: linear-gradient(180deg, #dce3ea 0%, #ced8e2 60%, #c6d1dc 100%); border-radius: 12px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 4px rgba(15, 24, 33, 0.18), 0 28px 60px rgba(15, 24, 33, 0.38)">
+    <sc-if value="{{skjult}}" hint-placeholder-val="{{ true }}">
+      <p style="margin: 0; font-size: 15px; line-height: 1.5; text-align: center">Tryk på bunken for at vende det øverste kort.</p>
+    </sc-if>
+    <sc-if value="{{vendt}}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #3f566d">Hvem skal have dem? · 4 tilbage</div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap">
+          <button style="height: 44px; padding: 0 16px 0 6px; display: flex; align-items: center; gap: 8px; border: 2px solid #1b2733; border-radius: 999px; background: #bcc6d0; font-family: Karla, sans-serif; font-size: 14px; font-weight: 700; color: #1b2733"><span style="width: 26px; height: 26px; border-radius: 50%; background: #D8A93F; border: 2px solid #1b2733; box-sizing: border-box; box-shadow: inset 0 -3px 5px rgba(0, 0, 0, 0.3), inset 0 2px 3px rgba(255, 255, 255, 0.35), 0 2px 4px rgba(15, 24, 33, 0.35)"></span>Mette</button>
+          <button style="height: 44px; padding: 0 16px 0 6px; display: flex; align-items: center; gap: 8px; border: 2px solid #1b2733; border-radius: 999px; background: #bcc6d0; font-family: Karla, sans-serif; font-size: 14px; font-weight: 700; color: #1b2733"><span style="width: 26px; height: 26px; border-radius: 50%; background: #8FAF74; border: 2px solid #1b2733; box-sizing: border-box; box-shadow: inset 0 -3px 5px rgba(0, 0, 0, 0.3), inset 0 2px 3px rgba(255, 255, 255, 0.35), 0 2px 4px rgba(15, 24, 33, 0.35)"></span>Jeppe</button>
+          <button style="height: 44px; padding: 0 16px 0 6px; display: flex; align-items: center; gap: 8px; border: 2px solid #1b2733; border-radius: 999px; background: #bcc6d0; font-family: Karla, sans-serif; font-size: 14px; font-weight: 700; color: #1b2733"><span style="width: 26px; height: 26px; border-radius: 50%; background: #87A4C6; border: 2px solid #1b2733; box-sizing: border-box; box-shadow: inset 0 -3px 5px rgba(0, 0, 0, 0.3), inset 0 2px 3px rgba(255, 255, 255, 0.35), 0 2px 4px rgba(15, 24, 33, 0.35)"></span>Sofie</button>
+          <button style="height: 44px; padding: 0 16px 0 6px; display: flex; align-items: center; gap: 8px; border: 2px solid #1b2733; border-radius: 999px; background: #bcc6d0; font-family: Karla, sans-serif; font-size: 14px; font-weight: 700; color: #1b2733"><span style="width: 26px; height: 26px; border-radius: 50%; background: #B189A6; border: 2px solid #1b2733; box-sizing: border-box; box-shadow: inset 0 -3px 5px rgba(0, 0, 0, 0.3), inset 0 2px 3px rgba(255, 255, 255, 0.35), 0 2px 4px rgba(15, 24, 33, 0.35)"></span>Ida</button>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+  <div class="korn" aria-hidden="true"></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":720,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { vendt: false }; }
+  renderVals() {
+    return {
+      vendt: this.state.vendt, skjult: !this.state.vendt,
+      traek: () => this.setState({ vendt: true })
+    };
+  }
+}
+</script>
+</body>
+</html>
