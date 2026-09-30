@@ -71,7 +71,7 @@ export function Lobby({
 
         <div className="papir papir-blok" style={{ gap: 4 }}>
           <div className="eyebrow">Husregler</div>
-          <h2 style={{ fontSize: 28, marginBottom: 8 }}>Sådan spiller I</h2>
+          <h2 style={{ fontSize: 28, margin: '8px 0' }}>Sådan spiller I</h2>
           <div className="valg-r">
             <div>
               <div className="valg-t">Hardcore</div>

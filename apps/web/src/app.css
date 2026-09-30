@@ -288,7 +288,7 @@
   flex-direction: column;
   gap: 6px;
 }
-.lobby-hoejre h2 { font-size: 36px; margin-bottom: 10px; }
+.lobby-hoejre h2 { font-size: 36px; margin: 8px 0 10px; }
 
 .linkboks {
   display: flex;
