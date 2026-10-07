@@ -12,9 +12,10 @@ function visMs(art: Udraab['art']): number {
   return 2600;
 }
 
-/** Båndet øverst på råbet: blæk, og ravgult når det handler om øl. */
+/** Råbet står i blæk. DRIK! får den røde kulør, tårnet sin øl. */
 function accent(art: Udraab['art']): string {
-  if (art === 'skaal' || art === 'taarn') return '#E0A03C';
+  if (art === 'drik') return '#A8423A';
+  if (art === 'taarn') return '#C4761A';
   return '#1B2733';
 }
 

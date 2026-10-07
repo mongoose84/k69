@@ -23,16 +23,15 @@ export function Lobby({
   };
 
   return (
-    <div className="plakat lobby">
-      <Elefant className="elefant-stor lobby-elefant" str={220} />
+    <div className="plakat grund">
+      <Elefant className="plakat-elefant lobby-elefant" str={220} />
 
       <header className="plakat-top">
-        <div className="mark" style={{ fontSize: 28 }}>K69</div>
+        <div className="mark">K69</div>
         <span className="pille">Lobby</span>
-        <span className="pille">Spil {spil.kode}</span>
       </header>
 
-      <section className="lobby-kol">
+      <section className="lobby-venstre">
         <h1>Del linket.<br />Hent glassene.</h1>
         <p className="lead">
           Alle der åbner linket skriver bare et navn og vælger en brik. Ingen konto, ingen kode i
@@ -41,44 +40,44 @@ export function Lobby({
 
         <div className="linkboks">
           <span>{url}</span>
-          <button onClick={() => void kopier()}>{kopieret ? 'Kopieret' : 'Kopiér'}</button>
+          <button className="knap knap-primaer" onClick={() => void kopier()}>
+            {kopieret ? 'Kopieret' : 'Kopiér'}
+          </button>
         </div>
 
-        <div className="kodekort">
+        <div className="koderaekke">
           <span className="eyebrow">Eller skriv koden på forsiden</span>
           <span className="kodetal">{spil.kode}</span>
         </div>
 
         <div>
-          <div className="eyebrow" style={{ color: '#0f1821', fontSize: 12, marginBottom: 10 }}>
+          <div className="eyebrow" style={{ marginBottom: 10 }}>
             Ved bordet · {spil.spillere.length} af 8
           </div>
-          <div className="liste-to">
+          <div className="spillerkort">
             {spil.spillere.map((s) => (
               <div key={s.id} className="raekke">
                 <Brik navn={s.navn} farve={s.farve} str={34} />
                 <div style={{ flexGrow: 1, minWidth: 0 }}>
-                  <div className="raekke-navn">{s.navn}</div>
-                  <div className="raekke-under">{s.drik.navn} · {s.drik.enhedCl} cl · {formatProcent(s.drik)}</div>
+                  <div style={{ fontSize: 15, fontWeight: 700 }}>{s.navn}</div>
+                  <div className="note">{s.drik.navn} · {s.drik.enhedCl} cl · {formatProcent(s.drik)}</div>
                 </div>
-                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                  {s.id === spil.vaertId && <Maerkat art="fyldt">VÆRT</Maerkat>}
-                  {s.id === migId && <Maerkat>DIG</Maerkat>}
-                  {!s.tilsluttet && <Maerkat art="daempet">OFFLINE</Maerkat>}
-                </div>
+                {s.id === spil.vaertId && <Maerkat fyldt>VÆRT</Maerkat>}
+                {s.id === migId && <Maerkat>DIG</Maerkat>}
+                {!s.tilsluttet && <Maerkat>OFFLINE</Maerkat>}
               </div>
             ))}
             {spil.spillere.length < 8 && (
               <div className="raekke raekke-tom">
-                <div style={{ width: 34, height: 34, flex: '0 0 34px', borderRadius: '50%', border: '2px dashed #1b2733' }} />
-                <span style={{ fontSize: 15 }}>Venter på flere…</span>
+                <i />
+                <span>Venter på flere…</span>
               </div>
             )}
           </div>
         </div>
       </section>
 
-      <section className="papir lobby-hoejre">
+      <section className="papir lobby-panel">
         <div className="eyebrow">Husregler</div>
         <h2>Sådan spiller I</h2>
 
@@ -129,14 +128,13 @@ export function Lobby({
         {erVaert ? (
           <button
             className="knap knap-primaer"
-            style={{ minHeight: 64, fontSize: 26, flexShrink: 0 }}
             disabled={spil.spillere.length < 1}
             onClick={() => send({ type: 'start' })}
           >
             Start spillet
           </button>
         ) : (
-          <div className="note" style={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
+          <div className="note" style={{ textAlign: 'center' }}>
             Venter på at {spil.spillere.find((s) => s.id === spil.vaertId)?.navn ?? 'værten'} starter.
           </div>
         )}

@@ -77,9 +77,9 @@ export function SyverKort({
     >
       <span className="syver-ring" style={{ '--fyld': `${Math.round(andel * 100)}%` } as React.CSSProperties} />
       <svg width={str * 0.45} height={str * 0.64} viewBox="0 0 34 48" style={{ position: 'relative' }}>
-        <rect x="0" y="0" width="34" height="48" rx="3" fill="#0F1821" transform="translate(2, 2.5)" />
-        <rect x="0" y="0" width="34" height="48" rx="3" fill="#CED8E2" stroke="#1B2733" strokeWidth="2.5" />
-        <text x="4" y="12" fontSize="11" fill={farve} style={{ fontFamily: 'var(--display)' }}>7</text>
+        <rect x="0" y="0" width="34" height="48" rx="3" fill="#0F1821" transform="translate(2.5, 3)" />
+        <rect x="0" y="0" width="34" height="48" rx="3" fill="#CED8E2" stroke="#1B2733" strokeWidth="2" />
+        <text x="4" y="11" fontSize="10" fill={farve} style={{ fontFamily: 'var(--display)' }}>7</text>
         <text x="4" y="18" fontSize="7" fill={farve} style={{ fontFamily: 'var(--sans)' }}>{tegn}</text>
         <text x="17" y="31" textAnchor="middle" dominantBaseline="central" fontSize="16" fill={farve} style={{ fontFamily: 'var(--sans)' }}>{tegn}</text>
       </svg>

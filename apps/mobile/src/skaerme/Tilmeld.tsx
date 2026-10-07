@@ -1,6 +1,6 @@
 import { useState, type JSX } from 'react';
 import {
-  Brik, EgenDrikFelter, StoerrelseValg, egenDrikKlar, fastDrikValg, tomEgenDrik, type EgenDrik
+  EgenDrikFelter, StoerrelseValg, egenDrikKlar, fastDrikValg, navneliste, tomEgenDrik, type EgenDrik
 } from '@k69/ui';
 import {
   BRIKFARVER, DRIKKE, DRIK_LISTE, formatProcent, type DrikId, type DrikValg, type Handling, type KortHold, type Spil
@@ -30,24 +30,21 @@ export function Tilmeld({
   const drikValg: DrikValg | null = drik === 'egen' ? (egenDrikKlar(egen) ? egen : null) : fastDrikValg(drik, cl);
   const klar = Boolean(navn.trim()) && hold !== null && drikValg !== null && kanJoine;
 
-  const navne = spil.spillere.map((s) => s.navn);
-  const hvem = navne.length > 1 ? `${navne.slice(0, -1).join(', ')} og ${navne[navne.length - 1]}` : navne[0];
-
   return (
-    <div className="skaerm">
-      <div className="vandmaerke side-vandmaerke" aria-hidden="true">{spil.kode}</div>
+    <div className="skaerm grund">
+      <div className="vandmaerke mobil-vandmaerke" aria-hidden="true">{spil.kode}</div>
 
       <header className="mobilbar">
-        <div className="mark" style={{ fontSize: 24 }}>K69</div>
+        <div className="mark">K69</div>
         <span className="pille" style={{ fontSize: 11, padding: '6px 11px' }}>Spil {spil.kode}</span>
       </header>
 
       <div className="rul">
-        <div className="side-hoved">
+        <div className="mobil-intro">
           <h1>
-            {hvem
-              ? `${hvem} ${iGang ? 'er i gang.' : 'venter.'}`
-              : `Du er den første i ${spil.kode}.`}
+            {spil.spillere.length > 0
+              ? `${navneliste(spil.spillere.map((s) => s.navn))} ${iGang ? 'er i gang.' : 'venter.'}`
+              : 'Du er den første.'}
           </h1>
           <p className="lead">
             {iGang
@@ -56,7 +53,7 @@ export function Tilmeld({
           </p>
         </div>
 
-        <div className="papir papir-blok">
+        <section className="papir mobil-panel">
           <div className="blok">
             <label className="mærke" htmlFor="navn">Dit navn</label>
             <input id="navn" type="text" value={navn} maxLength={24} placeholder="Fx Sofie"
@@ -65,14 +62,19 @@ export function Tilmeld({
 
           <div className="blok">
             <div className="mærke">Din brik</div>
-            <div className="brikvalg">
+            <div className="brikvalg" style={{ gap: 10 }}>
               {BRIKFARVER.map((f) => {
                 const optaget = taget.has(f);
                 return (
-                  <button key={f} aria-label={`Brik i farven ${f}${optaget ? ' (taget)' : ''}`} aria-pressed={farve === f}
-                    disabled={optaget} onClick={() => saetFarve(f)}
+                  <button
+                    key={f}
+                    aria-label={`Brik i farven ${f}${optaget ? ' (taget)' : ''}`}
+                    aria-pressed={farve === f}
+                    disabled={optaget}
                     className={farve === f ? 'brikvalg-paa' : undefined}
-                    style={{ background: f }} />
+                    onClick={() => saetFarve(f)}
+                    style={{ background: f }}
+                  />
                 );
               })}
             </div>
@@ -80,14 +82,14 @@ export function Tilmeld({
 
           <div className="blok">
             <div className="mærke">Hvad drikker du?</div>
-            <div className="fire">
+            <div className="to">
               {DRIK_LISTE.map((d) => (
-                <button key={d.id} className={drik === d.id ? 'flise flise-paa' : 'flise'} onClick={() => { saetDrik(d.id); saetCl(d.enhedCl); }}>
+                <button key={d.id} className={drik === d.id ? 'valgkort valgkort-paa' : 'valgkort'} onClick={() => { saetDrik(d.id); saetCl(d.enhedCl); }}>
                   <b>{d.navn}</b>
                   <span>{formatProcent(d)} · {drik === d.id ? cl : d.enhedCl} cl</span>
                 </button>
               ))}
-              <button className={drik === 'egen' ? 'flise flise-paa' : 'flise'} onClick={() => saetDrik('egen')}>
+              <button className={drik === 'egen' ? 'valgkort valgkort-paa' : 'valgkort'} onClick={() => saetDrik('egen')}>
                 <b>Andet</b>
                 <span>Skriv selv</span>
               </button>
@@ -100,7 +102,7 @@ export function Tilmeld({
                 <EgenDrikFelter vaerdi={egen} onSkift={(v) => { saetEgen(v); ryd(); }} />
               </div>
             )}
-            <div className="note" style={{ marginTop: 8 }}>
+            <div className="note" style={{ marginTop: 10 }}>
               En slurk er den samme mængde alkohol uanset hvad du drikker — 33 cl pilsner er 11 slurke.
             </div>
           </div>
@@ -109,7 +111,7 @@ export function Tilmeld({
             <div className="mærke">Dame- og kongekort</div>
             <div className="to">
               {HOLD.map((h) => (
-                <button key={h.id} className={hold === h.id ? 'flise flise-paa' : 'flise'} onClick={() => saetHold(h.id)}>
+                <button key={h.id} className={hold === h.id ? 'valgkort valgkort-paa' : 'valgkort'} onClick={() => saetHold(h.id)}>
                   <b>{h.navn}</b>
                   <span>{h.forklaring}</span>
                 </button>
@@ -119,17 +121,17 @@ export function Tilmeld({
           </div>
 
           {fejl && <div className="fejltekst">{fejl}</div>}
-        </div>
+        </section>
       </div>
 
-      <div className="ark-fast" style={{ padding: 0, marginTop: 0 }}>
+      <div className="ark-fast lys">
         <button
           className="knap knap-primaer"
           style={{ minHeight: 56 }}
           disabled={!klar}
           onClick={() => hold && drikValg && send({ type: 'join', navn, farve, drik: drikValg, kortHold: hold })}
         >
-          <Brik navn={navn || '?'} farve={farve} str={26} />
+          <span style={{ width: 26, height: 26, borderRadius: '50%', background: farve, border: '2px solid #ced8e2' }} />
           {!kanJoine ? 'Spillet er slut' : iGang ? 'Hop med i spillet' : 'Kom med i spillet'}
         </button>
       </div>

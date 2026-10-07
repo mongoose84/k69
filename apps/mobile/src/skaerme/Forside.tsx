@@ -34,44 +34,48 @@ export function Forside({ onSpil }: { onSpil: (kode: string) => void }): JSX.Ele
   };
 
   return (
-    <div className="skaerm forside">
+    <div className="skaerm grund">
       <div className="vandmaerke forside-vandmaerke" aria-hidden="true">K69</div>
-      <Elefant className="elefant-stor forside-elefant" str={380} titel="Krunk-elefanten" />
+      <Elefant className="plakat-elefant forside-elefant" str={380} titel="Krunk-elefanten" />
 
       <header className="mobilbar" style={{ justifyContent: 'space-between', padding: '0 20px' }}>
-        <div className="mark" style={{ fontSize: 24 }}>K69</div>
+        <div className="mark">K69</div>
         <span className="pille" style={{ fontSize: 11, padding: '6px 11px' }}>1–8 spillere</span>
       </header>
 
-      <div className="forside-hoved">
-        <h1>Ét tårn.<br />En pit der gør ondt.</h1>
-        <p className="lead">Brættet fra Tinglev.<br />38 felter og ét tårn.</p>
-      </div>
+      <div className="forside-indhold">
+        <div className="forside-tekst">
+          <h1>Ét tårn.<br />En pit der gør ondt.</h1>
+          <p className="lead">Brættet fra Tinglev. Start et spil og del linket i gruppen.</p>
+        </div>
 
-      <div className="ark-fast papir">
-        <button className="knap knap-primaer" disabled={travl} onClick={() => void start()}>
-          {travl ? 'Opretter…' : 'Start et spil'}
-        </button>
+        <section className="papir forside-panel">
+          <button className="knap knap-primaer" disabled={travl} onClick={() => void start()}>
+            {travl ? 'Opretter…' : 'Start et spil'}
+          </button>
 
-        <div className="skille"><span>eller deltag med en kode</span></div>
+          <div className="skille"><span>eller deltag med en kode</span></div>
 
-        <input
-          type="text"
-          className="kode-input"
-          value={kode}
-          maxLength={8}
-          placeholder="K7M2Q"
-          aria-label="Spilkode"
-          inputMode="text"
-          autoCapitalize="characters"
-          onChange={(e) => saetKode(e.target.value)}
-        />
-        <button className="knap" style={{ minHeight: 52 }} disabled={travl || !kode.trim()} onClick={() => void join()}>
-          Find spillet
-        </button>
+          <label className="eyebrow" htmlFor="kode-m" style={{ marginBottom: -4 }}>Spilkode</label>
+          <input
+            id="kode-m"
+            type="text"
+            className="kodefelt"
+            value={kode}
+            maxLength={8}
+            placeholder="FX K7M2Q"
+            inputMode="text"
+            autoCapitalize="characters"
+            style={{ textAlign: 'center', height: 56 }}
+            onChange={(e) => saetKode(e.target.value)}
+          />
+          <button className="knap" style={{ minHeight: 52 }} disabled={travl || !kode.trim()} onClick={() => void join()}>
+            Find spillet
+          </button>
 
-        {fejl && <div className="fejltekst">{fejl}</div>}
-        <div className="note">Ingen konto og ingen kode i mailen. Har du fået et link, så åbn det bare.</div>
+          {fejl && <div className="fejltekst">{fejl}</div>}
+          <div className="note">Ingen konto og ingen kode i mailen. Har du fået et link, så åbn det bare.</div>
+        </section>
       </div>
     </div>
   );

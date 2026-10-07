@@ -35,13 +35,13 @@ export function Forside({ onSpil }: { onSpil: (kode: string) => void }): JSX.Ele
   };
 
   return (
-    <div className="plakat forside">
+    <div className="plakat grund">
       <div className="vandmaerke forside-vandmaerke" aria-hidden="true">K69</div>
-      <Elefant className="elefant-stor forside-elefant" str={900} titel="Krunk-elefanten" />
+      <Elefant className="plakat-elefant forside-elefant" str={900} titel="Krunk-elefanten" />
 
-      <header className="plakat-top forside-top">
-        <div className="mark" style={{ fontSize: 28 }}>K69</div>
-        <div className="forside-piller">
+      <header className="plakat-top">
+        <div className="mark">K69</div>
+        <div className="piller">
           <span className="pille">38 felter</span>
           <span className="pille">6 i pitten</span>
           <span className="pille">1–8 spillere</span>
@@ -49,7 +49,7 @@ export function Forside({ onSpil }: { onSpil: (kode: string) => void }): JSX.Ele
       </header>
 
       <div className="forside-venstre">
-        <div className="forside-hoved">
+        <div>
           <h1>Ét tårn.<br />En pit der gør ondt.</h1>
           <p className="lead">
             Brættet fra Tinglev, nu i browseren. Start et spil, del linket i gruppen — resten drikker I selv.
@@ -73,20 +73,21 @@ export function Forside({ onSpil }: { onSpil: (kode: string) => void }): JSX.Ele
                 hvad de drikker — så er de med.
               </p>
               <button className="knap knap-primaer" disabled={travl} onClick={() => void start()}>
-                {travl ? 'Opretter…' : 'Opret spil og få et link'}
+                {travl ? 'Opretter…' : 'Opret spil'}
               </button>
             </div>
           ) : (
-            <div className="forside-raekke forside-raekke-bund">
+            <div className="forside-raekke forside-raekke-kode">
               <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <label className="mærke" htmlFor="kode" style={{ margin: 0 }}>Spilkode</label>
+                <label className="eyebrow" htmlFor="kode">Spilkode</label>
                 <input
                   id="kode"
                   type="text"
-                  className="kode-input"
+                  className="kodefelt"
                   value={kode}
                   maxLength={8}
                   placeholder="FX K7M2Q"
+                  style={{ height: 56 }}
                   onChange={(e) => saetKode(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && void join()}
                 />

@@ -27,51 +27,53 @@ export function Lobby({
   };
 
   return (
-    <div className="skaerm">
+    <div className="skaerm grund">
+      <Elefant className="plakat-elefant mobil-elefant" str={150} />
+
       <header className="mobilbar">
-        <div className="mark" style={{ fontSize: 24 }}>K69</div>
+        <div className="mark">K69</div>
         <span className="pille" style={{ fontSize: 11, padding: '6px 11px' }}>Lobby</span>
-        <div style={{ flexGrow: 1 }} />
-        <Elefant str={64} />
+        <span className="eyebrow" style={{ marginLeft: 6 }}>{spil.spillere.length} af 8</span>
       </header>
 
       <div className="rul">
-        <div className="side-hoved" style={{ paddingTop: 12 }}>
+        <div className="mobil-intro">
           <h1>Del linket.<br />Hent glassene.</h1>
           <p className="lead">Alle der åbner linket skriver bare et navn og vælger en brik.</p>
         </div>
 
         <div className="blok">
-          <button className="knap knap-primaer" style={{ width: '100%' }} onClick={() => void del()}>
+          <button className="knap knap-primaer" style={{ width: '100%', minHeight: 56 }} onClick={() => void del()}>
             {kopieret ? 'Linket er kopieret' : 'Del linket'}
           </button>
           <div className="linkboks-lille">{url}</div>
-          <div style={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', gap: '4px 14px', marginTop: 14 }}>
-            <span className="eyebrow" style={{ color: '#0f1821' }}>Eller skriv koden</span>
-            <span className="kodetal">{spil.kode}</span>
-          </div>
+        </div>
+
+        <div className="blok" style={{ gap: 6 }}>
+          <span className="eyebrow">Eller skriv koden på forsiden</span>
+          <span className="kodetal">{spil.kode}</span>
         </div>
 
         <div className="blok">
-          <div className="eyebrow" style={{ color: '#0f1821', marginBottom: 10 }}>Ved bordet · {spil.spillere.length} af 8</div>
+          <div className="eyebrow" style={{ marginBottom: 10 }}>Ved bordet</div>
           <div className="liste">
             {spil.spillere.map((s) => (
               <div key={s.id} className="raekke">
                 <Brik navn={s.navn} farve={s.farve} str={34} />
                 <div style={{ flexGrow: 1, minWidth: 0 }}>
-                  <div className="raekke-navn">{s.navn}</div>
-                  <div className="raekke-under">{s.drik.navn} · {s.drik.enhedCl} cl · {formatProcent(s.drik)}</div>
+                  <div style={{ fontSize: 15, fontWeight: 700 }}>{s.navn}</div>
+                  <div className="note">{s.drik.navn} · {s.drik.enhedCl} cl · {formatProcent(s.drik)}</div>
                 </div>
-                {s.id === spil.vaertId && <Maerkat art="fyldt">VÆRT</Maerkat>}
+                {s.id === spil.vaertId && <Maerkat fyldt>VÆRT</Maerkat>}
                 {s.id === migId && <Maerkat>DIG</Maerkat>}
               </div>
             ))}
           </div>
         </div>
 
-        <div className="papir papir-blok" style={{ gap: 4 }}>
+        <section className="papir mobil-panel" style={{ gap: 0 }}>
           <div className="eyebrow">Husregler</div>
-          <h2 style={{ fontSize: 28, margin: '8px 0' }}>Sådan spiller I</h2>
+          <h2 style={{ fontSize: 28, margin: '6px 0 10px' }}>Sådan spiller I</h2>
           <div className="valg-r">
             <div>
               <div className="valg-t">Hardcore</div>
@@ -87,16 +89,16 @@ export function Lobby({
               <span />
             </button>
           </div>
-        </div>
+        </section>
       </div>
 
-      <div className="ark-fast papir">
+      <div className="ark-fast lys">
         {erVaert ? (
           <button className="knap knap-primaer" style={{ minHeight: 60, fontSize: 24 }} onClick={() => send({ type: 'start' })}>
             Start spillet
           </button>
         ) : (
-          <div className="note" style={{ textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
+          <div className="note" style={{ textAlign: 'center' }}>
             Venter på at {spil.spillere.find((s) => s.id === spil.vaertId)?.navn ?? 'værten'} starter.
           </div>
         )}

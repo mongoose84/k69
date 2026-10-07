@@ -41,26 +41,26 @@ export function Bord({
   ).values()];
 
   return (
-    <div className="bord">
+    <div className="bord grund">
       <header className="topbar">
-        <div className="mark" style={{ fontSize: 30 }}>K69</div>
+        <div className="mark">K69</div>
         <span className="pille">Spil {spil.kode}</span>
         {paaTur && (
           <div className="tur-pille">
-            <Brik navn={paaTur.navn} farve={paaTur.farve} str={32} />
-            <span className="tur-pille-label">TUR</span>
-            <span className="tur-pille-navn">{paaTur.navn}</span>
+            <span style={{ width: 30, height: 30, borderRadius: '50%', background: paaTur.farve, border: '2px solid #ced8e2', boxShadow: 'var(--brik-skygge)' }} />
+            <span className="tur-pille-l">TUR</span>
+            <span className="tur-pille-n">{paaTur.navn}</span>
           </div>
         )}
         <SyverKort spil={spil} migId={migId} send={send} />
         <div style={{ flexGrow: 1 }} />
-        <div className="topbar-runde">Runde {spil.runde}</div>
+        <span className="topbar-runde">Runde {spil.runde}</span>
         <LydKnap />
       </header>
 
       <div className="bord-krop">
-        <aside className="rail rail-v">
-          <section className="rail-sek" style={{ flexGrow: 1, minHeight: 0, overflow: 'auto', borderBottom: 'none' }}>
+        <aside className="rail rail-v lys">
+          <section className="rail-sek" style={{ flexGrow: 1, minHeight: 0, overflow: 'auto' }}>
             <div className="rail-hoved">
               <span className="eyebrow">Ved bordet</span>
               <span className="eyebrow">{spil.spillere.length}</span>
@@ -68,18 +68,18 @@ export function Bord({
             <div className="spillere">
               {spil.spillere.map((s) => (
                 <div key={s.id} className={s.id === paaTur?.id ? 'sp sp-paa' : 'sp'}>
-                  <Brik navn={s.navn} farve={s.farve} str={32} />
+                  <Brik navn={s.navn} farve={s.farve} str={30} />
                   <div style={{ flexGrow: 1, minWidth: 0 }}>
-                    <div className="sp-navn">
-                      <span>{s.navn}</span>
-                      {s.id === spil.bierMeisterId && <Maerkat art="fyldt">BM</Maerkat>}
-                      {s.id === spil.taarn.toemmesAfId && <Maerkat art="oel">TÅRNET</Maerkat>}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
+                      <span className="sp-navn">{s.navn}</span>
+                      {s.id === spil.bierMeisterId && <Maerkat fyldt>BM</Maerkat>}
+                      {s.id === spil.taarn.toemmesAfId && <Maerkat fyldt>TÅRNET</Maerkat>}
                       {s.id === spil.syver?.holderId && <Maerkat>7'ER</Maerkat>}
                       {s.pitPlads > 0 && <Maerkat>PIT {s.pitPlads}</Maerkat>}
                       {s.id === migId && <Maerkat>DIG</Maerkat>}
-                      {!s.tilsluttet && <Maerkat art="daempet">OFFLINE</Maerkat>}
+                      {!s.tilsluttet && <Maerkat>OFFLINE</Maerkat>}
                     </div>
-                    <div className="note" style={{ fontSize: 11.5 }}>{spillerStatus(s)}</div>
+                    <div className="sp-status">{spillerStatus(s)}</div>
                     <div style={{ marginTop: 5, display: 'flex', alignItems: 'center', gap: 8 }}>
                       <Slurkemaaler tilbage={s.slurkeTilbage} ialt={slurkePrEnhed(s.drik)} bredde={8} />
                       <span className="note" style={{ fontSize: 10.5 }}>{formatAntal(s.slurkeTilbage)}/{formatAntal(slurkePrEnhed(s.drik))}</span>
@@ -87,14 +87,14 @@ export function Bord({
                   </div>
                   <div style={{ textAlign: 'right', flex: '0 0 58px' }} title={`${s.enheder} tømt · ${formatSlurke(s.slurkeIAlt)} i alt`}>
                     <div className="sp-tal">{s.enheder}</div>
-                    <div className="sp-tal-ord">{enhederOrd(s.enheder, s.drik)}</div>
+                    <div className="sp-ord">{enhederOrd(s.enheder, s.drik)}</div>
                   </div>
                 </div>
               ))}
             </div>
           </section>
 
-          <section className="rail-sek rail-sek-skil" style={{ borderBottom: 'none' }}>
+          <section className="rail-sek">
             <div className="rail-hoved">
               <span className="eyebrow">Tårnet</span>
               <span className="eyebrow">{spil.indstillinger.taarnKapacitetCl} cl glas</span>
@@ -103,11 +103,11 @@ export function Bord({
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <Glas andel={andel} bredde={44} hoejde={70} over={taarnLoeberOver(spil)} />
               <div>
-                <div className="taarn-tal">{taarnCl(spil.taarn.slurke)} cl</div>
-                <div className="note" style={{ fontSize: 12, marginTop: 3 }}>
+                <div className="taarn-cl">{taarnCl(spil.taarn.slurke)} cl</div>
+                <div className="note" style={{ marginTop: 4 }}>
                   {formatSlurke(spil.taarn.slurke)}
                   {jeg && jeg.drik.id !== 'ol'
-                    ? <> — <b style={{ color: 'var(--ink)' }}>{taarnFor(spil, jeg)}</b> af din {drikNavn(jeg.drik)}</>
+                    ? <> — <b>{taarnFor(spil, jeg)}</b> af din {drikNavn(jeg.drik)}</>
                     : null}
                   .
                   {toemmer && <> {toemmer.navn} er i gang med at bunde det.</>}
@@ -126,9 +126,9 @@ export function Bord({
               </div>
             )}
 
-            <div className="bm-linje">
+            <div className="bm-raekke">
               <div className="krone-boks">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CED8E2" strokeWidth="1.8" strokeLinejoin="round">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ced8e2" strokeWidth="1.8" strokeLinejoin="round">
                   <path d="M3 8l4 4 5-8 5 8 4-4v10H3z" />
                 </svg>
               </div>
@@ -143,13 +143,12 @@ export function Bord({
                 </div>
               </div>
             </div>
-
           </section>
         </aside>
 
         <main className="scene">
           <div className="vandmaerke scene-vandmaerke" aria-hidden="true">Runde {spil.runde}</div>
-          <Elefant className="elefant-stor scene-elefant" str={300} />
+          <Elefant className="plakat-elefant scene-elefant" str={300} />
           <Plade
             id="b"
             brikker={brikker}
@@ -169,20 +168,19 @@ export function Bord({
           <FejringKort spil={spil} />
         </main>
 
-        <aside className="rail rail-h">
-          <section
-            className={o ? 'rail-sek handling paa-blaek action-farvet' : 'rail-sek handling paa-blaek'}
-            style={o ? ({ '--sp': o.farve } as React.CSSProperties) : undefined}
-          >
-            <Handlingskort spil={spil} migId={migId} send={send} ruller={ruller} />
-          </section>
+        <aside className="rail rail-h lys">
+          {o && (
+            <section className="rail-sek handling-sek blaek action-farvet" style={{ '--sp': o.farve } as React.CSSProperties}>
+              <Handlingskort spil={spil} migId={migId} send={send} ruller={ruller} />
+            </section>
+          )}
 
           <section className="rail-sek">
             <div className="rail-hoved"><span className="eyebrow">Seneste ture</span></div>
             <SenesteTure spil={spil} />
           </section>
 
-          <section className="rail-sek" style={{ flexGrow: 1, minHeight: 0, overflow: 'auto', borderBottom: 'none' }}>
+          <section className="rail-sek" style={{ flexGrow: 1, minHeight: 0, overflow: 'auto' }}>
             <div className="rail-hoved"><span className="eyebrow">Hændelser</span></div>
             <div className="log">
               {spil.log.slice(0, 40).map((h) => (

@@ -16,6 +16,12 @@ export function kuloerTegn(k: Kort): string {
   return KULOER_TEGN[k.kuloer];
 }
 
+/** "Mette", "Mette og Jeppe", "Mette, Jeppe og Sofie". */
+export function navneliste(navne: string[]): string {
+  if (navne.length < 2) return navne[0] ?? '';
+  return `${navne.slice(0, -1).join(', ')} og ${navne[navne.length - 1]}`;
+}
+
 /** Er der et terningslag på vej, står terningen blank — ellers viser den det sidste. */
 export function venterPaaSlag(spil: Spil): boolean {
   const a = spil.afventer;

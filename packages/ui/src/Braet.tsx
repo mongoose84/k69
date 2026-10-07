@@ -1,33 +1,18 @@
-import { FELTER, FELT_INFO, FINGER_POS, INDRE_STI, PIT, BORDET_GEO, YDRE_STI, BRAET_STR, type FeltType } from '@k69/rules';
+import {
+  FELTER, FELT_INFO, FINGER_POS, INDRE_STI, PIT, BORDET_GEO, YDRE_STI, BRAET_STR, taarnKapacitetSlurke, type FeltType
+} from '@k69/rules';
 import { useEffect, useState, type JSX } from 'react';
-import { Elefant } from './Elefant.js';
 
 const SANS = "Karla, 'Helvetica Neue', Arial, sans-serif";
 const DISPLAY = "Anton, Impact, 'Arial Narrow', sans-serif";
 
 const BLAEK = '#1B2733';
+const BLAEK_DYB = '#0F1821';
 const LYS = '#CED8E2';
 const MELLEM = '#BCC6D0';
-const DAEMPET = '#3F566D';
+const KANT_LYS = '#9FB1C3';
+const DAEMPET = '#33475B';
 const ROED = '#A8423A';
-
-/**
- * Plakat-farverne for hver felttype. Typen står altid som tekst på feltet —
- * farven er aldrig det eneste signal. Reglerne (FELT_INFO) ejer navnene og
- * linjerne; her bestemmes kun hvordan de ser ud.
- */
-const FELT_STIL: Record<FeltType, { fyld: string; tekst: string; str: number }> = {
-  fri: { fyld: '#DFE6ED', tekst: BLAEK, str: 12 },
-  tre: { fyld: MELLEM, tekst: BLAEK, str: 13 },
-  skaal: { fyld: LYS, tekst: BLAEK, str: 13.5 },
-  bm: { fyld: BLAEK, tekst: LYS, str: 12 },
-  gobm: { fyld: MELLEM, tekst: BLAEK, str: 11 },
-  taarn: { fyld: '#9FB1C3', tekst: BLAEK, str: 12 },
-  kort: { fyld: LYS, tekst: BLAEK, str: 12 },
-  drik: { fyld: BLAEK, tekst: '#FFFFFF', str: 15 },
-  meier: { fyld: MELLEM, tekst: BLAEK, str: 13 },
-  krone: { fyld: LYS, tekst: BLAEK, str: 12 }
-};
 
 export interface BrikPaaPladen {
   id: string;
@@ -38,7 +23,25 @@ export interface BrikPaaPladen {
   erPaaTur?: boolean;
 }
 
-/** Filt, bane, øl, korn og glød — alt hvad brættet tegnes med. */
+/**
+ * Felterne i Plakat-stil. Typen står altid som tekst på feltet — farven er
+ * aldrig det eneste signal. Felternes navne og regler kommer fra reglerne;
+ * kun udseendet bor her.
+ */
+const FELT_STIL: Record<FeltType, { fyld: string; tekst: string; str: number }> = {
+  fri: { fyld: '#DFE6ED', tekst: BLAEK, str: 12 },
+  tre: { fyld: MELLEM, tekst: BLAEK, str: 13 },
+  skaal: { fyld: LYS, tekst: BLAEK, str: 13.5 },
+  bm: { fyld: BLAEK, tekst: LYS, str: 12 },
+  gobm: { fyld: MELLEM, tekst: BLAEK, str: 11 },
+  taarn: { fyld: KANT_LYS, tekst: BLAEK, str: 12 },
+  kort: { fyld: LYS, tekst: BLAEK, str: 12 },
+  drik: { fyld: BLAEK, tekst: '#FFFFFF', str: 15 },
+  meier: { fyld: MELLEM, tekst: BLAEK, str: 13 },
+  krone: { fyld: LYS, tekst: BLAEK, str: 12 }
+};
+
+/** Bane, filt, korn, øl og lampe — alt hvad brættet tegnes med. */
 export function BraetDefs({ id }: { id: string }): JSX.Element {
   return (
     <defs>
@@ -55,26 +58,40 @@ export function BraetDefs({ id }: { id: string }): JSX.Element {
         <stop offset="0%" stopColor="#F2C060" />
         <stop offset="100%" stopColor="#C4761A" />
       </linearGradient>
+      <linearGradient id={`${id}-beer-over`} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#E8A04A" />
+        <stop offset="100%" stopColor="#A8561A" />
+      </linearGradient>
       <radialGradient id={`${id}-lampe`} cx="50%" cy="48%" r="55%">
         <stop offset="0%" stopColor="#F2C060" stopOpacity="0.16" />
         <stop offset="70%" stopColor="#F2C060" stopOpacity="0" />
       </radialGradient>
-      {/* Brikkens dybde: lys ovenfra, skygge forneden. */}
-      <radialGradient id={`${id}-brik`} cx="50%" cy="28%" r="75%">
+      {/* Brikkens dybde: lys oppe til venstre, skygge forneden. */}
+      <radialGradient id={`${id}-brikglans`} cx="40%" cy="30%" r="75%">
         <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.38" />
         <stop offset="45%" stopColor="#FFFFFF" stopOpacity="0" />
-        <stop offset="80%" stopColor="#000000" stopOpacity="0" />
         <stop offset="100%" stopColor="#000000" stopOpacity="0.3" />
       </radialGradient>
+      {/* Kortbagsiden: små øldåser tone-i-tone, som man først ser når man kigger efter. */}
+      <pattern id={`${id}-daaser`} width="14" height="14" patternUnits="userSpaceOnUse">
+        <rect width="14" height="14" fill={BLAEK} />
+        <g transform="scale(0.25)" fill="#213044" stroke="#2A3B51" strokeWidth="2" strokeLinejoin="round">
+          <path transform="translate(7 5)" d="M1.5 2.5 Q1.5 0.5 3.5 0.5 H10.5 Q12.5 0.5 12.5 2.5 V18.5 Q12.5 20.5 10.5 20.5 H3.5 Q1.5 20.5 1.5 18.5 Z" />
+          <path transform="translate(36 31) rotate(90 7 10)" d="M1.5 2.5 Q1.5 0.5 3.5 0.5 H10.5 Q12.5 0.5 12.5 2.5 V18.5 Q12.5 20.5 10.5 20.5 H3.5 Q1.5 20.5 1.5 18.5 Z" />
+        </g>
+      </pattern>
+      <clipPath id={`${id}-indre`}>
+        <path d={INDRE_STI} />
+      </clipPath>
+      <filter id={`${id}-skygge`} x="-10%" y="-10%" width="120%" height="130%">
+        <feGaussianBlur stdDeviation="9" />
+      </filter>
       <filter id={`${id}-grain`} x="0" y="0" width="100%" height="100%">
         <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch" />
         <feColorMatrix type="saturate" values="0" />
         <feComponentTransfer>
           <feFuncA type="linear" slope="0.09" />
         </feComponentTransfer>
-      </filter>
-      <filter id={`${id}-skygge`} x="-10%" y="-10%" width="120%" height="130%">
-        <feGaussianBlur stdDeviation="9" />
       </filter>
       <filter id={`${id}-glow`} x="-70%" y="-70%" width="240%" height="240%">
         <feGaussianBlur stdDeviation="7" result="g" />
@@ -84,36 +101,21 @@ export function BraetDefs({ id }: { id: string }): JSX.Element {
           <feMergeNode in="SourceGraphic" />
         </feMerge>
       </filter>
-      <filter id={`${id}-gloed`} x="-100%" y="-100%" width="300%" height="300%">
-        <feGaussianBlur stdDeviation="8" />
-      </filter>
-      <clipPath id={`${id}-indre`}>
-        <path d={INDRE_STI} />
-      </clipPath>
-      {/* Små øldåser tone-i-tone på kortenes bagside — man ser dem først når man kigger efter. */}
-      <pattern id={`${id}-daaser`} patternUnits="userSpaceOnUse" width="12" height="12">
-        <rect width="12" height="12" fill={BLAEK} />
-        <g transform="scale(0.2143)" fill="#213044" stroke="#2A3B51" strokeWidth="1" strokeLinejoin="round">
-          <path transform="translate(7 5)" d="M1.5 2.5 Q1.5 0.5 3.5 0.5 H10.5 Q12.5 0.5 12.5 2.5 V18.5 Q12.5 20.5 10.5 20.5 H3.5 Q1.5 20.5 1.5 18.5 Z" />
-          <path transform="translate(36 31) rotate(90 7 10)" d="M1.5 2.5 Q1.5 0.5 3.5 0.5 H10.5 Q12.5 0.5 12.5 2.5 V18.5 Q12.5 20.5 10.5 20.5 H3.5 Q1.5 20.5 1.5 18.5 Z" />
-        </g>
-      </pattern>
     </defs>
   );
 }
 
-/** Lampelyset over bordet — grunden selv er skærmens stålblå. */
+/** Lampen over bordet. Den blå grund kommer fra fladen pladen ligger på. */
 export function BraetBaggrund({ id, w, h }: { id: string; w: number; h: number }): JSX.Element {
   return <rect x="0" y="0" width={w} height={h} fill={`url(#${id}-lampe)`} />;
 }
 
 function Felt({ nr, klikbart, onKlik }: { nr: number; klikbart: boolean; onKlik?: (n: number) => void }): JSX.Element {
   const f = FELTER[nr - 1]!;
-  const info = FELT_INFO[f.type];
   const stil = FELT_STIL[f.type];
-  const linjer = info.linjer;
-  const trin = stil.str * 1.08;
-  const dy0 = -((linjer.length - 1) * trin) / 2;
+  const linjer = FELT_INFO[f.type].linjer;
+  const linjeH = stil.str * 1.08;
+  const dy0 = -((linjer.length - 1) * linjeH) / 2;
 
   return (
     <g
@@ -131,10 +133,10 @@ function Felt({ nr, klikbart, onKlik }: { nr: number; klikbart: boolean; onKlik?
           fill={stil.tekst}
           fontSize={stil.str}
           letterSpacing="0.6"
-          style={{ fontFamily: DISPLAY, pointerEvents: 'none' }}
+          style={{ fontFamily: DISPLAY, textTransform: 'uppercase', pointerEvents: 'none' }}
         >
           {linjer.map((l, i) => (
-            <tspan key={l} x="0" dy={i === 0 ? dy0 : trin}>
+            <tspan key={l} x="0" dy={i === 0 ? dy0 : linjeH}>
               {l.toUpperCase()}
             </tspan>
           ))}
@@ -174,7 +176,7 @@ function Pit(): JSX.Element {
         strokeLinejoin="round"
       />
 
-      <text x={p0.x - 2} y={p0.y - 14} fill={BLAEK} fontSize="16" letterSpacing="3" style={{ fontFamily: DISPLAY }}>
+      <text x={p0.x} y={p0.y - 14} fill={BLAEK} fontSize="16" letterSpacing="3" style={{ fontFamily: DISPLAY }}>
         PITTEN
       </text>
       <text
@@ -182,9 +184,9 @@ function Pit(): JSX.Element {
         y={p0.y - 14}
         textAnchor="end"
         fill={BLAEK}
-        fontSize="10"
+        fontSize="11"
         fontWeight="700"
-        letterSpacing="1.3"
+        letterSpacing="1.4"
         style={{ fontFamily: SANS }}
       >
         DU RYGER IND PÅ DEN PLADS DU SLÅR
@@ -195,9 +197,9 @@ function Pit(): JSX.Element {
         return (
           <g key={c.plads}>
             <rect
-              x={c.x}
+              x={c.x + 2}
               y={c.y}
-              width={c.w}
+              width={c.w - 4}
               height={c.h}
               rx="4"
               fill={sidste ? BLAEK : LYS}
@@ -217,23 +219,23 @@ function Pit(): JSX.Element {
             </text>
             <text
               x={c.cx}
-              y={c.cy + 19}
+              y={c.cy + 20}
               textAnchor="middle"
               dominantBaseline="central"
               fill={sidste ? LYS : BLAEK}
-              fontSize="8.5"
+              fontSize="9"
               fontWeight="700"
-              letterSpacing="1.1"
+              letterSpacing="1.2"
               style={{ fontFamily: SANS }}
             >
               {c.plads} SHOTS
             </text>
             {c.plads > 1 && (
               <path
-                d={`M ${c.x - 4} ${c.cy - 5} L ${c.x - 10} ${c.cy} L ${c.x - 4} ${c.cy + 5}`}
+                d={`M ${c.x + 1} ${c.cy - 5} L ${c.x - 4} ${c.cy} L ${c.x + 1} ${c.cy + 5}`}
                 fill="none"
                 stroke={BLAEK}
-                strokeWidth="2"
+                strokeWidth="1.8"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
@@ -242,17 +244,17 @@ function Pit(): JSX.Element {
         );
       })}
 
-      <text x={p0.x} y={p0.y + p0.h + 20} fill={BLAEK} fontSize="10" fontWeight="700" letterSpacing="1.4" style={{ fontFamily: SANS }}>
+      <text x={p0.x} y={p0.y + p0.h + 22} fill={BLAEK} fontSize="11" fontWeight="700" letterSpacing="1.4" style={{ fontFamily: SANS }}>
         UD PÅ FELT 1
       </text>
       <text
         x={p5.x + p5.w}
-        y={p0.y + p0.h + 20}
+        y={p0.y + p0.h + 38}
         textAnchor="end"
         fill={BLAEK}
-        fontSize="10"
+        fontSize="11"
         fontWeight="700"
-        letterSpacing="1.3"
+        letterSpacing="1.4"
         style={{ fontFamily: SANS }}
       >
         SLÅ DIG NED MOD 1 — SLÅR DU OVER, ER DU UDE
@@ -286,16 +288,16 @@ function Terningflade({ vaerdi, blank }: { vaerdi: number | null; blank: boolean
   const pips = vaerdi ? PIPS[vaerdi] : undefined;
   return (
     <g>
-      <rect x="8" y="10" width="88" height="88" rx="17" fill="#0F1821" opacity="0.35" />
       {blank || !pips ? (
         <>
-          <rect x="4" y="4" width="88" height="88" rx="17" fill="#DCE3EA" stroke={BLAEK} strokeWidth="3" strokeDasharray="7 5" />
-          <text x="48" y="50" textAnchor="middle" dominantBaseline="central" fontSize="40" fill={BLAEK} style={{ fontFamily: DISPLAY }}>?</text>
+          <rect x="4" y="4" width="88" height="88" rx="16" fill={LYS} stroke={BLAEK} strokeWidth="3" strokeDasharray="8 6" />
+          <text x="48" y="50" textAnchor="middle" dominantBaseline="central" fontSize="38" fill={KANT_LYS} style={{ fontFamily: DISPLAY }}>?</text>
         </>
       ) : (
         <>
-          <rect x="4" y="4" width="88" height="88" rx="17" fill="#FFFFFF" stroke={BLAEK} strokeWidth="3.5" />
-          {pips.map(([cx, cy]) => <circle key={`${cx}-${cy}`} cx={cx - 2} cy={cy - 2} r="7.5" fill={BLAEK} />)}
+          <rect x="9" y="11" width="88" height="88" rx="16" fill={BLAEK_DYB} />
+          <rect x="4" y="4" width="88" height="88" rx="16" fill="#FFFFFF" stroke={BLAEK} strokeWidth="4" />
+          {pips.map(([cx, cy]) => <circle key={`${cx}-${cy}`} cx={cx - 2} cy={cy - 2} r="8" fill={BLAEK} />)}
         </>
       )}
     </g>
@@ -325,8 +327,9 @@ function RullendeTerning({ t }: { t: TerningPaaBordet }): JSX.Element {
     <g>
       {t.vaerdi && t.farve && (
         <>
-          <rect className="terning-landet" x="-4" y="-4" width="108" height="108" rx="21" fill="none" stroke={t.farve} strokeWidth="3" />
-          <rect x="-6" y="-6" width="112" height="112" rx="22" fill="none" stroke={t.farve} strokeWidth="3" opacity="0.9" />
+          <rect className="terning-landet" x="-6" y="-6" width="108" height="108" rx="22" fill="none" stroke={t.farve} strokeWidth="5" />
+          <rect x="-8" y="-8" width="112" height="112" rx="23" fill="none" stroke={t.farve} strokeWidth="5" />
+          <rect x="-10.5" y="-10.5" width="117" height="117" rx="25" fill="none" stroke={BLAEK} strokeWidth="2" />
         </>
       )}
       <Terningflade vaerdi={t.vaerdi} blank={!t.vaerdi} />
@@ -344,11 +347,10 @@ export interface KortPaaBordet {
 function Kortbag({ id, x, y, rot }: { id: string; x: number; y: number; rot: number }): JSX.Element {
   return (
     <g transform={`translate(${x}, ${y}) rotate(${rot})`}>
-      <rect x="0" y="0" width="34" height="48" rx="3" fill="#0F1821" transform="translate(2, 2.5)" />
-      <rect x="0" y="0" width="34" height="48" rx="3" fill={`url(#${id}-daaser)`} stroke={BLAEK} strokeWidth="1.2" />
-      <rect x="3" y="3" width="28" height="42" rx="2" fill="none" stroke="#5F7D9B" strokeWidth="0.8" />
-      <circle cx="17" cy="24" r="8.5" fill="#CED8E2" stroke="#5F7D9B" strokeWidth="0.8" />
-      <Elefant x={17 - 6.5} y={24 - 6.1} str={13} />
+      <rect x="0" y="0" width="34" height="48" rx="3" fill={BLAEK_DYB} transform="translate(2.5, 3)" />
+      <rect x="0" y="0" width="34" height="48" rx="3" fill={`url(#${id}-daaser)`} stroke={BLAEK} strokeWidth="1.6" />
+      <rect x="3.5" y="3.5" width="27" height="41" rx="2" fill="none" stroke="#5F7D9B" strokeWidth="0.9" />
+      <circle cx="17" cy="24" r="8" fill={MELLEM} stroke="#5F7D9B" strokeWidth="0.9" />
     </g>
   );
 }
@@ -359,10 +361,10 @@ function Kortforside({ x, y, kort }: { x: number; y: number; kort: NonNullable<K
     // CSS-animationen sætter sin egen transform, så placeringen ligger på gruppen udenom.
     <g transform={`translate(${x}, ${y}) rotate(7)`}>
       <g className="kort-vendes">
-        <rect x="0" y="0" width="34" height="48" rx="3" fill="#0F1821" transform="translate(2, 2.5)" />
-        <rect x="0" y="0" width="34" height="48" rx="3" fill={LYS} stroke={BLAEK} strokeWidth="1.5" />
+        <rect x="0" y="0" width="34" height="48" rx="3" fill={BLAEK_DYB} transform="translate(2.5, 3)" />
+        <rect x="0" y="0" width="34" height="48" rx="3" fill={LYS} stroke={BLAEK} strokeWidth="1.6" />
         <text x="4" y="11" fontSize="10" fill={farve} style={{ fontFamily: DISPLAY }}>{kort.rang}</text>
-        <text x="4" y="18" fontSize="7" fill={farve} style={{ fontFamily: SANS }}>{kort.tegn}</text>
+        <text x="4" y="19" fontSize="7" fill={farve} style={{ fontFamily: SANS }}>{kort.tegn}</text>
         <text x="17" y="31" textAnchor="middle" dominantBaseline="central" fontSize="16" fill={farve} style={{ fontFamily: SANS }}>{kort.tegn}</text>
       </g>
     </g>
@@ -388,42 +390,45 @@ function Bordet({
   const gW = 42, gH = 62, gx = cx - gW / 2, gTop = y0 + 14;
   const fyldH = Math.round(gH * Math.max(0, Math.min(1, andel)) * 10) / 10;
   const fy = Math.round((gTop + gH - fyldH) * 10) / 10;
+  // Løber tårnet over, bliver øllet mørkere ravgult — aldrig rødt, aldrig blåt.
+  // Samme luft over kanten som taarnAndel regner med.
+  const kap = taarnKapacitetSlurke(kapCl);
+  const over = andel > kap / (kap + 3);
 
   const kx = x0 + 22, ky = y0 + 22;
   const tx = (zoneR + x1) / 2 - 27, ty = y0 + 18;
 
   return (
     <g>
-      <rect x={x0 + 3} y={y0 + 9} width={w} height={h} rx="18" fill="#0F1821" opacity="0.4" filter={`url(#${id}-skygge)`} />
-      <rect x={x0} y={y0} width={w} height={h} rx="18" fill="#DFE6ED" stroke={BLAEK} strokeWidth="3" />
-      <rect x={x0 + 7} y={y0 + 7} width={w - 14} height={h - 14} rx="12" fill="none" stroke={BLAEK} strokeWidth="1" opacity="0.25" />
-      <line x1={zoneL} y1={y0 + 16} x2={zoneL} y2={y1 - 16} stroke={BLAEK} strokeWidth="1.2" opacity="0.3" />
-      <line x1={zoneR} y1={y0 + 16} x2={zoneR} y2={y1 - 16} stroke={BLAEK} strokeWidth="1.2" opacity="0.3" />
+      <rect x={x0 + 4} y={y0 + 10} width={w} height={h} rx="18" fill={BLAEK_DYB} opacity="0.35" filter={`url(#${id}-skygge)`} />
+      <rect x={x0} y={y0} width={w} height={h} rx="18" fill={`url(#${id}-bane)`} stroke={BLAEK} strokeWidth="3" />
+      <line x1={zoneL} y1={y0 + 16} x2={zoneL} y2={y1 - 16} stroke={BLAEK} strokeWidth="1.2" strokeDasharray="4 4" opacity="0.5" />
+      <line x1={zoneR} y1={y0 + 16} x2={zoneR} y2={y1 - 16} stroke={BLAEK} strokeWidth="1.2" strokeDasharray="4 4" opacity="0.5" />
 
       {/* Kortene */}
       <Kortbag id={id} x={kx + 3} y={ky + 3} rot={-3} />
       <Kortbag id={id} x={kx + 1.5} y={ky + 1.5} rot={-1.5} />
       <Kortbag id={id} x={kx} y={ky} rot={0} />
       {kort?.sidste && <Kortforside key={kort.traek} x={kx + 44} y={ky + 2} kort={kort.sidste} />}
-      <text x={(x0 + zoneL) / 2} y={y1 - 18} textAnchor="middle" fill={BLAEK} fontSize="12" letterSpacing="2" style={{ fontFamily: DISPLAY }}>
+      <text x={(x0 + zoneL) / 2} y={y1 - 18} textAnchor="middle" fill={BLAEK} fontSize="11" letterSpacing="2" style={{ fontFamily: DISPLAY }}>
         KORTENE
       </text>
       {kort && (
-        <text x={(x0 + zoneL) / 2} y={y1 - 7} textAnchor="middle" fill={DAEMPET} fontSize="7.5" fontWeight="700" letterSpacing="1.2" style={{ fontFamily: SANS }}>
+        <text x={(x0 + zoneL) / 2} y={y1 - 7} textAnchor="middle" fill={DAEMPET} fontSize="8" fontWeight="700" letterSpacing="1.2" style={{ fontFamily: SANS }}>
           {kort.tilbage} TILBAGE
         </text>
       )}
 
       {/* Tårnet */}
-      <rect x={gx} y={gTop} width={gW} height={gH} rx="4" fill="#E6ECF1" />
-      <rect x={gx + 2} y={fy} width={gW - 4} height={fyldH} rx="3" fill={`url(#${id}-beer)`} />
-      {fyldH > 1 && <rect x={gx + 2} y={fy - 5} width={gW - 4} height="6" rx="2" fill="#F6EBD4" />}
-      <rect x={gx} y={gTop} width={gW} height={gH} rx="4" fill="none" stroke={BLAEK} strokeWidth="2.5" />
-      <text x={cx} y={y1 - 18} textAnchor="middle" fill={BLAEK} fontSize="13" letterSpacing="2.4" style={{ fontFamily: DISPLAY }}>
+      <rect x={gx} y={gTop} width={gW} height={gH} rx="5" fill="#E6ECF1" />
+      <rect x={gx + 2} y={fy} width={gW - 4} height={fyldH} rx="3" fill={`url(#${id}-${over ? 'beer-over' : 'beer'})`} />
+      {fyldH > 1 && <rect x={gx + 2} y={fy - 5} width={gW - 4} height="6" rx="3" fill="#F6EBD4" />}
+      <rect x={gx} y={gTop} width={gW} height={gH} rx="5" fill="none" stroke={BLAEK} strokeWidth="2.5" />
+      <text x={cx} y={y1 - 18} textAnchor="middle" fill={BLAEK} fontSize="12" letterSpacing="2.4" style={{ fontFamily: DISPLAY }}>
         TÅRNET
       </text>
       {cl !== null && (
-        <text x={cx} y={y1 - 7} textAnchor="middle" fill={BLAEK} fontSize="8" fontWeight="700" letterSpacing="1.2" style={{ fontFamily: SANS }}>
+        <text x={cx} y={y1 - 7} textAnchor="middle" fill={DAEMPET} fontSize="8" fontWeight="700" letterSpacing="1.2" style={{ fontFamily: SANS }}>
           {cl} CL · {kapCl} CL GLAS
         </text>
       )}
@@ -432,11 +437,11 @@ function Bordet({
       <g transform={`translate(${tx}, ${ty}) scale(0.54)`}>
         <RullendeTerning t={terning ?? { vaerdi: null, ruller: false, farve: null, tekst: '' }} />
       </g>
-      <text x={(zoneR + x1) / 2} y={y1 - 18} textAnchor="middle" fill={BLAEK} fontSize="12" letterSpacing="2" style={{ fontFamily: DISPLAY }}>
+      <text x={(zoneR + x1) / 2} y={y1 - 18} textAnchor="middle" fill={BLAEK} fontSize="11" letterSpacing="2" style={{ fontFamily: DISPLAY }}>
         TERNINGEN
       </text>
       {terning && (
-        <text x={(zoneR + x1) / 2} y={y1 - 7} textAnchor="middle" fill={DAEMPET} fontSize="7.5" fontWeight="700" letterSpacing="1.2" style={{ fontFamily: SANS }}>
+        <text x={(zoneR + x1) / 2} y={y1 - 7} textAnchor="middle" fill={DAEMPET} fontSize="8" fontWeight="700" letterSpacing="1.2" style={{ fontFamily: SANS }}>
           {terning.tekst}
         </text>
       )}
@@ -460,7 +465,7 @@ export interface FingerPaaBordet {
 /** Stregtegnet hånd med pegefingeren mod kanten, 24-grid. Tegnes direkte i SVG'et. */
 function FingerIkon({ farve = LYS }: { farve?: string }): JSX.Element {
   return (
-    <g transform="translate(-13, -13) scale(1.0833)" fill="none" stroke={farve} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+    <g transform="translate(-13, -13) scale(1.0833)" fill="none" stroke={farve} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
       <path d="M10 3.2v9.3" />
       <path d="M10 3.2a1.6 1.6 0 0 1 3.2 0V11" />
       <path d="M13.2 8.6a1.6 1.6 0 0 1 3.2 0v3" />
@@ -484,8 +489,8 @@ function Finger({ f }: { f: FingerPaaBordet }): JSX.Element {
         <circle className="finger-ring" cx="0" cy="0" r="26" fill="none" stroke={BLAEK} strokeWidth="2.5" />
         {/* Trykfladen er større end det man ser. */}
         <circle cx="0" cy="0" r="34" fill="transparent" />
-        <circle cx="2" cy="4" r="22" fill="#0F1821" opacity="0.4" />
-        <circle cx="0" cy="0" r="21" fill={BLAEK} stroke={LYS} strokeWidth="2" />
+        <circle cx="3" cy="4" r="22" fill={BLAEK_DYB} />
+        <circle cx="0" cy="0" r="22" fill={BLAEK} stroke={LYS} strokeWidth="2" />
         <FingerIkon />
       </g>
       <g transform={`translate(${bx}, -46)`} style={{ pointerEvents: 'none' }}>
@@ -514,10 +519,10 @@ function SyverVedBrik({ kort }: { kort: KortHos }): JSX.Element {
   const farve = kort.roed ? ROED : BLAEK;
   return (
     <g transform="translate(9, -30) rotate(12) scale(0.5)" style={{ pointerEvents: 'none' }}>
-      <rect x="0" y="0" width="34" height="48" rx="3" fill="#0F1821" transform="translate(2, 2.5)" />
+      <rect x="0" y="0" width="34" height="48" rx="3" fill={BLAEK_DYB} transform="translate(2.5, 3)" />
       <rect x="0" y="0" width="34" height="48" rx="3" fill={LYS} stroke={BLAEK} strokeWidth="2" />
       <text x="4" y="11" fontSize="10" fill={farve} style={{ fontFamily: DISPLAY }}>7</text>
-      <text x="4" y="18" fontSize="7" fill={farve} style={{ fontFamily: SANS }}>{kort.tegn}</text>
+      <text x="4" y="19" fontSize="7" fill={farve} style={{ fontFamily: SANS }}>{kort.tegn}</text>
       <text x="17" y="31" textAnchor="middle" dominantBaseline="central" fontSize="16" fill={farve} style={{ fontFamily: SANS }}>{kort.tegn}</text>
     </g>
   );
@@ -584,16 +589,18 @@ export function BraetPlade({
 
   return (
     <g>
-      <path d={YDRE_STI} fill="#0F1821" opacity="0.45" transform="translate(4, 14)" filter={`url(#${id}-skygge)`} />
+      <path d={YDRE_STI} fill={BLAEK_DYB} opacity="0.45" transform="translate(4, 14)" filter={`url(#${id}-skygge)`} />
       <path d={YDRE_STI} fill={`url(#${id}-bane)`} stroke={BLAEK} strokeWidth="3" />
       <path d={INDRE_STI} fill={`url(#${id}-felt)`} stroke={BLAEK} strokeWidth="3" />
-      <rect x="0" y="0" width={BRAET_STR.w} height={BRAET_STR.h} fill="#FFFFFF" filter={`url(#${id}-grain)`} clipPath={`url(#${id}-indre)`} />
 
       <g>
         {FELTER.map((f) => (
           <Felt key={f.nr} nr={f.nr} klikbart={Boolean(onFeltKlik)} onKlik={onFeltKlik} />
         ))}
       </g>
+
+      {/* Filt-kornet ligger kun på filten indeni. */}
+      <rect x="0" y="0" width={BRAET_STR.w} height={BRAET_STR.h} fill="#FFFFFF" filter={`url(#${id}-grain)`} clipPath={`url(#${id}-indre)`} style={{ pointerEvents: 'none' }} />
 
       <Pit />
       <Bordet id={id} andel={taarnAndel} cl={taarnCl} kapCl={taarnKapCl} kort={kort} terning={terning} />
@@ -606,7 +613,7 @@ export function BraetPlade({
             key={nr}
             points={f.punkter}
             fill="none"
-            stroke="#0F1821"
+            stroke={BLAEK}
             strokeWidth="3"
             strokeDasharray="6 4"
             style={{ pointerEvents: 'none' }}
@@ -615,14 +622,24 @@ export function BraetPlade({
       })}
 
       {aktiv && (
-        <polygon
-          points={aktiv.punkter}
-          fill="none"
-          stroke="#F2C060"
-          strokeWidth="4"
-          filter={`url(#${id}-glow)`}
-          style={{ pointerEvents: 'none' }}
-        />
+        <>
+          <polygon
+            points={aktiv.punkter}
+            fill="none"
+            stroke="#F2C060"
+            strokeWidth="5"
+            opacity="0.8"
+            filter={`url(#${id}-glow)`}
+            style={{ pointerEvents: 'none' }}
+          />
+          <polygon
+            points={aktiv.punkter}
+            fill="none"
+            stroke={BLAEK}
+            strokeWidth="3.5"
+            style={{ pointerEvents: 'none' }}
+          />
+        </>
       )}
 
       {placeret.map((b) => (
@@ -633,16 +650,15 @@ export function BraetPlade({
         >
           {b.erPaaTur ? (
             <>
-              {/* Den der har turen: ringe og en glød af lampelys. */}
-              <circle cx="0" cy="0" r="24" fill="#F2C060" opacity="0.55" filter={`url(#${id}-gloed)`} />
+              <circle cx="0" cy="0" r="24" fill="#F2C060" opacity="0.55" filter={`url(#${id}-glow)`} />
               <circle cx="0" cy="0" r="22" fill={BLAEK} />
               <circle cx="0" cy="0" r="20" fill={LYS} />
             </>
           ) : (
-            <circle cx="0" cy="2" r="17.5" fill="#0F1821" opacity="0.35" />
+            <circle cx="1" cy="3" r="17" fill={BLAEK_DYB} opacity="0.35" />
           )}
-          <circle cx="0" cy="0" r="16" fill={b.farve} stroke={BLAEK} strokeWidth="2.5" />
-          <circle cx="0" cy="0" r="14.75" fill={`url(#${id}-brik)`} style={{ pointerEvents: 'none' }} />
+          <circle cx="0" cy="0" r="15" fill={b.farve} />
+          <circle cx="0" cy="0" r="15" fill={`url(#${id}-brikglans)`} stroke={BLAEK} strokeWidth="2.5" />
           <text
             x="0"
             y="1"
