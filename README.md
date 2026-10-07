@@ -1,6 +1,6 @@
 # K69
 
-Online-udgave af drukspillet K69 — brættet fra Tinglev. 38 felter, én pit med
+Online-udgave af drukspillet K69 — brættet fra Sønderborg. 38 felter, én pit med
 seks pladser, ét tårn, en kortbunke og Meier.
 
 Ingen konto og ingen adgangskode: man opretter et spil, deler linket, skriver et

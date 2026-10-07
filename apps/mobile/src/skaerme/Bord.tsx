@@ -1,9 +1,10 @@
 import { useState, type JSX } from 'react';
 import {
-  Brik, FejringKort, Glas, Handlingskort, KroneKort, Maerkat, MeierKort, Plade, SenesteTure, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
-  kortPaaBordet, LydKnap, opgave, spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, useLyde, UdraabKort, type SpilUdsyn
+  AfstemningKort, Brik, FejringKort, Glas, Handlingskort, KroneKort, Maerkat, MeierKort, Plade, SenesteTure, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
+  kortPaaBordet, LydKnap, opgave, spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, useLyde, UdraabKort, type SpilUdsyn, Maerke, useSpillerMenu
 } from '@k69/ui';
-import { formatAntal, formatSlurke, slurkePrEnhed, taarnCl, taarnLoeberOver, type KlientHandling } from '@k69/rules';
+import { formatSlurke, slurkePrEnhed, taarnCl, taarnLoeberOver, type KlientHandling } from '@k69/rules';
+import { VERSION } from '../version.js';
 
 type Faneblad = 'tur' | 'bord' | 'log';
 
@@ -25,6 +26,8 @@ export function Bord({
   const toemmer = spil.spillere.find((s) => s.id === spil.taarn.toemmesAfId);
   const andel = taarnAndel(spil);
   const over = taarnLoeberOver(spil);
+  // Afstemningen kører på det levende spil — den skal ikke vente på terningen.
+  const spillerMenu = useSpillerMenu(live, migId, send);
 
   const brikker = spil.spillere
     .filter((s) => s.tilstand === 'aktiv')
@@ -40,9 +43,12 @@ export function Bord({
   return (
     <div className="skaerm grund">
       <header className="mobilbar mobilbar-streg">
-        <div className="mark">K69</div>
+        <Maerke version={VERSION} />
         {paaTur && (
-          <div className="tur-pille">
+          <div
+            className={paaTur.id === migId ? 'tur-pille din-tur' : 'tur-pille'}
+            style={{ '--sp': paaTur.farve } as React.CSSProperties}
+          >
             <i style={{ background: paaTur.farve }} />
             <span>{paaTur.id === migId ? 'Din tur' : `${paaTur.navn}s tur`}</span>
           </div>
@@ -87,7 +93,7 @@ export function Bord({
         <div className="greb" />
         <div className="spiller-chips">
           {spil.spillere.filter((s) => s.tilstand === 'aktiv').map((s) => (
-            <span key={s.id} className={s.id === paaTur?.id ? 'spiller-chip spiller-chip-paa' : 'spiller-chip'}>
+            <span key={s.id} className={s.id === paaTur?.id ? 'spiller-chip spiller-chip-paa' : 'spiller-chip'} {...spillerMenu.props(s.id)}>
               <Brik navn={s.navn} farve={s.farve} str={20} />
               {s.id === migId ? 'Dig' : s.navn} {s.enheder}
             </span>
@@ -130,7 +136,7 @@ export function Bord({
 
               <div className="liste">
                 {spil.spillere.map((s) => (
-                  <div key={s.id} className={s.id === paaTur?.id ? 'raekke raekke-paa' : 'raekke'}>
+                  <div key={s.id} className={s.id === paaTur?.id ? 'raekke raekke-paa' : 'raekke'} {...spillerMenu.props(s.id)}>
                     <Brik navn={s.navn} farve={s.farve} str={32} />
                     <div style={{ flexGrow: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
@@ -147,9 +153,9 @@ export function Bord({
                         <span style={{ fontFamily: 'var(--serif)', fontSize: 20 }}>{s.enheder}</span>
                         <span className="eyebrow" style={{ fontSize: 9 }}>tømt</span>
                       </div>
-                      <Slurkemaaler tilbage={s.slurkeTilbage} ialt={slurkePrEnhed(s.drik)} bredde={7} />
+                      <Slurkemaaler tilbage={s.slurkeTilbage} ialt={slurkePrEnhed(s.drik)} bredde={107} />
                       <div className="eyebrow" style={{ fontSize: 9, marginTop: 4 }}>
-                        {formatAntal(s.slurkeTilbage)}/{formatAntal(slurkePrEnhed(s.drik))} {s.drik.navn}
+                        {Math.round(s.slurkeTilbage)}/{Math.round(slurkePrEnhed(s.drik))} {s.drik.navn}
                       </div>
                     </div>
                   </div>
@@ -183,7 +189,7 @@ export function Bord({
               <div style={{ marginTop: 6 }}><Slurkemaaler tilbage={jeg.slurkeTilbage} ialt={slurkePrEnhed(jeg.drik)} /></div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontFamily: 'var(--serif)', fontSize: 20 }}>{formatAntal(jeg.slurkeTilbage)}</div>
+              <div style={{ fontFamily: 'var(--serif)', fontSize: 20 }}>{Math.round(jeg.slurkeTilbage)}</div>
               <div className="eyebrow">slurke igen</div>
             </div>
           </div>
@@ -193,6 +199,8 @@ export function Bord({
       <KroneKort spil={spil} migId={migId} send={send} kompakt />
       <UdraabKort spil={spil} kompakt />
       <FejringKort spil={spil} kompakt />
+      {spillerMenu.menu}
+      <AfstemningKort spil={live} migId={migId} send={send} />
     </div>
   );
 }

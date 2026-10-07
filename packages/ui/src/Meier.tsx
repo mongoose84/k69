@@ -194,6 +194,14 @@ export function MeierKort({ spil, migId, send, kompakt = false }: MeierKortProps
     saetValgt(null);
   }, [slagNoegle]);
 
+  // På telefonen ligger stigen under bægeret. Når man slipper efter at have
+  // kigget, rulles den frem — ellers ser man kun knapperne til at sende videre.
+  const stigeRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!kompakt || kigger || !harKigget) return;
+    stigeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [kompakt, kigger, harKigget]);
+
   // Fejringen må ikke spærre for brættet i det uendelige.
   const visFejring = Boolean(resultat) && resultat!.id !== kvitteret;
   useEffect(() => {
@@ -245,7 +253,9 @@ export function MeierKort({ spil, migId, send, kompakt = false }: MeierKortProps
     onPointerDown: () => { saetKigger(true); saetHarKigget(true); },
     onPointerUp: () => saetKigger(false),
     onPointerLeave: () => saetKigger(false),
-    onPointerCancel: () => saetKigger(false)
+    onPointerCancel: () => saetKigger(false),
+    // Et langt tryk på en telefon åbner ellers en menu, der stjæler fingeren.
+    onContextMenu: (e: { preventDefault: () => void }) => e.preventDefault()
   };
 
   return (
@@ -344,7 +354,7 @@ export function MeierKort({ spil, migId, send, kompakt = false }: MeierKortProps
             {slag && harKigget && (
               <>
                 <div className="eyebrow">Meld — det samme eller højere</div>
-                <div className="meier-stige">
+                <div className="meier-stige" ref={stigeRef}>
                   {muligeMeldinger(laveste).map((t) => (
                     <button
                       key={t}

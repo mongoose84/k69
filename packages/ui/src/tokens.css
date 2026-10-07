@@ -157,6 +157,14 @@ button { font: inherit; color: inherit; }
   line-height: 1;
   color: var(--ink);
 }
+.mark-blok { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.mark-version {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  color: var(--ink-dim);
+}
 
 /* Det store nedtonede ord bag indholdet. */
 .vandmaerke {
@@ -400,6 +408,24 @@ button { font: inherit; color: inherit; }
   100% { opacity: 0; transform: scale(1.4); }
 }
 
+/* Pilen over brikken der er på tur hopper, så man kan se den fra den anden ende af bordet. */
+.tur-pil { animation: tur-pil-hop 0.9s ease-in-out infinite; }
+@keyframes tur-pil-hop {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-9px); }
+}
+
+/* Er det ens egen tur, blinker pillen i toppen i ens egen farve. */
+.din-tur { animation: din-tur-puls 1.4s ease-in-out infinite; }
+@keyframes din-tur-puls {
+  0%, 100% { box-shadow: 0 0 0 0 var(--sp, #f2c060); }
+  50% { box-shadow: 0 0 0 6px var(--sp, #f2c060); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tur-pil, .din-tur { animation: none; }
+}
+
 /* Det trukne kort glider ud af bunken og vender sig med forsiden op. */
 .kort-vendes {
   transform-box: fill-box;
@@ -497,8 +523,14 @@ input[type='text']:focus {
   max-height: calc(100% - 84px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   max-width: none;
   box-shadow: 6px 8px 0 #0f1821, 0 30px 60px rgba(15, 24, 33, 0.45);
+  /* På telefonen er der ikke plads til både bægeret og meldingerne — hele
+     kortet scroller, så stigen ikke gemmer sig i et lille felt for sig selv. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
-.meier-kort-vundet {
+.meier-kort-mobil > * { flex-shrink: 0; }
+.meier-kort-mobil .meier-styring { overflow: visible; }
+.meier-kort-mobil .meier-stige { max-height: none; overflow: visible; }.meier-kort-vundet {
   /* Fejringen fylder mere end selve duellen — giv den plads. */
   min-height: min(560px, 100%);
 }
@@ -700,6 +732,8 @@ input[type='text']:focus {
   background: transparent;
   cursor: pointer;
   user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
   touch-action: none;
 }
 .meier-kig:hover { background: rgba(27, 39, 51, 0.06); }
@@ -1289,3 +1323,127 @@ input[type='text']:focus {
 }
 .lyd-knap:hover { background: rgba(27, 39, 51, 0.08); }
 .lyd-fra { opacity: 0.6; }
+
+/* ------------------------------------------------- spring over og smid ud
+   Højreklik på en spiller giver en lille menu; bordet stemmer bagefter på en
+   skærm der ligger over alt andet, med en nedtælling. */
+
+.spillermenu-bag { position: fixed; inset: 0; z-index: 90; }
+.spillermenu {
+  --ink: #1b2733;
+  --ink-dim: #33475b;
+  position: fixed;
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border: 2px solid #1b2733;
+  border-radius: 8px;
+  background: var(--papir);
+  color: var(--ink);
+  box-shadow: 5px 6px 0 #0f1821;
+}
+.spillermenu-hoved {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px 8px;
+  border-bottom: 1.5px solid #9fb1c3;
+  font-family: var(--display);
+  font-size: 16px;
+  text-transform: uppercase;
+}
+.spillermenu-valg {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #1b2733;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+.spillermenu-valg:hover:not(:disabled) { background: rgba(27, 39, 51, 0.1); }
+.spillermenu-valg:disabled { opacity: 0.5; cursor: not-allowed; }
+.spillermenu-valg small { font-size: 11px; font-weight: 600; color: var(--ink-dim); }
+.spillermenu-fare { color: var(--rust); }
+.spillermenu-note { padding: 2px 10px 4px; font-size: 11px; line-height: 1.4; color: var(--ink-dim); }
+
+.afstemning-bag {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(15, 24, 33, 0.55);
+  animation: afstemning-ind 220ms ease-out both;
+}
+.afstemning-kort {
+  --ink: #1b2733;
+  --ink-dim: #33475b;
+  --ink-faint: #3f566d;
+  width: 420px;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 26px 28px 24px;
+  border: 3px solid #1b2733;
+  border-radius: 12px;
+  background: var(--papir);
+  color: var(--ink);
+  text-align: center;
+  box-shadow: 10px 12px 0 #0f1821, 0 30px 70px rgba(15, 24, 33, 0.45);
+}
+.afstemning-titel {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 34px;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+.afstemning-ur { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.afstemning-tal { font-family: var(--display); font-size: 56px; line-height: 1; font-variant-numeric: tabular-nums; }
+.afstemning-bjaelke {
+  width: 100%;
+  height: 10px;
+  overflow: hidden;
+  border: 2px solid #1b2733;
+  border-radius: 999px;
+  background: rgba(27, 39, 51, 0.12);
+}
+.afstemning-bjaelke div { height: 100%; background: #1b2733; transition: width 200ms linear; }
+.afstemning-knapper { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.afstemning-knapper .knap { min-height: 56px; font-size: 20px; }
+.afstemning-stilling {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.afstemning-ja { border-top: 8px solid #1b2733; }
+.afstemning-nej { border-top: 8px solid var(--rust); }
+@keyframes afstemning-ind {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .afstemning-bag { animation: none; }
+}

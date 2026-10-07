@@ -88,7 +88,11 @@ const TOLKE: { [T in KlientHandling['type']]: (o: Raa) => Extract<KlientHandling
   'meier-tro': () => ({ type: 'meier-tro' }),
   'meier-loeft': () => ({ type: 'meier-loeft' }),
   'meld-afgang': () => ({ type: 'meld-afgang' }),
-  'terning-paa-gulvet': () => ({ type: 'terning-paa-gulvet' })
+  'terning-paa-gulvet': () => ({ type: 'terning-paa-gulvet' }),
+  'afstemning-start': (o) => ({
+    type: 'afstemning-start', art: enAf(o.art, ['spring', 'smid'] as const), spillerId: tekst(o.spillerId, 64)
+  }),
+  'afstemning-stem': (o) => ({ type: 'afstemning-stem', id: tal(o.id), ja: sandhed(o.ja) })
 };
 
 /** Læs en handling fra nettet. Kaster RegelFejl hvis den ikke er en klienthandling. */
