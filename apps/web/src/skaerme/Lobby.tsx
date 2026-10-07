@@ -1,7 +1,8 @@
 import { useState, type JSX } from 'react';
-import { Brik, Elefant, Maerkat } from '@k69/ui';
+import { Brik, Elefant, Maerkat, Maerke } from '@k69/ui';
 import { MEIER_SLURKE, formatProcent, type Handling, type Spil } from '@k69/rules';
 import { spilUrl } from '../api.js';
+import { VERSION } from '../version.js';
 
 export function Lobby({
   spil, migId, send
@@ -27,7 +28,7 @@ export function Lobby({
       <Elefant className="plakat-elefant lobby-elefant" str={220} />
 
       <header className="plakat-top">
-        <div className="mark">K69</div>
+        <Maerke version={VERSION} />
         <span className="pille">Lobby</span>
       </header>
 
@@ -86,8 +87,8 @@ export function Lobby({
             <div>
               <div className="valg-t">Hardcore</div>
               <div className="valg-d">
-                Straf for alle tegn på stivhed. Man kan kun hoppe ud fra et blankt felt. Skal
-                aftales fra begyndelsen.
+                Ikke flere slurke — bare sværere at slippe ud. Man kan kun hoppe ud fra et blankt
+                felt. Skal aftales fra begyndelsen.
               </div>
             </div>
             <button
@@ -109,17 +110,6 @@ export function Lobby({
               </div>
             </div>
             <span className="valg-tal">{MEIER_SLURKE}</span>
-          </div>
-
-          <div className="valg-r">
-            <div>
-              <div className="valg-t">Reglerne håndhæves</div>
-              <div className="valg-d">
-                Serveren holder styr på turen: du kan ikke hoppe ud som Bier Meister eller med øl i
-                tårnet, og de ramte slår selv om deres plads i pitten. Har du tårnet, spiller du med imens.
-              </div>
-            </div>
-            <Maerkat>ALTID</Maerkat>
           </div>
         </div>
 

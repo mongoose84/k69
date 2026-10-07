@@ -20,7 +20,8 @@ const POLETTER_PR_SEKUND = 30;
 
 /** Handlinger der skal ligge på disken med det samme. Resten samles op. */
 const VIGTIGE = new Set<Handling['type']>([
-  'join', 'start', 'slaa', 'meld-afgang', 'toem-taarn-faerdig', 'taarn-faerdig'
+  'join', 'start', 'slaa', 'meld-afgang', 'toem-taarn-faerdig', 'taarn-faerdig',
+  'afstemning-start', 'afstemning-stem'
 ]);
 
 function send(sok: WebSocket, besked: unknown): void {
@@ -30,9 +31,54 @@ function send(sok: WebSocket, besked: unknown): void {
 
 /** Hver klient får sin egen udgave — Meier-slaget må kun holderen se. */
 function udsend(spil: Spil): void {
+  planlaegAfstemning(spil);
   const flok = rum.get(spil.id);
   if (!flok) return;
   for (const f of flok) send(f.sok, { t: 'spil', spil: forSpiller(spil, f.spillerId) });
+}
+
+/**
+ * Afstemningens ur. Motoren afgør den selv ved næste handling når tiden er
+ * gået — men står bordet stille, er det her der siger til. Ét ur pr. spil.
+ */
+const ure = new Map<string, { id: number; ur: NodeJS.Timeout }>();
+
+function planlaegAfstemning(spil: Spil): void {
+  const a = spil.afstemning;
+  const ur = ure.get(spil.id);
+  if (!a || a.udfald) {
+    if (ur) {
+      clearTimeout(ur.ur);
+      ure.delete(spil.id);
+    }
+    return;
+  }
+  if (ur?.id === a.id) return;
+  if (ur) clearTimeout(ur.ur);
+  const om = Math.max(0, Date.parse(a.udloeber) - Date.now()) + 150;
+  ure.set(spil.id, { id: a.id, ur: setTimeout(() => void afgoerPaaTid(spil.kode, a.id), om) });
+}
+
+async function afgoerPaaTid(kode: string, id: number): Promise<void> {
+  const spil = await hentSpil(kode);
+  if (!spil) return;
+  ure.delete(spil.id);
+  const foerLog = spil.naesteHaendelseId;
+  try {
+    const efter = anvend(spil, { type: 'afstemning-afgoer', id }, ktx('system'));
+    gem(efter, true);
+    udsend(efter);
+    logNye(efter, foerLog);
+  } catch (e) {
+    console.error('afstemningen kunne ikke afgøres', e);
+  }
+}
+
+/** Nye linjer til hændelsestabellen, ældste først. */
+function logNye(spil: Spil, foerLog: number): void {
+  for (const h of spil.log.filter((l) => l.id >= foerLog).reverse()) {
+    logHaendelse(spil.id, h.slags, h.tekst, h.spillerId);
+  }
 }
 
 function harPolet(f: Forbindelse): boolean {
@@ -151,11 +197,7 @@ async function udfoer(f: Forbindelse, handling: Handling): Promise<void> {
     const efter = anvend(spil, handling, ktx(f.spillerId));
     gem(efter, VIGTIGE.has(handling.type));
     udsend(efter);
-
-    // Nye linjer til hændelsestabellen, ældste først.
-    for (const h of efter.log.filter((l) => l.id >= foerLog).reverse()) {
-      logHaendelse(efter.id, h.slags, h.tekst, h.spillerId);
-    }
+    logNye(efter, foerLog);
   } catch (e) {
     if (e instanceof RegelFejl) {
       send(f.sok, { t: 'fejl', besked: e.message });

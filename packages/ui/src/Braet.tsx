@@ -148,49 +148,32 @@ function Felt({ nr, klikbart, onKlik }: { nr: number; klikbart: boolean; onKlik?
 
 /**
  * Pitten. Man ryger ind på den plads man slår, arbejder sig ned mod 1, og
- * forlader den ud på felt 1 — derfor peger pilene og den stiplede vej mod
- * venstre og op på brættet igen.
+ * forlader den ud på felt 1 — derfor peger pilene mod venstre, og buen fører
+ * op på "3 til..?" igen.
  */
-function Pit(): JSX.Element {
+function Pit({ id }: { id: string }): JSX.Element {
   const p0 = PIT[0]!;
   const p5 = PIT[5]!;
-  const f1 = FELTER[0]!;
-  const ud = f1.indre[4]!;
-  const udX = Math.round(ud[0] * 10) / 10;
-  const udY = Math.round(ud[1] * 10) / 10;
+  // Buen går fra plads 1, under felt 38 og ind i ydersiden af felt 1.
+  const maal = FELTER[0]!.ydre[5]!;
+  const mx = Math.round(maal[0] * 10) / 10;
+  const my = Math.round((maal[1] + 10) * 10) / 10;
+  const sx = p0.x - 4;
+  const sy = p0.y + p0.h - 16;
 
   return (
     <g>
+      <marker id={`${id}-pilspids`} viewBox="0 0 10 10" refX="3" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+        <path d="M 0 0.5 L 10 5 L 0 9.5 L 2.5 5 Z" fill={BLAEK} />
+      </marker>
       <path
-        d={`M ${p0.x - 8} ${p0.cy} C ${p0.x - 70} ${p0.cy + 6} ${udX + 34} ${udY + 44} ${udX + 5} ${udY + 15}`}
+        d={`M ${sx} ${sy} C ${sx - 30} ${sy + 34} ${mx + 40} ${my + 36} ${mx + 6} ${my + 6}`}
         fill="none"
         stroke={BLAEK}
-        strokeWidth="2.4"
-        strokeDasharray="7 6"
+        strokeWidth="3"
+        strokeLinecap="round"
+        markerEnd={`url(#${id}-pilspids)`}
       />
-      <path
-        d={`M ${udX - 6} ${udY + 20} L ${udX + 5} ${udY + 15} L ${udX + 2} ${udY + 27}`}
-        fill={BLAEK}
-        stroke={BLAEK}
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-
-      <text x={p0.x} y={p0.y - 14} fill={BLAEK} fontSize="16" letterSpacing="3" style={{ fontFamily: DISPLAY }}>
-        PITTEN
-      </text>
-      <text
-        x={p5.x + p5.w}
-        y={p0.y - 14}
-        textAnchor="end"
-        fill={BLAEK}
-        fontSize="11"
-        fontWeight="700"
-        letterSpacing="1.4"
-        style={{ fontFamily: SANS }}
-      >
-        DU RYGER IND PÅ DEN PLADS DU SLÅR
-      </text>
 
       {PIT.map((c) => {
         const sidste = c.plads === 1;
@@ -208,27 +191,14 @@ function Pit(): JSX.Element {
             />
             <text
               x={c.cx}
-              y={c.cy - 8}
+              y={c.cy}
               textAnchor="middle"
               dominantBaseline="central"
               fill={sidste ? LYS : BLAEK}
-              fontSize="28"
+              fontSize="30"
               style={{ fontFamily: DISPLAY }}
             >
               {c.plads}
-            </text>
-            <text
-              x={c.cx}
-              y={c.cy + 20}
-              textAnchor="middle"
-              dominantBaseline="central"
-              fill={sidste ? LYS : BLAEK}
-              fontSize="9"
-              fontWeight="700"
-              letterSpacing="1.2"
-              style={{ fontFamily: SANS }}
-            >
-              {c.plads} SHOTS
             </text>
             {c.plads > 1 && (
               <path
@@ -244,20 +214,16 @@ function Pit(): JSX.Element {
         );
       })}
 
-      <text x={p0.x} y={p0.y + p0.h + 22} fill={BLAEK} fontSize="11" fontWeight="700" letterSpacing="1.4" style={{ fontFamily: SANS }}>
-        UD PÅ FELT 1
-      </text>
       <text
-        x={p5.x + p5.w}
-        y={p0.y + p0.h + 38}
-        textAnchor="end"
+        x={(p0.x + p5.x + p5.w) / 2}
+        y={p0.y + p0.h + 28}
+        textAnchor="middle"
         fill={BLAEK}
-        fontSize="11"
-        fontWeight="700"
-        letterSpacing="1.4"
-        style={{ fontFamily: SANS }}
+        fontSize="20"
+        letterSpacing="4"
+        style={{ fontFamily: DISPLAY }}
       >
-        SLÅ DIG NED MOD 1 — SLÅR DU OVER, ER DU UDE
+        PITTEN
       </text>
     </g>
   );
@@ -602,7 +568,7 @@ export function BraetPlade({
       {/* Filt-kornet ligger kun på filten indeni. */}
       <rect x="0" y="0" width={BRAET_STR.w} height={BRAET_STR.h} fill="#FFFFFF" filter={`url(#${id}-grain)`} clipPath={`url(#${id}-indre)`} style={{ pointerEvents: 'none' }} />
 
-      <Pit />
+      <Pit id={id} />
       <Bordet id={id} andel={taarnAndel} cl={taarnCl} kapCl={taarnKapCl} kort={kort} terning={terning} />
 
       {fremhaevFelter?.map((nr) => {
@@ -671,6 +637,25 @@ export function BraetPlade({
             {b.navn.slice(0, 1).toUpperCase()}
           </text>
           {kortHos && b.id === kortHos.spillerId && <SyverVedBrik kort={kortHos} />}
+        </g>
+      ))}
+
+      {/* Pilen over den der er på tur — tegnes til sidst, så ingen brik dækker den. */}
+      {placeret.filter((b) => b.erPaaTur).map((b) => (
+        <g
+          key={`pil-${b.id}`}
+          transform={`translate(${b.x}, ${b.y})`}
+          style={{ transition: `transform ${BRIK_RYKKER_MS}ms cubic-bezier(0.33, 1.08, 0.45, 1)`, pointerEvents: 'none' }}
+        >
+          <g className="tur-pil">
+            <path
+              d="M -8 -62 L 8 -62 L 8 -48 L 17 -48 L 0 -30 L -17 -48 L -8 -48 Z"
+              fill={b.farve}
+              stroke={BLAEK}
+              strokeWidth="3"
+              strokeLinejoin="round"
+            />
+          </g>
         </g>
       ))}
 

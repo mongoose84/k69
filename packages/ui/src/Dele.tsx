@@ -309,25 +309,25 @@ export function Maerkat({ children, fyldt = false }: { children: ReactNode; fyld
   );
 }
 
-const MAALER_STREGER = 11;
-
 /**
- * Slurke-måler: 11 streger for den enhed man er i gang med, fyldt i forhold til
- * hvor meget der er tilbage. For en pilsner er én streg præcis én slurk.
+ * Slurke-måler: én sammenhængende bjælke for den enhed man er i gang med, fyldt
+ * i forhold til hvor meget der er tilbage.
  */
-export function Slurkemaaler({ tilbage, ialt, bredde = 12 }: { tilbage: number; ialt: number; bredde?: number }): JSX.Element {
-  const fyldte = ialt > 0 ? Math.ceil((tilbage / ialt) * MAALER_STREGER - 1e-9) : 0;
+export function Slurkemaaler({ tilbage, ialt, bredde = 160 }: { tilbage: number; ialt: number; bredde?: number }): JSX.Element {
+  const andel = ialt > 0 ? Math.max(0, Math.min(1, tilbage / ialt)) : 0;
   return (
-    <div style={{ display: 'flex', gap: 3 }}>
-      {Array.from({ length: MAALER_STREGER }, (_, i) => (
-        <div
-          key={i}
-          style={{
-            width: bredde, height: 7, borderRadius: 1,
-            background: i < fyldte ? 'var(--oel)' : 'rgba(27, 39, 51, 0.18)'
-          }}
-        />
-      ))}
+    <div
+      role="meter"
+      aria-valuemin={0}
+      aria-valuemax={Math.round(ialt)}
+      aria-valuenow={Math.round(tilbage)}
+      aria-label="Slurke tilbage"
+      style={{
+        width: bredde, height: 8, flex: `0 0 ${bredde}px`, borderRadius: 4, overflow: 'hidden',
+        background: 'rgba(27, 39, 51, 0.18)'
+      }}
+    >
+      <div style={{ width: `${andel * 100}%`, height: '100%', borderRadius: 4, background: 'var(--oel)', transition: 'width 400ms ease' }} />
     </div>
   );
 }
@@ -352,6 +352,16 @@ export function Kortbillede({
       <div style={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: bredde * 0.46 }}>
         {tegn}
       </div>
+    </div>
+  );
+}
+
+/** K69-mærket oppe i hjørnet, med versionen småt nedenunder. */
+export function Maerke({ version }: { version: string }): JSX.Element {
+  return (
+    <div className="mark-blok">
+      <div className="mark">K69</div>
+      <div className="mark-version">v{version}</div>
     </div>
   );
 }

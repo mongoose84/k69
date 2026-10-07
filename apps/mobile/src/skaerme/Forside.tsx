@@ -1,6 +1,7 @@
 import { useState, type JSX } from 'react';
-import { Elefant, opretSpil, slaaOpSpil } from '@k69/ui';
+import { Elefant, opretSpil, slaaOpSpil, Maerke } from '@k69/ui';
 import { API } from '../api.js';
+import { VERSION } from '../version.js';
 
 export function Forside({ onSpil }: { onSpil: (kode: string) => void }): JSX.Element {
   const [kode, saetKode] = useState('');
@@ -39,14 +40,14 @@ export function Forside({ onSpil }: { onSpil: (kode: string) => void }): JSX.Ele
       <Elefant className="plakat-elefant forside-elefant" str={380} titel="Krunk-elefanten" />
 
       <header className="mobilbar" style={{ justifyContent: 'space-between', padding: '0 20px' }}>
-        <div className="mark">K69</div>
+        <Maerke version={VERSION} />
         <span className="pille" style={{ fontSize: 11, padding: '6px 11px' }}>1–8 spillere</span>
       </header>
 
       <div className="forside-indhold">
         <div className="forside-tekst">
           <h1>Ét tårn.<br />En pit der gør ondt.</h1>
-          <p className="lead">Brættet fra Tinglev. Start et spil og del linket i gruppen.</p>
+          <p className="lead">Brættet fra Sønderborg. Start et spil og del linket i gruppen.</p>
         </div>
 
         <section className="papir forside-panel">

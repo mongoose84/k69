@@ -244,6 +244,67 @@ function skub(): void {
   stoej(k.a, k.ud, k.t, 0.35, { type: 'lowpass', freq: 900, til: 400 }, 0.22);
 }
 
+/**
+ * Bordet der siger "ååååh" når der bliver meldt. Et kor af savtakker med hver
+ * sin tone, sendt gennem to formantfiltre der giver vokalen, og som glider
+ * langsomt opad — det er dét der bygger spændingen op.
+ */
+function aah(forsinkelse = 0): void {
+  const k = klar(forsinkelse);
+  if (!k) return;
+  const { a, ud, t } = k;
+  const varighed = 1.9;
+
+  const kor = a.createGain();
+  const ind = a.createGain();
+  ind.gain.value = 2.6;
+  // "å": F1 omkring 480 Hz, F2 omkring 800 Hz.
+  for (const [freq, q, styrke] of [[480, 5, 1], [800, 7, 0.55], [2600, 9, 0.12]] as const) {
+    const f = a.createBiquadFilter();
+    f.type = 'bandpass';
+    f.frequency.value = freq;
+    f.Q.value = q;
+    const g = a.createGain();
+    g.gain.value = styrke;
+    kor.connect(f).connect(g).connect(ind);
+  }
+  const blod = a.createBiquadFilter();
+  blod.type = 'lowpass';
+  blod.frequency.value = 2400;
+  ind.connect(blod).connect(ud);
+
+  for (let i = 0; i < 9; i++) {
+    const start = t + Math.random() * 0.18;
+    const slut = t + varighed - Math.random() * 0.2;
+    const grund = 140 + Math.random() * 170;
+    const osc = a.createOscillator();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(grund, start);
+    osc.frequency.linearRampToValueAtTime(grund * 1.22, slut - 0.25);
+    osc.frequency.linearRampToValueAtTime(grund * 1.12, slut);
+
+    const lfo = a.createOscillator();
+    const dybde = a.createGain();
+    lfo.frequency.value = 4.5 + Math.random() * 1.5;
+    dybde.gain.value = grund * 0.015;
+    lfo.connect(dybde).connect(osc.frequency);
+
+    const g = a.createGain();
+    g.gain.setValueAtTime(0.0001, start);
+    g.gain.exponentialRampToValueAtTime(0.05, start + 0.35 + Math.random() * 0.2);
+    g.gain.setValueAtTime(0.05, slut - 0.35);
+    g.gain.exponentialRampToValueAtTime(0.0001, slut);
+
+    osc.connect(g).connect(kor);
+    osc.start(start);
+    osc.stop(slut + 0.05);
+    lfo.start(start);
+    lfo.stop(slut + 0.05);
+  }
+  // Lidt luft i det, så det lyder som mennesker og ikke et orgel.
+  stoej(a, ud, t + 0.1, varighed - 0.3, { type: 'bandpass', freq: 700, q: 1.5 }, 0.05);
+}
+
 /** Alle skal trykke — nu! */
 function alarm(): void {
   const k = klar();
@@ -295,6 +356,9 @@ export function useLyde(live: Spil, vist: Spil, migId: string): void {
     const f = forrigeLive.current;
     forrigeLive.current = live;
     if (live.terningNr !== f.terningNr) terningRuller();
+    // Bordet skal stemme — afstemningen vises på det levende spil, så lyden følger med.
+    const a = live.afstemning;
+    if (a && !a.udfald && a.id !== f.afstemning?.id) alarm();
   }, [live]);
 
   useEffect(() => {
@@ -319,8 +383,10 @@ export function useLyde(live: Spil, vist: Spil, migId: string): void {
     const m = vist.meier;
     const fm = f.meier;
     if (m && fm && m.historik.length > fm.historik.length) {
-      if (m.historik[0]?.melding) skub();
-      else baeger();
+      if (m.historik[0]?.melding) {
+        skub();
+        aah(150);
+      } else baeger();
     }
 
     const kaploebNu = vist.afventer?.slags === 'kaploeb';

@@ -962,3 +962,74 @@ test('hændelserne ved hvilken tur de hører til, og hvis tur det var', () => {
   assert.ok(anden.length > 0);
   assert.ok(anden.every((h) => h.tur === tur + 1));
 });
+
+/* ------------------------------------------------ spring over og smid ud */
+
+test('bordet kan springe en over der ikke slår', () => {
+  let spil = opsat(['A', 'B', 'C']);
+  assert.equal(afventerSpiller(spil.afventer), 'p0');
+  spil = gør(spil, 'p1', { type: 'afstemning-start', art: 'spring', spillerId: 'p0' });
+  const id = spil.afstemning!.id;
+  assert.deepEqual(spil.afstemning!.vaelgere, ['p1', 'p2']);
+  assert.equal(spil.afstemning!.udfald, null);
+  spil = gør(spil, 'p2', { type: 'afstemning-stem', id, ja: true });
+  assert.equal(spil.afstemning!.udfald, 'ja');
+  assert.equal(afventerSpiller(spil.afventer), 'p1');
+  assert.equal(find(spil, 'p0')!.tilstand, 'aktiv');
+});
+
+test('lige stemmer er nej', () => {
+  let spil = opsat(['A', 'B', 'C']);
+  spil = gør(spil, 'p1', { type: 'afstemning-start', art: 'smid', spillerId: 'p0' });
+  spil = gør(spil, 'p2', { type: 'afstemning-stem', id: spil.afstemning!.id, ja: false });
+  assert.equal(spil.afstemning!.udfald, 'nej');
+  assert.equal(find(spil, 'p0')!.tilstand, 'aktiv');
+});
+
+test('man kan kun springe over når spillet venter på en', () => {
+  const spil = opsat(['A', 'B', 'C']);
+  assert.throws(() => gør(spil, 'p0', { type: 'afstemning-start', art: 'spring', spillerId: 'p2' }), /venter ikke/);
+  assert.throws(() => gør(spil, 'p0', { type: 'afstemning-start', art: 'smid', spillerId: 'p0' }), /dig selv/);
+});
+
+test('smides den ud der er på, går turen videre', () => {
+  let spil = opsat(['A', 'B', 'C']);
+  spil = gør(spil, 'p1', { type: 'afstemning-start', art: 'smid', spillerId: 'p0' });
+  spil = gør(spil, 'p2', { type: 'afstemning-stem', id: spil.afstemning!.id, ja: true });
+  assert.equal(find(spil, 'p0')!.tilstand, 'ude');
+  assert.equal(afventerSpiller(spil.afventer), 'p1');
+});
+
+test('dem der er offline stemmer ikke, og er man alene om det, afgøres det med det samme', () => {
+  let spil = opsat(['A', 'B']);
+  find(spil, 'p0')!.tilsluttet = false;
+  spil = gør(spil, 'p1', { type: 'afstemning-start', art: 'spring', spillerId: 'p0' });
+  assert.equal(spil.afstemning!.udfald, 'ja');
+  assert.equal(afventerSpiller(spil.afventer), 'p1');
+});
+
+test('når tiden er gået, afgøres afstemningen på de afgivne stemmer', () => {
+  let spil = opsat(['A', 'B', 'C', 'D']);
+  spil = gør(spil, 'p1', { type: 'afstemning-start', art: 'spring', spillerId: 'p0' });
+  const id = spil.afstemning!.id;
+  assert.throws(() => anvend(spil, { type: 'afstemning-stem', id, ja: true }, ktx('p0')), /ikke med/);
+  // For tidligt: der sker ingenting.
+  spil = gør(spil, 'p1', { type: 'afstemning-afgoer', id });
+  assert.equal(spil.afstemning!.udfald, null);
+  const senere: Kontekst = { ...ktx('system'), naa: () => '2026-01-01T00:00:21.000Z' };
+  spil = anvend(spil, { type: 'afstemning-afgoer', id }, senere);
+  assert.equal(spil.afstemning!.udfald, 'ja');
+  assert.equal(afventerSpiller(spil.afventer), 'p1');
+});
+
+test('smides en ud midt i en Meier, aflyses duellen', () => {
+  let spil = opsat(['A', 'B', 'C']);
+  placer(spil, 'p0', foersteFeltAf('meier') - 1);
+  spil = gør(spil, 'p0', { type: 'slaa' }, [1]);
+  spil = gør(spil, 'p0', { type: 'meier-vaelg', spillerId: 'p1' });
+  spil = gør(spil, 'p2', { type: 'afstemning-start', art: 'smid', spillerId: 'p1' });
+  spil = gør(spil, 'p0', { type: 'afstemning-stem', id: spil.afstemning!.id, ja: true });
+  assert.equal(spil.meier, null);
+  assert.equal(find(spil, 'p1')!.tilstand, 'ude');
+  assert.equal(afventerSpiller(spil.afventer), 'p2');
+});

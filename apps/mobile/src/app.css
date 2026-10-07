@@ -391,3 +391,6 @@
 @media (min-width: 560px) {
   .skaerm { max-width: 560px; margin: 0 auto; border-left: 2px solid #1b2733; border-right: 2px solid #1b2733; }
 }
+
+/* Et langt tryk på en spiller åbner menuen — ikke telefonens tekstmarkering. */
+.spiller-chip, .liste .raekke { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
