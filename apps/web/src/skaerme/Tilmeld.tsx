@@ -1,10 +1,11 @@
 import { useState, type JSX } from 'react';
 import {
-  EgenDrikFelter, Elefant, StoerrelseValg, egenDrikKlar, fastDrikValg, navneliste, tomEgenDrik, type EgenDrik
+  EgenDrikFelter, Elefant, StoerrelseValg, egenDrikKlar, fastDrikValg, navneliste, tomEgenDrik, type EgenDrik, Maerke
 } from '@k69/ui';
 import {
   BRIKFARVER, DRIKKE, DRIK_LISTE, formatAntal, formatProcent, slurkePrEnhed, type DrikId, type DrikValg, type Handling, type KortHold, type Spil
 } from '@k69/rules';
+import { VERSION } from '../version.js';
 
 const HOLD: Array<{ id: KortHold; navn: string; forklaring: string }> = [
   { id: 'dame', navn: 'Damerne', forklaring: 'Du drikker når Damen bliver trukket' },
@@ -36,7 +37,7 @@ export function Tilmeld({
       <Elefant className="plakat-elefant tilmeld-elefant" str={560} />
 
       <header className="plakat-top">
-        <div className="mark">K69</div>
+        <Maerke version={VERSION} />
         <span className="pille">Spil {spil.kode}</span>
       </header>
 

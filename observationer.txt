@@ -1,0 +1,24 @@
+Teksten omkring pitten skal væk. Der skal stå "Pitten" neden under pitten. - inklusiv 1 shots, 2 shots osv.
+
+Tilføj et versionnummer - bare småt under hvor der står K69 oppe i venstre hjørne
+
+pilen fra pitten til "3 til ...?" skal gøres pænere
+
+Når man logger ind skal der stå "Brættet fra Sønderborg" ikke fra Tinglev. Der skal heller ikke stå at man skal finde glassene frem og stille tårnet, for det giver ikke mening i en browser
+
+oppe ved "Ved bordet"-sektionen, der skal vi ikke have 11 gule prikker til at vise hvor mange slurke. Vis istedet en sammenhængene progressbar. Og rund tallene til heltal (integers)
+
+Når man vælger farve, så er der 2 gule. Lad den ene være mere orange
+
+I afsnittet Sådan spiller I, fjern "Reglerne håndhæves" sektionen
+
+Hardcore versionen skal ikke give flere slurke, men i stedet bare være svært at komme ud af 
+
+Det må gerne være mere tydeligt når det er din tur - fx. med en pil eller andet der viser det er din tur,
+
+Når nogen melder noget i meier, så skal der være noget lyd der siger "ååååh" for at opbygge spænding. Find gerne lydfiler fra et gratis 3rd pary site
+
+Mobil version: 
+Meyer virker ikke, man kan ikke vælge hvad man har slået, kun sende videre
+
+Vi skal have en "Spring over" og "Smid ud" funktion. Det skal komme frem hvis man højre-klikker på en spiller. Gør man det, skal alle der stadig er online se en skærm hvor der står "Spring Mads over" eller "Smid Mads ud" og de skal så trykke på "Ja" eller "Nej". De har 20 sekunder til at svare og der skal være en nedtælling.

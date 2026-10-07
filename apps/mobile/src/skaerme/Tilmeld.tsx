@@ -1,10 +1,11 @@
 import { useState, type JSX } from 'react';
 import {
-  EgenDrikFelter, StoerrelseValg, egenDrikKlar, fastDrikValg, navneliste, tomEgenDrik, type EgenDrik
+  EgenDrikFelter, StoerrelseValg, egenDrikKlar, fastDrikValg, navneliste, tomEgenDrik, type EgenDrik, Maerke
 } from '@k69/ui';
 import {
   BRIKFARVER, DRIKKE, DRIK_LISTE, formatProcent, type DrikId, type DrikValg, type Handling, type KortHold, type Spil
 } from '@k69/rules';
+import { VERSION } from '../version.js';
 
 const HOLD: Array<{ id: KortHold; navn: string; forklaring: string }> = [
   { id: 'dame', navn: 'Damerne', forklaring: 'Drikker på Damen' },
@@ -35,7 +36,7 @@ export function Tilmeld({
       <div className="vandmaerke mobil-vandmaerke" aria-hidden="true">{spil.kode}</div>
 
       <header className="mobilbar">
-        <div className="mark">K69</div>
+        <Maerke version={VERSION} />
         <span className="pille" style={{ fontSize: 11, padding: '6px 11px' }}>Spil {spil.kode}</span>
       </header>
 

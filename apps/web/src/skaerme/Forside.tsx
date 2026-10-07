@@ -1,6 +1,7 @@
 import { useState, type JSX } from 'react';
-import { Elefant, opretSpil, slaaOpSpil } from '@k69/ui';
+import { Elefant, opretSpil, slaaOpSpil, Maerke } from '@k69/ui';
 import { API } from '../api.js';
+import { VERSION } from '../version.js';
 
 export function Forside({ onSpil }: { onSpil: (kode: string) => void }): JSX.Element {
   const [fane, saetFane] = useState<'ny' | 'join'>('ny');
@@ -40,7 +41,7 @@ export function Forside({ onSpil }: { onSpil: (kode: string) => void }): JSX.Ele
       <Elefant className="plakat-elefant forside-elefant" str={900} titel="Krunk-elefanten" />
 
       <header className="plakat-top">
-        <div className="mark">K69</div>
+        <Maerke version={VERSION} />
         <div className="piller">
           <span className="pille">38 felter</span>
           <span className="pille">6 i pitten</span>
@@ -52,7 +53,7 @@ export function Forside({ onSpil }: { onSpil: (kode: string) => void }): JSX.Ele
         <div>
           <h1>Ét tårn.<br />En pit der gør ondt.</h1>
           <p className="lead">
-            Brættet fra Tinglev, nu i browseren. Start et spil, del linket i gruppen — resten drikker I selv.
+            Brættet fra Sønderborg, nu i browseren. Start et spil, del linket i gruppen — resten drikker I selv.
           </p>
         </div>
 
@@ -101,10 +102,6 @@ export function Forside({ onSpil }: { onSpil: (kode: string) => void }): JSX.Ele
           {fejl && <div className="fejltekst">{fejl}</div>}
         </section>
       </div>
-
-      <p className="forside-fod">
-        Alle skal have en øl eller et glas klar. Stil de 6 shotglas i pitten og tårnet midt på bordet.
-      </p>
     </div>
   );
 }

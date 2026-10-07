@@ -212,6 +212,27 @@ export interface Finger {
   ramte: string[];
 }
 
+/**
+ * Bordet stemmer om at springe en spiller over eller smide ham ud. Startes med
+ * et højreklik på spilleren; alle der er online ved start stemmer — undtagen
+ * ham det handler om. Den der startede den, tæller som ja.
+ */
+export interface Afstemning {
+  /** Hændelses-id'et for starten, så klienten kan kende den igen. */
+  id: number;
+  art: 'spring' | 'smid';
+  maalId: string;
+  startetAf: string;
+  /** Dem der må stemme — låst fast da afstemningen startede. */
+  vaelgere: string[];
+  stemmer: Record<string, 'ja' | 'nej'>;
+  startet: string;
+  /** Når tiden er gået, afgøres den på de stemmer der er afgivet. */
+  udloeber: string;
+  /** Sat når den er afgjort. Bliver stående, så klienten kan vise udfaldet. */
+  udfald: 'ja' | 'nej' | null;
+}
+
 export interface Haendelse {
   id: number;
   tid: string;
@@ -264,6 +285,8 @@ export interface Spil {
   /** Fingeren der ligger på bordkanten lige nu. */
   finger: Finger | null;
   afventer: Afventer | null;
+  /** Den seneste afstemning om at springe over eller smide ud. Mangler i gamle gemte spil. */
+  afstemning?: Afstemning | null;
   log: Haendelse[];
   /** Spillere der skal i pitten når det aktuelle felt er kvitteret. */
   afventerPit: string[];
@@ -300,6 +323,10 @@ export type Handling =
   | { type: 'meier-loeft' }
   | { type: 'meld-afgang' }
   | { type: 'terning-paa-gulvet' }
+  | { type: 'afstemning-start'; art: 'spring' | 'smid'; spillerId: string }
+  | { type: 'afstemning-stem'; id: number; ja: boolean }
+  /** Sendes af serverens ur når tiden er gået — motoren tjekker selv at den er det. */
+  | { type: 'afstemning-afgoer'; id: number }
   | { type: 'forbindelse'; tilsluttet: boolean };
 
 export interface Kontekst {

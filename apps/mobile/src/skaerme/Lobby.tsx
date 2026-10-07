@@ -1,7 +1,8 @@
 import { useState, type JSX } from 'react';
-import { Brik, Elefant, Maerkat } from '@k69/ui';
+import { Brik, Elefant, Maerkat, Maerke } from '@k69/ui';
 import { formatProcent, type Handling, type Spil } from '@k69/rules';
 import { spilUrl } from '../api.js';
+import { VERSION } from '../version.js';
 
 export function Lobby({
   spil, migId, send
@@ -31,7 +32,7 @@ export function Lobby({
       <Elefant className="plakat-elefant mobil-elefant" str={150} />
 
       <header className="mobilbar">
-        <div className="mark">K69</div>
+        <Maerke version={VERSION} />
         <span className="pille" style={{ fontSize: 11, padding: '6px 11px' }}>Lobby</span>
         <span className="eyebrow" style={{ marginLeft: 6 }}>{spil.spillere.length} af 8</span>
       </header>
@@ -77,7 +78,7 @@ export function Lobby({
           <div className="valg-r">
             <div>
               <div className="valg-t">Hardcore</div>
-              <div className="valg-d">Kun ud fra et blankt felt. Aftal det fra start.</div>
+              <div className="valg-d">Ikke flere slurke — man kan kun hoppe ud fra et blankt felt. Aftal det fra start.</div>
             </div>
             <button
               className={spil.indstillinger.hardcore ? 'kontakt kontakt-paa' : 'kontakt'}

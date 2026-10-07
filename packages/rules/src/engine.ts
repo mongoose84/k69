@@ -13,7 +13,7 @@ import {
 } from './types.js';
 
 export const BRIKFARVER = [
-  '#D8A93F', '#8FAF74', '#87A4C6', '#C4776B', '#B189A6', '#7FB0A4', '#C9A227', '#9C9A78'
+  '#D8A93F', '#8FAF74', '#87A4C6', '#C4776B', '#B189A6', '#7FB0A4', '#E07B39', '#9C9A78'
 ];
 
 export const STANDARD_INDSTILLINGER = {
@@ -59,6 +59,7 @@ export function nytSpil(id: string, kode: string, naa: string): Spil {
     syver: null,
     finger: null,
     afventer: null,
+    afstemning: null,
     log: [],
     afventerPit: [],
     naesteHaendelseId: 1,
@@ -546,8 +547,12 @@ export function afgangSpaerret(spil: Spil, s: Spiller): string | null {
 
 export function anvend(spil: Spil, handling: Handling, ctx: Kontekst): Spil {
   spil.opdateret = ctx.naa();
+  // Er tiden gået, afgøres afstemningen før alt andet — også hvis serverens ur
+  // aldrig nåede at sige til (genstart).
+  afstemningUdloebet(spil, ctx);
 
   switch (handling.type) {
+    case 'afstemning-afgoer': return spil;
     case 'join': return join(spil, handling, ctx);
     case 'saet-drik': return saetDrik(spil, handling.drik, ctx);
     case 'saet-indstilling': return saetIndstilling(spil, handling, ctx);
@@ -588,6 +593,8 @@ export function anvend(spil: Spil, handling: Handling, ctx: Kontekst): Spil {
     case 'meier-loeft': return meierLoeft(spil, s, ctx);
     case 'meld-afgang': return meldAfgang(spil, s, ctx);
     case 'terning-paa-gulvet': return terningPaaGulvet(spil, s, ctx);
+    case 'afstemning-start': return afstemningStart(spil, s, handling.art, handling.spillerId, ctx);
+    case 'afstemning-stem': return afstemningStem(spil, s, handling.id, handling.ja, ctx);
     default: fejl('Ukendt handling.');
   }
 }
@@ -890,9 +897,21 @@ function kaploebTryk(spil: Spil, s: Spiller, ctx: Kontekst): Spil {
   if (!a || a.slags !== 'kaploeb') fejl('Der er ikke noget kapløb i gang.');
   if (a.ramte.includes(s.id)) return spil;
   a.ramte.push(s.id);
+  afgoerKaploeb(spil, ctx);
+  return spil;
+}
 
+/** Når kun én mangler at trykke, er han sidste mand. Kaldes også når nogen forlader bordet. */
+function afgoerKaploeb(spil: Spil, ctx: Kontekst): void {
+  const a = spil.afventer;
+  if (!a || a.slags !== 'kaploeb') return;
   const med = aktive(spil);
-  if (a.ramte.length >= med.length - 1 && med.length > 1) {
+  if (med.length <= 1) {
+    afslutFelt(spil, ctx);
+    return;
+  }
+  const naaet = a.ramte.filter((id) => med.some((o) => o.id === id));
+  if (naaet.length >= med.length - 1) {
     const sidste = med.find((o) => !a.ramte.includes(o.id));
     const foerste = find(spil, a.ramte[0]!);
     if (sidste) {
@@ -914,7 +933,6 @@ function kaploebTryk(spil: Spil, s: Spiller, ctx: Kontekst): Spil {
     }
     afslutFelt(spil, ctx);
   }
-  return spil;
 }
 
 /* ------------------------------------------------------------------ 10'eren */
@@ -1160,6 +1178,192 @@ function terningPaaGulvet(spil: Spil, s: Spiller, _ctx: Kontekst): Spil {
   drik(s, 1);
   skriv(spil, 'straf', `${navn(s)} sendte terningen ud over bordkanten og drikker en straf-slurk.`, s);
   return spil;
+}
+
+/* -------------------------------------------- spring over og smid ud */
+
+/** Så lang tid har bordet til at stemme. */
+export const AFSTEMNING_SEKUNDER = 20;
+
+/**
+ * Venter spillet på denne spiller lige nu? Det er kun dér det giver mening at
+ * springe ham over — ellers kører spillet jo videre uden ham.
+ */
+export function venterPaa(spil: Spil, id: string): boolean {
+  const a = spil.afventer;
+  if (!a) return false;
+  if (a.slags === 'kaploeb') return !a.ramte.includes(id) && aktive(spil).some((o) => o.id === id);
+  return a.spillerId === id;
+}
+
+function afstemningStart(spil: Spil, s: Spiller, art: 'spring' | 'smid', maalId: string, ctx: Kontekst): Spil {
+  if (art !== 'spring' && art !== 'smid') fejl('Ukendt afstemning.');
+  if (spil.afstemning && !spil.afstemning.udfald) fejl('Bordet stemmer allerede om noget.');
+  const maal = find(spil, maalId);
+  if (!maal || maal.tilstand !== 'aktiv') fejl('Vælg en der er med i spillet.');
+  if (maal.id === s.id) fejl('Du kan ikke stemme om dig selv.');
+  if (art === 'spring' && !venterPaa(spil, maal.id)) fejl(`Spillet venter ikke på ${navn(maal)} lige nu.`);
+
+  const vaelgere = aktive(spil).filter((o) => o.id !== maal.id && (o.tilsluttet || o.id === s.id)).map((o) => o.id);
+  const startet = ctx.naa();
+  spil.afstemning = {
+    id: spil.naesteHaendelseId,
+    art,
+    maalId: maal.id,
+    startetAf: s.id,
+    vaelgere,
+    stemmer: { [s.id]: 'ja' },
+    startet,
+    udloeber: new Date(Date.parse(startet) + AFSTEMNING_SEKUNDER * 1000).toISOString(),
+    udfald: null
+  };
+  skriv(
+    spil, 'afstemning',
+    `${navn(s)} vil ${art === 'spring' ? `springe ${navn(maal)} over` : `smide ${navn(maal)} ud`} — bordet stemmer.`,
+    s
+  );
+  afgoerHvisKlart(spil, ctx);
+  return spil;
+}
+
+function afstemningStem(spil: Spil, s: Spiller, id: number, ja: boolean, ctx: Kontekst): Spil {
+  const a = spil.afstemning;
+  if (!a || a.id !== id || a.udfald) fejl('Afstemningen er slut.');
+  if (!a.vaelgere.includes(s.id)) fejl('Du er ikke med i den her afstemning.');
+  a.stemmer[s.id] = ja ? 'ja' : 'nej';
+  afgoerHvisKlart(spil, ctx);
+  return spil;
+}
+
+function optael(a: NonNullable<Spil['afstemning']>): { ja: number; nej: number; mangler: number } {
+  const v = a.vaelgere.map((id) => a.stemmer[id]);
+  const ja = v.filter((x) => x === 'ja').length;
+  const nej = v.filter((x) => x === 'nej').length;
+  return { ja, nej, mangler: a.vaelgere.length - ja - nej };
+}
+
+/** Afgør med det samme, hvis de manglende stemmer ikke kan vende udfaldet. Flertal af de afgivne; lige er nej. */
+function afgoerHvisKlart(spil: Spil, ctx: Kontekst): void {
+  const a = spil.afstemning;
+  if (!a || a.udfald) return;
+  const { ja, nej, mangler } = optael(a);
+  if (ja > nej + mangler || nej >= ja + mangler) afgoerAfstemning(spil, ctx);
+}
+
+function afstemningUdloebet(spil: Spil, ctx: Kontekst): void {
+  const a = spil.afstemning;
+  if (!a || a.udfald) return;
+  if (Date.parse(spil.opdateret) >= Date.parse(a.udloeber)) afgoerAfstemning(spil, ctx);
+}
+
+function afgoerAfstemning(spil: Spil, ctx: Kontekst): void {
+  const a = spil.afstemning;
+  if (!a || a.udfald) return;
+  const { ja, nej } = optael(a);
+  const vedtaget = ja > nej && spil.fase === 'spiller';
+  a.udfald = vedtaget ? 'ja' : 'nej';
+  const maal = find(spil, a.maalId);
+  if (!maal) return;
+  const stillingen = `${ja}–${nej}`;
+
+  if (!vedtaget) {
+    skriv(
+      spil, 'afstemning',
+      `Bordet stemte nej (${stillingen}) — ${navn(maal)} ${a.art === 'spring' ? 'bliver ikke sprunget over' : 'bliver ved bordet'}.`,
+      maal
+    );
+    return;
+  }
+  if (maal.tilstand !== 'aktiv') return;
+
+  if (a.art === 'smid') {
+    smidUd(spil, maal, stillingen, ctx);
+    return;
+  }
+  if (!venterPaa(spil, maal.id)) {
+    skriv(spil, 'afstemning', `Bordet stemte ja (${stillingen}), men ${navn(maal)} nåede selv at komme til.`, maal);
+    return;
+  }
+  skriv(spil, 'afstemning', `Bordet stemte ja (${stillingen}) — ${navn(maal)} bliver sprunget over.`, maal);
+  slipOpgave(spil, maal, 'spring', ctx);
+}
+
+function smidUd(spil: Spil, s: Spiller, stillingen: string, ctx: Kontekst): void {
+  const harOpgave = venterPaa(spil, s.id);
+  const m = spil.meier;
+  const iDuel = Boolean(m && (m.udfordrerId === s.id || m.modstanderId === s.id));
+
+  s.tilstand = 'ude';
+  s.varslerAfgang = false;
+  skriv(spil, 'afstemning', `Bordet stemte ja (${stillingen}) — ${navn(s)} er smidt ud af spillet.`, s);
+  if (spil.syver?.holderId === s.id) spil.syver = null;
+  if (spil.taarn.toemmesAfId === s.id) {
+    spil.taarn.toemmesAfId = null;
+    skriv(spil, 'taarn', `Tårnet står frit igen — ${navn(s)} nåede ikke at bunde det.`);
+  }
+
+  if (harOpgave) slipOpgave(spil, s, 'smid', ctx);
+  else if (iDuel) {
+    // Duellen kan ikke fortsætte uden ham — bægeret tages af bordet.
+    spil.meier = null;
+    skriv(spil, 'meier', 'Meier-duellen er aflyst.');
+    afslutFelt(spil, ctx);
+  } else afgoerKaploeb(spil, ctx);
+
+  s.pitPlads = 0;
+  afgoerFinger(spil);
+  if (aktive(spil).length === 0) {
+    spil.fase = 'slut';
+    spil.afventer = null;
+    skriv(spil, 'slut', 'Spillet er slut — der er ingen tilbage ved bordet.');
+  }
+}
+
+/**
+ * Spillet venter på en der ikke er der. Opgaven droppes, og spillet går videre
+ * som om den var klaret uden at der skete noget — med to undtagelser: er han
+ * slået i pitten, slås der for ham, og 10'erens gæt går videre til venstremanden.
+ */
+function slipOpgave(spil: Spil, s: Spiller, art: 'spring' | 'smid', ctx: Kontekst): void {
+  const a = spil.afventer;
+  if (!a) return;
+  switch (a.slags) {
+    case 'slag':
+    case 'pit-slag':
+      afslutTur(spil);
+      return;
+    case 'pit-placering':
+      if (art === 'spring') {
+        skriv(spil, 'pit', `Terningen bliver slået for ${navn(s)}.`, s);
+        pitPlacer(spil, s, a.kaede, ctx);
+      } else naestePitPlacering(spil, a.kaede.slice());
+      return;
+    case 'fyld-taarn':
+      if (art === 'spring') {
+        taarnFaerdig(spil, s, ctx);
+        return;
+      }
+      if (taarnLoeberOver(spil)) spil.taarn.slurke = taarnKapacitetSlurke(spil.indstillinger.taarnKapacitetCl);
+      afslutFelt(spil, ctx);
+      return;
+    case 'hoejere-lavere': {
+      const naeste = sidemand(spil, s, 'venstre');
+      if (naeste) spil.afventer = { ...a, spillerId: naeste.id };
+      else afslutFelt(spil, ctx);
+      return;
+    }
+    case 'kaploeb':
+      if (art === 'spring') a.ramte.push(s.id);
+      afgoerKaploeb(spil, ctx);
+      return;
+    case 'meier':
+      spil.meier = null;
+      skriv(spil, 'meier', 'Meier-duellen er aflyst.');
+      afslutFelt(spil, ctx);
+      return;
+    default:
+      afslutFelt(spil, ctx);
+  }
 }
 
 /* -------------------------------------------------- hvad den enkelte må se */
