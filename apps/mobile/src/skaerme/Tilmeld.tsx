@@ -3,7 +3,7 @@ import {
   EgenDrikFelter, StoerrelseValg, egenDrikKlar, fastDrikValg, navneliste, tomEgenDrik, type EgenDrik
 } from '@k69/ui';
 import {
-  BRIKFARVER, DRIKKE, DRIK_LISTE, formatProcent, type DrikId, type DrikValg, type Handling, type KortHold, type Spil
+  BRIKFARVER, DRIKKE, DRIK_LISTE, formatProcent, type DrikId, type DrikValg, type KlientHandling, type KortHold, type Spil
 } from '@k69/rules';
 
 const HOLD: Array<{ id: KortHold; navn: string; forklaring: string }> = [
@@ -14,7 +14,7 @@ const HOLD: Array<{ id: KortHold; navn: string; forklaring: string }> = [
 export function Tilmeld({
   spil, send, fejl, ryd
 }: {
-  spil: Spil; send: (h: Handling) => void; fejl: string | null; ryd: () => void;
+  spil: Spil; send: (h: KlientHandling) => void; fejl: string | null; ryd: () => void;
 }): JSX.Element {
   const taget = new Set(spil.spillere.map((s) => s.farve));
   const [navn, saetNavn] = useState('');

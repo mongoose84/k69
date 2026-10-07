@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { WebSocket } from '@fastify/websocket';
-import { RegelFejl, anvend, forSpiller, type Handling, type Spil } from '@k69/rules';
+import { RegelFejl, anvend, forSpiller, tolkHandling, type KlientHandling, type Spil } from '@k69/rules';
 import { gem, hentSpil, logHaendelse } from './store.js';
 
 interface Forbindelse {
@@ -19,9 +19,26 @@ const MAX_POLETTER = 60;
 const POLETTER_PR_SEKUND = 30;
 
 /** Handlinger der skal ligge på disken med det samme. Resten samles op. */
-const VIGTIGE = new Set<Handling['type']>([
+const VIGTIGE = new Set<KlientHandling['type']>([
   'join', 'start', 'slaa', 'meld-afgang', 'toem-taarn-faerdig', 'taarn-faerdig'
 ]);
+
+/**
+ * Én handling ad gangen pr. spil. Motoren arbejder på en kopi, så to handlinger
+ * der kørte samtidig, ville hver lave deres eget nye spil — og den sidste ville
+ * skrive den første ud. Køen gør at hver handling bygger videre på den forrige.
+ */
+const koeer = new Map<string, Promise<void>>();
+
+function iKoe(spilId: string, opgave: () => Promise<void>): Promise<void> {
+  const naeste = (koeer.get(spilId) ?? Promise.resolve()).then(opgave);
+  const hale = naeste.catch(() => {});
+  koeer.set(spilId, hale);
+  void hale.then(() => {
+    if (koeer.get(spilId) === hale) koeer.delete(spilId);
+  });
+  return naeste;
+}
 
 function send(sok: WebSocket, besked: unknown): void {
   if (sok.readyState !== 1) return;
@@ -57,7 +74,7 @@ export function tilslut(sok: WebSocket): void {
   let f: Forbindelse | null = null;
 
   sok.on('message', (raa: Buffer) => {
-    let besked: { t?: string; kode?: string; spillerId?: string; handling?: Handling };
+    let besked: { t?: string; kode?: string; spillerId?: string; handling?: unknown };
     try {
       besked = JSON.parse(raa.toString());
     } catch {
@@ -121,24 +138,38 @@ async function hej(sok: WebSocket, kode: string, spillerId?: string): Promise<Fo
   return f;
 }
 
-async function saetForbundet(f: Forbindelse, tilsluttet: boolean): Promise<void> {
-  const spil = await hentSpil(f.kode);
-  if (!spil) return;
-  try {
-    const efter = anvend(spil, { type: 'forbindelse', tilsluttet }, ktx(f.spillerId));
-    gem(efter);
-    udsend(efter);
-  } catch {
-    // Er man ikke med i spillet endnu, er der ikke noget at markere.
-  }
+function saetForbundet(f: Forbindelse, tilsluttet: boolean): Promise<void> {
+  return iKoe(f.spilId, async () => {
+    const spil = await hentSpil(f.kode);
+    if (!spil) return;
+    try {
+      const efter = anvend(spil, { type: 'forbindelse', tilsluttet }, ktx(f.spillerId));
+      gem(efter);
+      udsend(efter);
+    } catch {
+      // Er man ikke med i spillet endnu, er der ikke noget at markere.
+    }
+  });
 }
 
-async function udfoer(f: Forbindelse, handling: Handling): Promise<void> {
+function udfoer(f: Forbindelse, raa: unknown): Promise<void> {
   if (!harPolet(f)) {
     send(f.sok, { t: 'fejl', besked: 'Rolig nu — for mange beskeder på én gang.' });
-    return;
+    return Promise.resolve();
   }
 
+  let handling: KlientHandling;
+  try {
+    handling = tolkHandling(raa);
+  } catch {
+    send(f.sok, { t: 'fejl', besked: 'Ugyldig handling.' });
+    return Promise.resolve();
+  }
+
+  return iKoe(f.spilId, () => anvendOgUdsend(f, handling));
+}
+
+async function anvendOgUdsend(f: Forbindelse, handling: KlientHandling): Promise<void> {
   const spil = await hentSpil(f.kode);
   if (!spil) {
     send(f.sok, { t: 'fejl', besked: 'Spillet findes ikke længere.', fatal: true });

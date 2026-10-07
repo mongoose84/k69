@@ -271,8 +271,11 @@ export interface Spil {
   opdateret: string;
 }
 
-/** Handlinger en klient kan sende. Alt andet afvises. */
-export type Handling =
+/**
+ * Handlinger en klient kan sende. Alt andet afvises — og det der kommer over
+ * nettet, skal gennem `tolkHandling` før det når motoren.
+ */
+export type KlientHandling =
   | { type: 'join'; navn: string; farve: string; drik: DrikValg; kortHold: KortHold }
   | { type: 'saet-drik'; drik: DrikValg }
   | { type: 'saet-indstilling'; hardcore?: boolean }
@@ -299,8 +302,12 @@ export type Handling =
   | { type: 'meier-tro' }
   | { type: 'meier-loeft' }
   | { type: 'meld-afgang' }
-  | { type: 'terning-paa-gulvet' }
-  | { type: 'forbindelse'; tilsluttet: boolean };
+  | { type: 'terning-paa-gulvet' };
+
+/** Det serveren selv fortæller motoren. Kan aldrig komme fra en klient. */
+export type SystemHandling = { type: 'forbindelse'; tilsluttet: boolean };
+
+export type Handling = KlientHandling | SystemHandling;
 
 export interface Kontekst {
   /** Hvem sender handlingen. */

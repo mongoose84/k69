@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type JSX } from 'react';
 import {
-  muligeMeldinger, trin, trinNavn, type Handling, type MeierResultat, type Spil, type Spiller
+  muligeMeldinger, trin, trinNavn, type KlientHandling, type MeierResultat, type Spil, type Spiller
 } from '@k69/rules';
 import { Terning } from './Dele.js';
 import { Elefant } from './Elefant.js';
@@ -163,7 +163,7 @@ function Fejring({
 export interface MeierKortProps {
   spil: Spil;
   migId: string;
-  send: (h: Handling) => void;
+  send: (h: KlientHandling) => void;
   /** Mobilen lægger kortet over hele skærmen; web lægger det over pladen. */
   kompakt?: boolean;
 }

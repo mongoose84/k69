@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type JSX } from 'react';
-import { type Handling, type Spil } from '@k69/rules';
+import { type KlientHandling, type Spil } from '@k69/rules';
 import { taarnAndel } from './Handlinger.js';
 
 /*
@@ -394,7 +394,7 @@ function KroneKast({ fyld, kast, minTur, kasterNavn, ingenUdpegning, onKast, onR
 export interface KroneKortProps {
   spil: Spil;
   migId: string;
-  send: (h: Handling) => void;
+  send: (h: KlientHandling) => void;
   /** Mobilen lægger kortet over hele skærmen; web lægger det over pladen. */
   kompakt?: boolean;
 }

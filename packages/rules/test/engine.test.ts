@@ -7,7 +7,7 @@ import {
 import { HOEJERE_LAVERE_SLURKE, nyBunke, virkning } from '../src/cards.js';
 import { DRIKKE, clPrSlurk, iCl, slurkePrEnhed, taarnCl, tilDrik } from '../src/drinks.js';
 import { STIGE, kode, trin, trinNavn } from '../src/meier.js';
-import { MEIER_SLURKE, afventerSpiller, anvend, find, nytSpil, opgraderGemt, taarnLoeberOver } from '../src/engine.js';
+import { BRIKFARVER, MEIER_SLURKE, afventerSpiller, anvend, find, nytSpil, opgraderGemt, taarnLoeberOver } from '../src/engine.js';
 import { RegelFejl, type FeltType, type Handling, type Kort, type Kontekst, type Spil } from '../src/types.js';
 
 /* --------------------------------------------------------------- værktøj */
@@ -961,4 +961,57 @@ test('hændelserne ved hvilken tur de hører til, og hvis tur det var', () => {
   const anden = spil.log.filter((h) => h.turAf === 'p1');
   assert.ok(anden.length > 0);
   assert.ok(anden.every((h) => h.tur === tur + 1));
+});
+
+/* ------------------------------------------------------- alt eller intet */
+
+test('en handling ændrer aldrig det spil den får — kun det den giver tilbage', () => {
+  const spil = opsat(['A', 'B']);
+  const foer = structuredClone(spil);
+  const efter = gør(spil, 'p0', { type: 'slaa' }, [3]);
+  assert.notEqual(efter, spil);
+  assert.deepEqual(spil, foer);
+});
+
+test('fejler en uddeling halvvejs, har ingen drukket noget', () => {
+  let spil = opsat(['A', 'B']);
+  placer(spil, 'p0', FELT_RAEKKE.lastIndexOf('tre'));
+  spil = gør(spil, 'p0', { type: 'slaa' }, [1]);
+  assert.equal(spil.afventer?.slags, 'giv-slurke');
+
+  const foer = structuredClone(spil);
+  assert.throws(() => gør(spil, 'p0', {
+    type: 'giv-slurke',
+    fordeling: [{ spillerId: 'p1', antal: 2 }, { spillerId: 'ingen', antal: 1 }]
+  }), RegelFejl);
+  assert.deepEqual(spil, foer);
+});
+
+test('man kan kun melde det der står i Meyer-stigen', () => {
+  let spil = opsat(['A', 'B']);
+  placer(spil, 'p0', foersteFeltAf('meier') - 1);
+  spil = gør(spil, 'p0', { type: 'slaa' }, [1]);
+  spil = gør(spil, 'p0', { type: 'meier-vaelg', spillerId: 'p1' });
+  spil = gør(spil, 'p0', { type: 'meier-slaa' }, [4, 2]);
+  for (const melding of [-1, 1.5, STIGE.length, 999, Number.NaN]) {
+    assert.throws(() => gør(spil, 'p0', { type: 'meier-meld', melding }), /findes ikke/);
+  }
+  spil = gør(spil, 'p0', { type: 'meier-meld', melding: STIGE.length - 1 });
+  assert.equal(spil.meier?.melding, STIGE.length - 1);
+});
+
+test('tårnet kan ikke fyldes med noget der ikke er et tal', () => {
+  let spil = opsat(['A', 'B']);
+  placer(spil, 'p0', foersteFeltAf('taarn') - 1);
+  spil = gør(spil, 'p0', { type: 'slaa' }, [1]);
+  assert.throws(() => gør(spil, 'p0', { type: 'fyld-taarn', slurke: Number.NaN }), RegelFejl);
+  assert.equal(spil.taarn.slurke, 0);
+});
+
+test('en brik får en af brikfarverne — også når der bliver bedt om en anden', () => {
+  let spil = nytSpil('spil', 'TEST', '2026-01-01T00:00:00.000Z');
+  spil = gør(spil, 'p0', { type: 'join', navn: 'A', farve: 'url(x)', drik: 'ol', kortHold: 'dame' });
+  spil = gør(spil, 'p1', { type: 'join', navn: 'B', farve: BRIKFARVER[2]!, drik: 'ol', kortHold: 'dame' });
+  assert.equal(find(spil, 'p0')!.farve, BRIKFARVER[0]);
+  assert.equal(find(spil, 'p1')!.farve, BRIKFARVER[2]);
 });

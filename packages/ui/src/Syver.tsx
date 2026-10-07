@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type JSX } from 'react';
-import { KULOER_TEGN, type Handling, type Spil } from '@k69/rules';
+import { KULOER_TEGN, type KlientHandling, type Spil } from '@k69/rules';
 import { erRoedt } from './tekst.js';
 
 /** Så længe skal kortet holdes nede før fingeren lander. */
@@ -13,7 +13,7 @@ export const SYVER_HOLD_MS = 900;
 export function SyverKort({
   spil, migId, send, kompakt = false
 }: {
-  spil: Spil; migId: string; send: (h: Handling) => void; kompakt?: boolean;
+  spil: Spil; migId: string; send: (h: KlientHandling) => void; kompakt?: boolean;
 }): JSX.Element | null {
   const syver = spil.syver;
   const min = syver?.holderId === migId && !spil.finger;

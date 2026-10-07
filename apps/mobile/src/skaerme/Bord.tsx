@@ -3,14 +3,14 @@ import {
   Brik, FejringKort, Glas, Handlingskort, KroneKort, Maerkat, MeierKort, Plade, SenesteTure, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
   kortPaaBordet, LydKnap, opgave, spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, useLyde, UdraabKort, type SpilUdsyn
 } from '@k69/ui';
-import { formatAntal, formatSlurke, slurkePrEnhed, taarnCl, taarnLoeberOver, type Handling } from '@k69/rules';
+import { formatAntal, formatSlurke, slurkePrEnhed, taarnCl, taarnLoeberOver, type KlientHandling } from '@k69/rules';
 
 type Faneblad = 'tur' | 'bord' | 'log';
 
 export function Bord({
   spil: live, migId, send
 }: {
-  spil: SpilUdsyn; migId: string; send: (h: Handling) => void;
+  spil: SpilUdsyn; migId: string; send: (h: KlientHandling) => void;
 }): JSX.Element {
   const [fane, saetFane] = useState<Faneblad>('tur');
   const [foelger, saetFoelger] = useState(true);

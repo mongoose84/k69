@@ -4,3 +4,4 @@ export * from './cards.js';
 export * from './drinks.js';
 export * from './meier.js';
 export * from './engine.js';
+export * from './handling.js';

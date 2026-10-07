@@ -1,12 +1,12 @@
 import { useState, type JSX } from 'react';
 import { Brik, Elefant, Maerkat } from '@k69/ui';
-import { MEIER_SLURKE, formatProcent, type Handling, type Spil } from '@k69/rules';
+import { MEIER_SLURKE, formatProcent, type KlientHandling, type Spil } from '@k69/rules';
 import { spilUrl } from '../api.js';
 
 export function Lobby({
   spil, migId, send
 }: {
-  spil: Spil; migId: string; send: (h: Handling) => void;
+  spil: Spil; migId: string; send: (h: KlientHandling) => void;
 }): JSX.Element {
   const [kopieret, saetKopieret] = useState(false);
   const erVaert = spil.vaertId === migId;

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { Handling, Spil } from '@k69/rules';
+import type { KlientHandling, Spil } from '@k69/rules';
 
 export type SpilUdsyn = Spil & { bunkeTilbage: number };
 
@@ -24,7 +24,7 @@ export interface Forbindelse {
   forbundet: boolean;
   fejl: string | null;
   fatal: boolean;
-  send: (h: Handling) => void;
+  send: (h: KlientHandling) => void;
   ryd: () => void;
 }
 
@@ -40,13 +40,16 @@ export function useSpil(kode: string | null, apiBase: string): Forbindelse {
   const [spillerId, saetSpillerId] = useState<string>(() => mitId());
 
   const sok = useRef<WebSocket | null>(null);
-  const koe = useRef<Handling[]>([]);
+  const koe = useRef<KlientHandling[]>([]);
   const lukket = useRef(false);
   const forsoeg = useRef(0);
+  /** Som `fatal`, men læsbar fra onclose — state ville være fanget fra da effekten kørte. */
+  const erFatal = useRef(false);
 
   useEffect(() => {
     if (!kode) return;
     lukket.current = false;
+    erFatal.current = false;
     let puls: ReturnType<typeof setInterval> | null = null;
     let genforbind: ReturnType<typeof setTimeout> | null = null;
 
@@ -84,14 +87,17 @@ export function useSpil(kode: string | null, apiBase: string): Forbindelse {
           saetSpil(b.spil);
         } else if (b.t === 'fejl') {
           saetFejl(b.besked ?? 'Der gik noget galt.');
-          if (b.fatal) saetFatal(true);
+          if (b.fatal) {
+            erFatal.current = true;
+            saetFatal(true);
+          }
         }
       };
 
       s.onclose = () => {
         saetForbundet(false);
         if (puls) clearInterval(puls);
-        if (lukket.current || fatal) return;
+        if (lukket.current || erFatal.current) return;
         forsoeg.current += 1;
         const ventetid = Math.min(8000, 400 * 2 ** Math.min(forsoeg.current, 5));
         genforbind = setTimeout(aabn, ventetid);
@@ -109,11 +115,11 @@ export function useSpil(kode: string | null, apiBase: string): Forbindelse {
       sok.current?.close();
       sok.current = null;
     };
-    // fatal indgår bevidst ikke: en fatal fejl skal ikke rive forbindelsen op igen.
+    // fatal læses via erFatal, så en fatal fejl ikke river forbindelsen op igen.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kode, apiBase]);
 
-  const send = useCallback((h: Handling) => {
+  const send = useCallback((h: KlientHandling) => {
     const s = sok.current;
     if (s && s.readyState === 1) s.send(JSON.stringify({ t: 'handling', handling: h }));
     else koe.current.push(h);

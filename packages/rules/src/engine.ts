@@ -5,7 +5,7 @@ import {
   HOEJERE_LAVERE_SLURKE, HOLD_SLURKE, SIDEMAND_SLURKE, bland, gaetRigtigt, kortNavn, kortTekst, nyBunke, virkning
 } from './cards.js';
 import { formatSlurke, slurkePrEnhed, taarnCl, taarnKapacitetSlurke, tilDrik } from './drinks.js';
-import { erMeyer, trin, trinNavn } from './meier.js';
+import { STIGE, erMeyer, trin, trinNavn } from './meier.js';
 import {
   RegelFejl,
   type Afventer, type DrikValg, type Handling, type Haendelse, type Kontekst,
@@ -544,7 +544,13 @@ export function afgangSpaerret(spil: Spil, s: Spiller): string | null {
 
 /* ------------------------------------------------------------------- motoren */
 
-export function anvend(spil: Spil, handling: Handling, ctx: Kontekst): Spil {
+/**
+ * Udfør én handling. Alt eller intet: motoren arbejder på en kopi, så en
+ * RegelFejl midt i en handling efterlader det gemte spil urørt. Det nye spil
+ * er returværdien — `foer` ændres aldrig.
+ */
+export function anvend(foer: Spil, handling: Handling, ctx: Kontekst): Spil {
+  const spil = structuredClone(foer);
   spil.opdateret = ctx.naa();
 
   switch (handling.type) {
@@ -622,7 +628,10 @@ function join(spil: Spil, h: Extract<Handling, { type: 'join' }>, ctx: Kontekst)
   }
 
   const taget = new Set(spil.spillere.map((o) => o.farve));
-  const farve = !taget.has(h.farve) ? h.farve : (BRIKFARVER.find((f) => !taget.has(f)) ?? BRIKFARVER[0]!);
+  // Kun brikfarverne — er den valgte taget eller ukendt, får man den første ledige.
+  const farve = BRIKFARVER.includes(h.farve) && !taget.has(h.farve)
+    ? h.farve
+    : (BRIKFARVER.find((f) => !taget.has(f)) ?? BRIKFARVER[0]!);
 
   const spiller: Spiller = {
     id: ctx.spillerId,
@@ -764,6 +773,7 @@ function givSlurke(
 
 function fyldTaarn(spil: Spil, s: Spiller, slurke: number, _ctx: Kontekst): Spil {
   kraevAfventer(spil, 'fyld-taarn', s);
+  if (!Number.isFinite(slurke)) fejl('Ugyldig mængde.');
   const tilfoej = Math.max(0, Math.min(4, slurke));
   if (tilfoej === 0) return spil;
 
@@ -1070,6 +1080,7 @@ function meierSlaa(spil: Spil, s: Spiller, ctx: Kontekst): Spil {
 function meierMeld(spil: Spil, s: Spiller, melding: number, _ctx: Kontekst): Spil {
   const m = kraevMeier(spil, s);
   if (m.slagAf !== s.id || !m.slag) fejl('Du skal slå først.');
+  if (!Number.isInteger(melding) || melding < 0 || melding >= STIGE.length) fejl('Den melding findes ikke.');
   if (m.melding !== null && melding < m.melding) fejl('Du skal melde det samme eller højere.');
   m.melding = melding;
   m.meldtAf = s.id;

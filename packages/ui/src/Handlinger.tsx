@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type JSX } from 'react';
 import {
   KULOER_TEGN, RANG_NAVN, STIGE, afventerSpiller, afgangSpaerret, formatCl, formatSlurke, taarnCl,
-  taarnKapacitetSlurke, taarnLoeberOver, type Handling, type Spil, type Spiller
+  taarnKapacitetSlurke, taarnLoeberOver, type KlientHandling, type Spil, type Spiller
 } from '@k69/rules';
 import { Brik, HoldKnap, Kortbillede, Terning } from './Dele.js';
 import { drikNavn, erRoedt, kuloerTegn, opgave, venterPaaSlag } from './tekst.js';
@@ -9,7 +9,7 @@ import { drikNavn, erRoedt, kuloerTegn, opgave, venterPaaSlag } from './tekst.js
 export interface HandlingProps {
   spil: Spil;
   migId: string;
-  send: (h: Handling) => void;
+  send: (h: KlientHandling) => void;
   /** Mobilen har mindre plads: færre forklaringer, større trykflader. */
   kompakt?: boolean;
   /** Sandt mens terningen tumler på bordet — så kan man ikke slå igen imens. */

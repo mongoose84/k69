@@ -3,7 +3,7 @@ import {
   Brik, Elefant, FejringKort, Glas, Handlingskort, KroneKort, Maerkat, MeierKort, Plade, SenesteTure, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
   kortPaaBordet, LydKnap, opgave, spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, useLyde, UdraabKort, type SpilUdsyn
 } from '@k69/ui';
-import { formatAntal, formatCl, slurkePrEnhed, formatSlurke, taarnCl, taarnLoeberOver, type DrikInfo, type Handling } from '@k69/rules';
+import { formatAntal, formatCl, slurkePrEnhed, formatSlurke, taarnCl, taarnLoeberOver, type DrikInfo, type KlientHandling } from '@k69/rules';
 
 /** Ordet under tælleren: "pilsnere tømt", "glas vin tømt", "Classic tømt". */
 function enhederOrd(antal: number, drik: DrikInfo): string {
@@ -16,7 +16,7 @@ function enhederOrd(antal: number, drik: DrikInfo): string {
 export function Bord({
   spil: live, migId, send
 }: {
-  spil: SpilUdsyn; migId: string; send: (h: Handling) => void;
+  spil: SpilUdsyn; migId: string; send: (h: KlientHandling) => void;
 }): JSX.Element {
   // Mens terningen ruller, står alt stille på det gamle spil — se useForsinketSpil.
   const { vist: spil, ruller } = useForsinketSpil(live);

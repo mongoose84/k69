@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { KULOER_TEGN, type Handling, type Spil } from '@k69/rules';
+import { KULOER_TEGN, type KlientHandling, type Spil } from '@k69/rules';
 import type { FingerPaaBordet, KortHos, KortPaaBordet, TerningPaaBordet } from './Braet.js';
 import { erRoedt, venterPaaSlag } from './tekst.js';
 
@@ -78,7 +78,7 @@ export function kortPaaBordet(spil: Spil & { bunkeTilbage?: number }): KortPaaBo
 }
 
 /** Fingeren på bordkanten som pladen skal tegne den — med trykket, hvis man ikke selv har nået det. */
-export function fingerPaaBordet(spil: Spil, migId: string, send: (h: Handling) => void): FingerPaaBordet | null {
+export function fingerPaaBordet(spil: Spil, migId: string, send: (h: KlientHandling) => void): FingerPaaBordet | null {
   const f = spil.finger;
   if (!f) return null;
   const aktive = spil.spillere.filter((s) => s.tilstand === 'aktiv');
