@@ -16,6 +16,12 @@ export function kuloerTegn(k: Kort): string {
   return KULOER_TEGN[k.kuloer];
 }
 
+/** "Mette", "Mette og Jeppe", "Mette, Jeppe og Sofie". */
+export function navneliste(navne: string[]): string {
+  if (navne.length < 2) return navne[0] ?? '';
+  return `${navne.slice(0, -1).join(', ')} og ${navne[navne.length - 1]}`;
+}
+
 /** Er der et terningslag på vej, står terningen blank — ellers viser den det sidste. */
 export function venterPaaSlag(spil: Spil): boolean {
   const a = spil.afventer;
@@ -34,13 +40,14 @@ export interface Opgave {
   mig: boolean;
 }
 
+/** Feltets plakat-farve — samme fyld som på brættet. */
 const FARVE: Record<string, string> = {
-  fri: '#8C9689', tre: '#93AE7C', skaal: '#D3B44E', bm: '#C9A227', gobm: '#D08A4E',
-  taarn: '#E0A03C', kort: '#88A2C2', drik: '#C4635B', meier: '#B084A0', krone: '#DCC684'
+  fri: '#DFE6ED', tre: '#BCC6D0', skaal: '#CED8E2', bm: '#1B2733', gobm: '#BCC6D0',
+  taarn: '#9FB1C3', kort: '#CED8E2', drik: '#1B2733', meier: '#BCC6D0', krone: '#CED8E2'
 };
 
 export function feltFarve(nr: number): string {
-  return FARVE[feltType(nr)] ?? '#8C9689';
+  return FARVE[feltType(nr)] ?? '#DFE6ED';
 }
 
 function navnPaa(spil: Spil, id: string | null | undefined): string {
@@ -56,7 +63,7 @@ export function opgave(spil: Spil, migId: string): Opgave | null {
   const mig = paa === migId;
   const dig = mig ? 'Du' : navnPaa(spil, paa);
   const spiller = spil.spillere.find((s) => s.id === paa);
-  const farve = spiller?.farve ?? 'var(--brass)';
+  const farve = spiller?.farve ?? '#CED8E2';
 
   const grund = (titel: string, tekst: string): Opgave => ({ titel, tekst, spillerId: paa, farve, mig });
 
@@ -124,7 +131,7 @@ export function opgave(spil: Spil, migId: string): Opgave | null {
         titel: t.titel,
         tekst: `${t.tekst} ${a.ramte.length} har trykket.`,
         spillerId: null,
-        farve: '#88A2C2',
+        farve: '#CED8E2',
         mig: !a.ramte.includes(migId)
       };
     }

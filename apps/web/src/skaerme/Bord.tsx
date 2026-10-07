@@ -1,9 +1,9 @@
 import type { JSX } from 'react';
 import {
-  Brik, FejringKort, Glas, Handlingskort, KroneKort, Maerkat, MeierKort, Plade, SenesteTure, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
+  Brik, Elefant, FejringKort, Glas, Handlingskort, KroneKort, Maerkat, MeierKort, Plade, SenesteTure, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
   kortPaaBordet, LydKnap, opgave, spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, useLyde, UdraabKort, type SpilUdsyn
 } from '@k69/ui';
-import { formatAntal, formatCl, slurkePrEnhed, formatSlurke, taarnCl, type DrikInfo, type Handling } from '@k69/rules';
+import { formatAntal, formatCl, slurkePrEnhed, formatSlurke, taarnCl, taarnLoeberOver, type DrikInfo, type Handling } from '@k69/rules';
 
 /** Ordet under tælleren: "pilsnere tømt", "glas vin tømt", "Classic tømt". */
 function enhederOrd(antal: number, drik: DrikInfo): string {
@@ -41,81 +41,73 @@ export function Bord({
   ).values()];
 
   return (
-    <div className="bord">
+    <div className="bord grund">
       <header className="topbar">
-        <div className="mark" style={{ fontSize: 30 }}>K69</div>
-        <div className="kode-chip"><span>SPIL</span><b>{spil.kode}</b></div>
+        <div className="mark">K69</div>
+        <span className="pille">Spil {spil.kode}</span>
         {paaTur && (
           <div className="tur-pille">
-            <Brik navn={paaTur.navn} farve={paaTur.farve} str={34} />
-            <div>
-              <div className="eyebrow">Tur</div>
-              <div style={{ fontSize: 14, fontWeight: 600 }}>{paaTur.navn}</div>
-            </div>
+            <span style={{ width: 30, height: 30, borderRadius: '50%', background: paaTur.farve, border: '2px solid #ced8e2', boxShadow: 'var(--brik-skygge)' }} />
+            <span className="tur-pille-l">TUR</span>
+            <span className="tur-pille-n">{paaTur.navn}</span>
           </div>
         )}
         <SyverKort spil={spil} migId={migId} send={send} />
         <div style={{ flexGrow: 1 }} />
-        <div className="note">Runde {spil.runde}</div>
+        <span className="topbar-runde">Runde {spil.runde}</span>
         <LydKnap />
       </header>
 
       <div className="bord-krop">
-        <aside className="rail rail-v">
+        <aside className="rail rail-v lys">
           <section className="rail-sek" style={{ flexGrow: 1, minHeight: 0, overflow: 'auto' }}>
             <div className="rail-hoved">
               <span className="eyebrow">Ved bordet</span>
-              <span className="eyebrow" style={{ color: 'var(--brass)' }}>{spil.spillere.length}</span>
+              <span className="eyebrow">{spil.spillere.length}</span>
             </div>
             <div className="spillere">
               {spil.spillere.map((s) => (
                 <div key={s.id} className={s.id === paaTur?.id ? 'sp sp-paa' : 'sp'}>
-                  <Brik navn={s.navn} farve={s.farve} str={34} />
+                  <Brik navn={s.navn} farve={s.farve} str={30} />
                   <div style={{ flexGrow: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: 14, fontWeight: 600 }}>{s.navn}</span>
-                      {s.id === spil.bierMeisterId && <Maerkat>BM</Maerkat>}
-                      {s.id === spil.taarn.toemmesAfId && <Maerkat farve="var(--amber)">TÅRNET</Maerkat>}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
+                      <span className="sp-navn">{s.navn}</span>
+                      {s.id === spil.bierMeisterId && <Maerkat fyldt>BM</Maerkat>}
+                      {s.id === spil.taarn.toemmesAfId && <Maerkat fyldt>TÅRNET</Maerkat>}
                       {s.id === spil.syver?.holderId && <Maerkat>7'ER</Maerkat>}
-                      {s.pitPlads > 0 && <Maerkat farve="#d98279">PIT {s.pitPlads}</Maerkat>}
-                      {s.id === migId && <Maerkat farve="var(--sage)">DIG</Maerkat>}
-                      {!s.tilsluttet && <Maerkat farve="var(--ink-faint)">OFFLINE</Maerkat>}
+                      {s.pitPlads > 0 && <Maerkat>PIT {s.pitPlads}</Maerkat>}
+                      {s.id === migId && <Maerkat>DIG</Maerkat>}
+                      {!s.tilsluttet && <Maerkat>OFFLINE</Maerkat>}
                     </div>
-                    <div className="note" style={{ fontSize: 11 }}>{spillerStatus(s)}</div>
+                    <div className="sp-status">{spillerStatus(s)}</div>
                     <div style={{ marginTop: 5, display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <Slurkemaaler tilbage={s.slurkeTilbage} ialt={slurkePrEnhed(s.drik)} bredde={9} />
-                      <span className="note" style={{ fontSize: 10 }}>{formatAntal(s.slurkeTilbage)}/{formatAntal(slurkePrEnhed(s.drik))}</span>
+                      <Slurkemaaler tilbage={s.slurkeTilbage} ialt={slurkePrEnhed(s.drik)} bredde={8} />
+                      <span className="note" style={{ fontSize: 10.5 }}>{formatAntal(s.slurkeTilbage)}/{formatAntal(slurkePrEnhed(s.drik))}</span>
                     </div>
                   </div>
-                  <div style={{ textAlign: 'right', flex: '0 0 62px' }} title={`${s.enheder} tømt · ${formatSlurke(s.slurkeIAlt)} i alt`}>
-                    <div style={{ fontFamily: 'var(--serif)', fontSize: 22, lineHeight: 1, color: s.enheder > 0 ? 'var(--amber)' : 'var(--ink-dim)' }}>
-                      {s.enheder}
-                    </div>
-                    <div className="eyebrow" style={{ fontSize: 9, marginTop: 3 }}>
-                      {enhederOrd(s.enheder, s.drik)}
-                    </div>
+                  <div style={{ textAlign: 'right', flex: '0 0 58px' }} title={`${s.enheder} tømt · ${formatSlurke(s.slurkeIAlt)} i alt`}>
+                    <div className="sp-tal">{s.enheder}</div>
+                    <div className="sp-ord">{enhederOrd(s.enheder, s.drik)}</div>
                   </div>
                 </div>
               ))}
             </div>
           </section>
 
-          <section className="rail-sek" style={{ borderBottom: 'none' }}>
+          <section className="rail-sek">
             <div className="rail-hoved">
               <span className="eyebrow">Tårnet</span>
-              <span className="eyebrow" style={{ color: 'var(--ink-faint)' }}>{spil.indstillinger.taarnKapacitetCl} cl glas</span>
+              <span className="eyebrow">{spil.indstillinger.taarnKapacitetCl} cl glas</span>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <Glas andel={andel} />
+              <Glas andel={andel} bredde={44} hoejde={70} over={taarnLoeberOver(spil)} />
               <div>
-                <div style={{ fontFamily: 'var(--serif)', fontSize: 28, color: 'var(--amber)', lineHeight: 1.05 }}>
-                  {taarnCl(spil.taarn.slurke)} cl
-                </div>
-                <div className="note">
+                <div className="taarn-cl">{taarnCl(spil.taarn.slurke)} cl</div>
+                <div className="note" style={{ marginTop: 4 }}>
                   {formatSlurke(spil.taarn.slurke)}
                   {jeg && jeg.drik.id !== 'ol'
-                    ? <> — <b style={{ color: 'var(--amber)' }}>{taarnFor(spil, jeg)}</b> af din {drikNavn(jeg.drik)}</>
+                    ? <> — <b>{taarnFor(spil, jeg)}</b> af din {drikNavn(jeg.drik)}</>
                     : null}
                   .
                   {toemmer && <> {toemmer.navn} er i gang med at bunde det.</>}
@@ -134,28 +126,29 @@ export function Bord({
               </div>
             )}
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 14 }}>
+            <div className="bm-raekke">
               <div className="krone-boks">
-                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#C9A227" strokeWidth="1.6" strokeLinejoin="round">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ced8e2" strokeWidth="1.8" strokeLinejoin="round">
                   <path d="M3 8l4 4 5-8 5 8 4-4v10H3z" />
                 </svg>
               </div>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 600 }}>
+                <div style={{ fontSize: 14, fontWeight: 700 }}>
                   {bm ? `${bm.navn} er Bier Meister` : 'Ingen Bier Meister endnu'}
                 </div>
-                <div className="note">
+                <div className="note" style={{ fontSize: 12, lineHeight: 1.4 }}>
                   {bm
                     ? 'Henter øl og drikker 3 slurke hver gang nogen lander på Go!'
                     : 'Lander man på Go! Bier Meister nu, drikker man selv de 3 slurke.'}
                 </div>
               </div>
             </div>
-
           </section>
         </aside>
 
         <main className="scene">
+          <div className="vandmaerke scene-vandmaerke" aria-hidden="true">Runde {spil.runde}</div>
+          <Elefant className="plakat-elefant scene-elefant" str={300} />
           <Plade
             id="b"
             brikker={brikker}
@@ -175,20 +168,19 @@ export function Bord({
           <FejringKort spil={spil} />
         </main>
 
-        <aside className="rail rail-h">
-          <section
-            className={o ? 'rail-sek action-farvet' : 'rail-sek'}
-            style={o ? ({ '--sp': o.farve } as React.CSSProperties) : undefined}
-          >
-            <Handlingskort spil={spil} migId={migId} send={send} ruller={ruller} />
-          </section>
+        <aside className="rail rail-h lys">
+          {o && (
+            <section className="rail-sek handling-sek blaek action-farvet" style={{ '--sp': o.farve } as React.CSSProperties}>
+              <Handlingskort spil={spil} migId={migId} send={send} ruller={ruller} />
+            </section>
+          )}
 
           <section className="rail-sek">
             <div className="rail-hoved"><span className="eyebrow">Seneste ture</span></div>
             <SenesteTure spil={spil} />
           </section>
 
-          <section className="rail-sek" style={{ flexGrow: 1, minHeight: 0, overflow: 'auto', borderBottom: 'none' }}>
+          <section className="rail-sek" style={{ flexGrow: 1, minHeight: 0, overflow: 'auto' }}>
             <div className="rail-hoved"><span className="eyebrow">Hændelser</span></div>
             <div className="log">
               {spil.log.slice(0, 40).map((h) => (

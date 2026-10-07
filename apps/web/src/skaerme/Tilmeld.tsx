@@ -1,6 +1,6 @@
 import { useState, type JSX } from 'react';
 import {
-  BRAET_STR, BraetDefs, BraetPlade, Brik, EgenDrikFelter, StoerrelseValg, egenDrikKlar, fastDrikValg, tomEgenDrik, type EgenDrik
+  EgenDrikFelter, Elefant, StoerrelseValg, egenDrikKlar, fastDrikValg, navneliste, tomEgenDrik, type EgenDrik
 } from '@k69/ui';
 import {
   BRIKFARVER, DRIKKE, DRIK_LISTE, formatAntal, formatProcent, slurkePrEnhed, type DrikId, type DrikValg, type Handling, type KortHold, type Spil
@@ -31,29 +31,29 @@ export function Tilmeld({
   const klar = Boolean(navn.trim()) && hold !== null && drikValg !== null && kanJoine;
 
   return (
-    <div className="forside">
-      <section className="hero">
-        <svg className="hero-art" viewBox={`0 0 ${BRAET_STR.w} ${BRAET_STR.h}`} aria-hidden="true">
-          <BraetDefs id="t" />
-          <BraetPlade id="t" brikker={[]} taarnAndel={0.35} />
-        </svg>
-        <div className="hero-slør" />
-        <div className="hero-tekst">
-          <div className="mark" style={{ fontSize: 96, lineHeight: 0.86 }}>K69</div>
-          <p className="hero-lead">
-            {spil.spillere.length > 0
-              ? `${spil.spillere.map((s) => s.navn).join(', ')} ${iGang ? 'er i gang i' : 'venter i'} ${spil.kode}.`
-              : `Du er den første i ${spil.kode}.`}
-          </p>
-          <p className="hero-kicker">
-            {iGang
-              ? 'Spillet kører allerede — men har du linket, kan du hoppe med. Du får et frifelt og kommer med i turen bagest i rækken.'
-              : 'Skriv et navn, vælg en brik og hvad du drikker — så er du med.'}
-          </p>
-        </div>
-      </section>
+    <div className="plakat grund">
+      <div className="vandmaerke tilmeld-vandmaerke" aria-hidden="true">{spil.kode}</div>
+      <Elefant className="plakat-elefant tilmeld-elefant" str={560} />
 
-      <section className="panel">
+      <header className="plakat-top">
+        <div className="mark">K69</div>
+        <span className="pille">Spil {spil.kode}</span>
+      </header>
+
+      <div className="tilmeld-tekst">
+        <h1>
+          {spil.spillere.length > 0
+            ? `${navneliste(spil.spillere.map((s) => s.navn))} ${iGang ? 'er i gang.' : 'venter.'}`
+            : 'Du er den første.'}
+        </h1>
+        <p className="lead">
+          {iGang
+            ? 'Spillet kører allerede — men har du linket, kan du hoppe med. Du får et frifelt og kommer med i turen bagest i rækken.'
+            : 'Skriv et navn, vælg en brik og hvad du drikker — så er du med.'}
+        </p>
+      </div>
+
+      <section className="papir tilmeld-panel">
         <div>
           <label className="mærke" htmlFor="navn">Dit navn</label>
           <input
@@ -69,21 +69,18 @@ export function Tilmeld({
 
         <div>
           <div className="mærke">Din brik</div>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <div className="brikvalg">
             {BRIKFARVER.map((f) => {
               const optaget = taget.has(f);
               return (
                 <button
                   key={f}
-                  aria-label={`Brik i farven ${f}`}
+                  aria-label={`Brik i farven ${f}${optaget ? ' (taget)' : ''}`}
+                  aria-pressed={farve === f}
                   disabled={optaget}
+                  className={farve === f ? 'brikvalg-paa' : undefined}
                   onClick={() => saetFarve(f)}
-                  style={{
-                    width: 40, height: 40, borderRadius: '50%', background: f, cursor: optaget ? 'not-allowed' : 'pointer',
-                    border: farve === f ? '2px solid var(--brass-lt)' : '2px solid transparent',
-                    boxShadow: farve === f ? '0 0 0 2px rgba(201,162,39,0.25)' : 'none',
-                    opacity: optaget ? 0.22 : 1
-                  }}
+                  style={{ background: f }}
                 />
               );
             })}
@@ -96,7 +93,7 @@ export function Tilmeld({
             {DRIK_LISTE.map((d) => (
               <button
                 key={d.id}
-                className={drik === d.id ? 'drik drik-paa' : 'drik'}
+                className={drik === d.id ? 'valgkort valgkort-paa' : 'valgkort'}
                 onClick={() => { saetDrik(d.id); saetCl(d.enhedCl); }}
               >
                 <b>{d.navn}</b>
@@ -104,7 +101,7 @@ export function Tilmeld({
               </button>
             ))}
             <button
-              className={drik === 'egen' ? 'drik drik-paa' : 'drik'}
+              className={drik === 'egen' ? 'valgkort valgkort-paa' : 'valgkort'}
               onClick={() => saetDrik('egen')}
             >
               <b>Noget andet</b>
@@ -119,7 +116,7 @@ export function Tilmeld({
               <EgenDrikFelter vaerdi={egen} onSkift={(v) => { saetEgen(v); ryd(); }} />
             </div>
           )}
-          <div className="note" style={{ marginTop: 8 }}>
+          <div className="note" style={{ marginTop: 10 }}>
             En slurk er den samme mængde alkohol uanset hvad du drikker — en pilsner på 33 cl er 11
             slurke, en på 50 cl er 16,7. Appen omregner tårnet til din egen drik.
           </div>
@@ -129,7 +126,7 @@ export function Tilmeld({
           <div className="mærke">Dame- og kongekort</div>
           <div className="drikke">
             {HOLD.map((h) => (
-              <button key={h.id} className={hold === h.id ? 'drik drik-paa' : 'drik'} onClick={() => saetHold(h.id)}>
+              <button key={h.id} className={hold === h.id ? 'valgkort valgkort-paa' : 'valgkort'} onClick={() => saetHold(h.id)}>
                 <b>{h.navn}</b>
                 <span>{h.forklaring}</span>
               </button>
@@ -141,13 +138,14 @@ export function Tilmeld({
         {fejl && <div className="fejltekst">{fejl}</div>}
         {!kanJoine && <div className="fejltekst">Spillet er slut.</div>}
 
+        <div style={{ flexGrow: 1 }} />
         <button
           className="knap knap-primaer"
-          style={{ minHeight: 58 }}
+          style={{ minHeight: 60, fontSize: 22, flexShrink: 0 }}
           disabled={!klar}
           onClick={() => hold && drikValg && send({ type: 'join', navn, farve, drik: drikValg, kortHold: hold })}
         >
-          <Brik navn={navn || '?'} farve={farve} str={26} />
+          <span style={{ width: 26, height: 26, borderRadius: '50%', background: farve, border: '2px solid #ced8e2' }} />
           {iGang ? 'Hop med i spillet' : 'Kom med i spillet'}
         </button>
       </section>

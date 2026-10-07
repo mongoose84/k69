@@ -3,7 +3,7 @@ import {
   Brik, FejringKort, Glas, Handlingskort, KroneKort, Maerkat, MeierKort, Plade, SenesteTure, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
   kortPaaBordet, LydKnap, opgave, spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, useLyde, UdraabKort, type SpilUdsyn
 } from '@k69/ui';
-import { formatAntal, formatSlurke, slurkePrEnhed, taarnCl, type Handling } from '@k69/rules';
+import { formatAntal, formatSlurke, slurkePrEnhed, taarnCl, taarnLoeberOver, type Handling } from '@k69/rules';
 
 type Faneblad = 'tur' | 'bord' | 'log';
 
@@ -24,6 +24,7 @@ export function Bord({
   const bm = spil.spillere.find((s) => s.id === spil.bierMeisterId);
   const toemmer = spil.spillere.find((s) => s.id === spil.taarn.toemmesAfId);
   const andel = taarnAndel(spil);
+  const over = taarnLoeberOver(spil);
 
   const brikker = spil.spillere
     .filter((s) => s.tilstand === 'aktiv')
@@ -37,27 +38,26 @@ export function Bord({
   const foelgFelt = jeg && jeg.pitPlads === 0 && jeg.felt > 0 ? jeg.felt : null;
 
   return (
-    <div className="skaerm">
-      <header className="mobilbar">
-        <div className="mark" style={{ fontSize: 24 }}>K69</div>
-        <div className="kode-lille">{spil.kode}</div>
-        <LydKnap />
+    <div className="skaerm grund">
+      <header className="mobilbar mobilbar-streg">
+        <div className="mark">K69</div>
+        {paaTur && (
+          <div className="tur-pille">
+            <i style={{ background: paaTur.farve }} />
+            <span>{paaTur.id === migId ? 'Din tur' : `${paaTur.navn}s tur`}</span>
+          </div>
+        )}
         <SyverKort spil={spil} migId={migId} send={send} kompakt />
         <div style={{ flexGrow: 1 }} />
-        <div className="avatarer">
-          {spil.spillere.filter((s) => s.tilstand === 'aktiv').map((s, i) => (
-            <span
-              key={s.id}
-              className={s.id === paaTur?.id ? 'av av-paa' : 'av'}
-              style={{ marginLeft: i === 0 ? 0 : -7 }}
-            >
-              <Brik navn={s.navn} farve={s.farve} str={28} />
-            </span>
-          ))}
+        <div className="taarn-lille" title={`${spil.kode} · ${formatSlurke(spil.taarn.slurke)} i tårnet`}>
+          <Glas andel={andel} bredde={16} hoejde={26} over={over} />
+          <span>{taarnCl(spil.taarn.slurke)} CL</span>
         </div>
+        <LydKnap />
       </header>
 
       <div className="mobilplade">
+        <div className="vandmaerke mobilplade-vandmaerke" aria-hidden="true">Runde {spil.runde}</div>
         <Plade
           id="mb"
           brikker={brikker}
@@ -75,15 +75,24 @@ export function Bord({
           visMinimap
         />
         <button
-          className={foelger ? 'chip chip-paa' : 'chip'}
+          className={foelger ? 'chip' : 'chip chip-paa'}
+          aria-pressed={!foelger}
           onClick={() => saetFoelger((f) => !f)}
         >
-          {foelger ? 'Følger min brik' : 'Overblik'}
+          {foelger ? 'Overblik' : 'Følg min brik'}
         </button>
       </div>
 
-      <div className="ark">
+      <div className="ark lys">
         <div className="greb" />
+        <div className="spiller-chips">
+          {spil.spillere.filter((s) => s.tilstand === 'aktiv').map((s) => (
+            <span key={s.id} className={s.id === paaTur?.id ? 'spiller-chip spiller-chip-paa' : 'spiller-chip'}>
+              <Brik navn={s.navn} farve={s.farve} str={20} />
+              {s.id === migId ? 'Dig' : s.navn} {s.enheder}
+            </span>
+          ))}
+        </div>
         <div className="faneblade">
           {(['tur', 'bord', 'log'] as Faneblad[]).map((f) => (
             <button key={f} className={fane === f ? 'fb fb-paa' : 'fb'} onClick={() => saetFane(f)}>
@@ -92,18 +101,19 @@ export function Bord({
           ))}
         </div>
 
-        <div
-          className={fane === 'tur' && o ? 'ark-krop action-farvet' : 'ark-krop'}
-          style={fane === 'tur' && o ? ({ '--sp': o.farve } as React.CSSProperties) : undefined}
-        >
-          {fane === 'tur' && <Handlingskort spil={spil} migId={migId} send={send} kompakt ruller={ruller} />}
+        <div className="ark-krop">
+          {fane === 'tur' && o && (
+            <div className="handling-blok blaek action-farvet" style={{ '--sp': o.farve } as React.CSSProperties}>
+              <Handlingskort spil={spil} migId={migId} send={send} kompakt ruller={ruller} />
+            </div>
+          )}
 
           {fane === 'bord' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                <Glas andel={andel} bredde={38} hoejde={62} />
+                <Glas andel={andel} bredde={38} hoejde={62} over={over} />
                 <div>
-                  <div style={{ fontFamily: 'var(--serif)', fontSize: 24, color: 'var(--amber)' }}>
+                  <div style={{ fontFamily: 'var(--serif)', fontSize: 28, lineHeight: 1 }}>
                     {taarnCl(spil.taarn.slurke)} cl
                   </div>
                   <div className="note">
@@ -114,7 +124,7 @@ export function Bord({
                 </div>
                 <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
                   <div className="eyebrow">Bier Meister</div>
-                  <div style={{ fontSize: 14, fontWeight: 600, marginTop: 3 }}>{bm?.navn ?? 'Ingen'}</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, marginTop: 3 }}>{bm?.navn ?? 'Ingen'}</div>
                 </div>
               </div>
 
@@ -123,20 +133,18 @@ export function Bord({
                   <div key={s.id} className={s.id === paaTur?.id ? 'raekke raekke-paa' : 'raekke'}>
                     <Brik navn={s.navn} farve={s.farve} str={32} />
                     <div style={{ flexGrow: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: 14, fontWeight: 600 }}>{s.navn}</span>
-                        {s.id === spil.bierMeisterId && <Maerkat>BM</Maerkat>}
-                        {s.id === spil.taarn.toemmesAfId && <Maerkat farve="var(--amber)">TÅRNET</Maerkat>}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: 14, fontWeight: 700 }}>{s.navn}</span>
+                        {s.id === spil.bierMeisterId && <Maerkat fyldt>BM</Maerkat>}
+                        {s.id === spil.taarn.toemmesAfId && <Maerkat fyldt>TÅRNET</Maerkat>}
                         {s.id === spil.syver?.holderId && <Maerkat>7'ER</Maerkat>}
-                        {!s.tilsluttet && <Maerkat farve="var(--ink-faint)">OFFLINE</Maerkat>}
+                        {!s.tilsluttet && <Maerkat>OFFLINE</Maerkat>}
                       </div>
-                      <div className="note" style={{ fontSize: 11 }}>{spillerStatus(s)}</div>
+                      <div className="note" style={{ fontSize: 11.5 }}>{spillerStatus(s)}</div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'flex-end', gap: 6 }}>
-                        <span style={{ fontFamily: 'var(--serif)', fontSize: 18, color: s.enheder > 0 ? 'var(--amber)' : 'var(--ink-dim)' }}>
-                          {s.enheder}
-                        </span>
+                        <span style={{ fontFamily: 'var(--serif)', fontSize: 20 }}>{s.enheder}</span>
                         <span className="eyebrow" style={{ fontSize: 9 }}>tømt</span>
                       </div>
                       <Slurkemaaler tilbage={s.slurkeTilbage} ialt={slurkePrEnhed(s.drik)} bredde={7} />
@@ -147,6 +155,7 @@ export function Bord({
                   </div>
                 ))}
               </div>
+              <div className="eyebrow" style={{ textAlign: 'center' }}>Spil {spil.kode}</div>
             </div>
           )}
 
@@ -174,7 +183,7 @@ export function Bord({
               <div style={{ marginTop: 6 }}><Slurkemaaler tilbage={jeg.slurkeTilbage} ialt={slurkePrEnhed(jeg.drik)} /></div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontFamily: 'var(--serif)', fontSize: 19 }}>{formatAntal(jeg.slurkeTilbage)}</div>
+              <div style={{ fontFamily: 'var(--serif)', fontSize: 20 }}>{formatAntal(jeg.slurkeTilbage)}</div>
               <div className="eyebrow">slurke igen</div>
             </div>
           </div>

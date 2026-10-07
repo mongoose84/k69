@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<title>K69 — øl i tårnet</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;1,6..96,500&amp;family=Karla:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1b2733}a:hover{color:#0f1821}
+button{cursor:pointer}
+.korn{position:absolute;inset:0;background-image:url(../assets/korn.svg);opacity:0.12;mix-blend-mode:multiply;pointer-events:none}
+</style>
+</helmet>
+<div style="position: relative; width: 720px; height: 900px; box-sizing: border-box; background: radial-gradient(90% 75% at 28% 18%, #7b96b1 0%, #5f7d9b 52%, #48627e 100%); color: #1b2733; font-family: Karla, 'Helvetica Neue', sans-serif; overflow: hidden; padding: 48px 56px; display: flex; flex-direction: column; align-items: center; gap: 22px">
+  <div aria-hidden="true" style="position: absolute; left: -16px; bottom: -40px; font-family: Anton, Impact, sans-serif; font-size: 260px; line-height: 1; color: #6d8aa6">TÅRN</div>
+  <img src="../assets/elefant.svg" alt="" style="position: absolute; right: -60px; bottom: 90px; width: 240px; height: 226px">
+
+  <div style="position: relative; text-align: center; display: flex; flex-direction: column; gap: 6px">
+    <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase">Felt 9 · Jeppe</div>
+    <h1 style="margin: 0; font-family: Anton, Impact, sans-serif; font-weight: 400; font-size: 56px; line-height: 1; text-transform: uppercase">Øl i tårnet</h1>
+    <p style="margin: 0; font-family: 'Bodoni Moda', Georgia, serif; font-style: italic; font-size: 20px; line-height: 1.4; color: #0f1821">Hæld så meget du har lyst til. Løber det over, bunder du det selv.</p>
+  </div>
+
+  <div style="position: relative; width: 190px; height: 330px; box-sizing: border-box; border: 4px solid #1b2733; border-top-width: 0; border-radius: 0 0 22px 22px; background: linear-gradient(90deg, #e6ecf1 0%, #f7f9fb 30%, #dfe6ed 100%); overflow: hidden; box-shadow: 0 24px 50px rgba(15, 24, 33, 0.35)">
+    <div style="{{oel}}"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 25%; border-top: 2px dashed #1b2733"></div>
+    <span style="position: absolute; right: 8px; top: calc(25% - 22px); font-size: 11px; font-weight: 700; letter-spacing: 0.1em">KANTEN</span>
+  </div>
+
+  <div style="position: relative; text-align: center">
+    <div style="font-family: Anton, Impact, sans-serif; font-size: 64px; line-height: 1">{{cl}} cl</div>
+    <div style="font-size: 14px; font-weight: 600">{{slurke}} slurke i alt i tårnet</div>
+  </div>
+
+  <button onMouseDown="{{start}}" onMouseUp="{{stop}}" onMouseLeave="{{stop}}" onTouchStart="{{start}}" onTouchEnd="{{stop}}" style="position: relative; width: 100%; height: 72px; border: 0; border-radius: 3px; background: #1b2733; color: #ced8e2; font-family: Anton, Impact, sans-serif; font-size: 26px; letter-spacing: 0.05em; text-transform: uppercase">{{knap}}</button>
+  <div style="position: relative; font-size: 13px; font-weight: 600">Slip når du synes det er nok</div>
+  <div class="korn" aria-hidden="true"></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":720,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { niveau: 0.42, haelder: false }; }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() {
+    const n = this.state.niveau;
+    const over = n >= 0.75;
+    return {
+      oel: 'position: absolute; left: 0; right: 0; bottom: 0; height: ' + Math.round(n * 100) + '%; background: linear-gradient(180deg, ' + (over ? '#E8A04A, #A8561A' : '#F2C060, #C4761A') + '); border-top: 14px solid #F6EBD4; box-shadow: 0 0 40px rgba(242, 192, 96, 0.6)',
+      cl: Math.round(n * 50),
+      slurke: Math.round(n * 50 / 3),
+      knap: over ? 'Nu løber det over' : (this.state.haelder ? 'Hælder…' : 'Hold for at hælde'),
+      start: () => {
+        clearInterval(this.t);
+        this.setState({ haelder: true });
+        this.t = setInterval(() => this.setState((s) => ({ niveau: Math.min(1, s.niveau + 0.01) })), 60);
+      },
+      stop: () => { clearInterval(this.t); this.setState({ haelder: false }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

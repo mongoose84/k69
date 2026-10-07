@@ -73,16 +73,16 @@ function GivSlurke({ spil, migId, send, antal }: HandlingProps & { antal: number
             </span>
             <button
               className="knap"
-              style={{ minHeight: 38, width: 38, padding: 0 }}
+              style={{ minHeight: 44, width: 44, padding: 0, fontSize: 18 }}
               disabled={n === 0}
               onClick={() => saetFordeling({ ...fordeling, [s.id]: n - 1 })}
             >
               −
             </button>
-            <span style={{ fontFamily: 'var(--serif)', fontSize: 20, width: 26, textAlign: 'center' }}>{n}</span>
+            <span style={{ fontFamily: 'var(--display)', fontSize: 22, width: 26, textAlign: 'center' }}>{n}</span>
             <button
               className="knap"
-              style={{ minHeight: 38, width: 38, padding: 0 }}
+              style={{ minHeight: 44, width: 44, padding: 0, fontSize: 18 }}
               disabled={rest === 0}
               onClick={() => saetFordeling({ ...fordeling, [s.id]: n + 1 })}
             >
@@ -196,17 +196,17 @@ export function Handlingskort({ spil, migId, send, kompakt, ruller = false }: Ha
   const terning = venterPaaSlag(spil) ? null : spil.terning;
 
   const hoved = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <span style={{ width: 9, height: 9, borderRadius: '50%', background: o.farve }} />
-        <span className="eyebrow" style={{ color: o.farve }}>
+        <span style={{ width: 10, height: 10, borderRadius: '50%', background: o.farve, border: '1.5px solid var(--ink)' }} />
+        <span className="eyebrow">
           {terning && spil.terningAf
             ? `${spil.spillere.find((s) => s.id === spil.terningAf)?.navn ?? 'Nogen'} slog ${terning}`
             : `Runde ${spil.runde}`}
         </span>
       </div>
-      <h2 style={{ fontSize: kompakt ? 26 : 30, lineHeight: 1.08, color: o.farve }}>{o.titel}</h2>
-      <p style={{ margin: 0, fontSize: 13, lineHeight: 1.6, color: 'var(--ink-dim)' }}>{o.tekst}</p>
+      <h2 style={{ fontSize: kompakt ? 26 : 34, lineHeight: 1, color: 'var(--ink)' }}>{o.titel}</h2>
+      <p style={{ margin: 0, fontSize: 13, lineHeight: 1.5, color: 'var(--ink-dim)' }}>{o.tekst}</p>
     </div>
   );
 
@@ -232,7 +232,7 @@ export function Handlingskort({ spil, migId, send, kompakt, ruller = false }: Ha
         ) : (
           <button
             className="knap knap-tom"
-            style={{ minHeight: 38, fontSize: 11 }}
+            style={{ minHeight: 44, fontSize: 11 }}
             disabled={Boolean(spaerre)}
             title={spaerre ?? undefined}
             onClick={() => send({ type: 'meld-afgang' })}

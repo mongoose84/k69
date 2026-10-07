@@ -1,5 +1,5 @@
 import { useState, type JSX } from 'react';
-import { BRAET_STR, BraetDefs, BraetPlade, opretSpil, slaaOpSpil } from '@k69/ui';
+import { Elefant, opretSpil, slaaOpSpil } from '@k69/ui';
 import { API } from '../api.js';
 
 export function Forside({ onSpil }: { onSpil: (kode: string) => void }): JSX.Element {
@@ -35,74 +35,76 @@ export function Forside({ onSpil }: { onSpil: (kode: string) => void }): JSX.Ele
   };
 
   return (
-    <div className="forside">
-      <section className="hero">
-        <svg className="hero-art" viewBox={`0 0 ${BRAET_STR.w} ${BRAET_STR.h}`} aria-hidden="true">
-          <BraetDefs id="f" />
-          <BraetPlade id="f" brikker={[]} taarnAndel={0.4} />
-        </svg>
-        <div className="hero-slør" />
-        <div className="hero-tekst">
-          <div className="mark" style={{ fontSize: 124, lineHeight: 0.86 }}>K69</div>
-          <p className="hero-lead">Brættet fra Tinglev. 38 felter, ét tårn og en pit der gør ondt.</p>
-          <p className="hero-kicker">
-            Ingen konto og ingen kode i mailen. Start et spil, del linket i gruppen, og skriv jeres
-            navne når I kommer ind. Brættet, terningen, kortbunken, Meyer-bægeret og tårnet er med —
-            resten drikker I selv.
+    <div className="plakat grund">
+      <div className="vandmaerke forside-vandmaerke" aria-hidden="true">K69</div>
+      <Elefant className="plakat-elefant forside-elefant" str={900} titel="Krunk-elefanten" />
+
+      <header className="plakat-top">
+        <div className="mark">K69</div>
+        <div className="piller">
+          <span className="pille">38 felter</span>
+          <span className="pille">6 i pitten</span>
+          <span className="pille">1–8 spillere</span>
+        </div>
+      </header>
+
+      <div className="forside-venstre">
+        <div>
+          <h1>Ét tårn.<br />En pit der gør ondt.</h1>
+          <p className="lead">
+            Brættet fra Tinglev, nu i browseren. Start et spil, del linket i gruppen — resten drikker I selv.
           </p>
         </div>
-        <div className="hero-tal">
-          <div><b>38</b><span>Felter</span></div>
-          <div><b>6</b><span>Pladser i pitten</span></div>
-          <div><b>1—8</b><span>Spillere</span></div>
-        </div>
-      </section>
 
-      <section className="panel">
-        <div className="faner">
-          <button className={fane === 'ny' ? 'fane fane-paa' : 'fane'} onClick={() => saetFane('ny')}>
-            Start nyt spil
-          </button>
-          <button className={fane === 'join' ? 'fane fane-paa' : 'fane'} onClick={() => saetFane('join')}>
-            Join med kode
-          </button>
-        </div>
-
-        {fane === 'ny' ? (
-          <>
-            <p className="note" style={{ fontSize: 13.5, lineHeight: 1.7 }}>
-              Du får et link du kan dele. Alle der åbner det skriver bare et navn, vælger en brik og
-              hvad de drikker — så er de med.
-            </p>
-            <button className="knap knap-primaer" style={{ minHeight: 58 }} disabled={travl} onClick={() => void start()}>
-              {travl ? 'Opretter…' : 'Opret spil og få et link'}
+        <section className="papir forside-panel">
+          <div className="faner" role="tablist">
+            <button role="tab" aria-selected={fane === 'ny'} className={fane === 'ny' ? 'fane fane-paa' : 'fane'} onClick={() => saetFane('ny')}>
+              Start nyt spil
             </button>
-          </>
-        ) : (
-          <>
-            <label className="mærke" htmlFor="kode">Spilkode</label>
-            <input
-              id="kode"
-              type="text"
-              value={kode}
-              maxLength={8}
-              placeholder="FX K7M2Q"
-              style={{ letterSpacing: '0.3em', textTransform: 'uppercase', fontFamily: 'var(--serif)', fontSize: 24 }}
-              onChange={(e) => saetKode(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && void join()}
-            />
-            <button className="knap knap-primaer" style={{ minHeight: 58 }} disabled={travl || !kode.trim()} onClick={() => void join()}>
-              {travl ? 'Kigger efter…' : 'Find spillet'}
+            <button role="tab" aria-selected={fane === 'join'} className={fane === 'join' ? 'fane fane-paa' : 'fane'} onClick={() => saetFane('join')}>
+              Deltag med kode
             </button>
-          </>
-        )}
+          </div>
 
-        {fejl && <div className="fejltekst">{fejl}</div>}
+          {fane === 'ny' ? (
+            <div className="forside-raekke">
+              <p className="note" style={{ margin: 0, flexGrow: 1, fontSize: 13.5 }}>
+                Du får et link du kan dele. Alle der åbner det skriver bare et navn, vælger en brik og
+                hvad de drikker — så er de med.
+              </p>
+              <button className="knap knap-primaer" disabled={travl} onClick={() => void start()}>
+                {travl ? 'Opretter…' : 'Opret spil'}
+              </button>
+            </div>
+          ) : (
+            <div className="forside-raekke forside-raekke-kode">
+              <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label className="eyebrow" htmlFor="kode">Spilkode</label>
+                <input
+                  id="kode"
+                  type="text"
+                  className="kodefelt"
+                  value={kode}
+                  maxLength={8}
+                  placeholder="FX K7M2Q"
+                  style={{ height: 56 }}
+                  onChange={(e) => saetKode(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && void join()}
+                />
+              </div>
+              <button className="knap knap-primaer" disabled={travl || !kode.trim()} onClick={() => void join()}>
+                {travl ? 'Kigger efter…' : 'Find spillet'}
+              </button>
+            </div>
+          )}
 
-        <div className="note">
-          Alle skal have en øl eller et glas klar. Stil de 6 shotglas i pitten og tårnet midt på bordet.
-        </div>
-      </section>
+          {fejl && <div className="fejltekst">{fejl}</div>}
+        </section>
+      </div>
+
+      <p className="forside-fod">
+        Alle skal have en øl eller et glas klar. Stil de 6 shotglas i pitten og tårnet midt på bordet.
+      </p>
     </div>
   );
 }

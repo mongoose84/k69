@@ -40,19 +40,19 @@ function Spilrute({ kode, onForlad }: { kode: string; onForlad: () => void }): J
 
   if (fatal) {
     return (
-      <div className="tomskaerm">
-        <h1 style={{ fontSize: 30 }}>Det spil findes ikke</h1>
-        <p className="note">{fejl ?? 'Tjek koden i linket.'}</p>
-        <button className="knap knap-primaer" onClick={onForlad}>Til forsiden</button>
+      <div className="tomskaerm grund">
+        <h1 style={{ fontSize: 42 }}>Det spil findes ikke</h1>
+        <p className="lead" style={{ fontSize: 19 }}>{fejl ?? 'Tjek koden i linket.'}</p>
+        <button className="knap knap-primaer" style={{ padding: '0 26px' }} onClick={onForlad}>Til forsiden</button>
       </div>
     );
   }
 
   if (!spil) {
     return (
-      <div className="tomskaerm">
-        <div className="mark" style={{ fontSize: 52 }}>K69</div>
-        <p className="note">{forbundet ? 'Henter bordet…' : 'Forbinder…'}</p>
+      <div className="tomskaerm grund">
+        <div className="mark" style={{ fontSize: 72 }}>K69</div>
+        <p className="lead" style={{ fontSize: 19 }}>{forbundet ? 'Henter bordet…' : 'Forbinder…'}</p>
       </div>
     );
   }

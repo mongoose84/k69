@@ -36,10 +36,20 @@ const STIER: Array<[Rolle, string]> = [
   ['streg', 'M696.9,397.1 702.6,393.5 699.7,384.1 698.9,383.5 698,383.2 697.2,383 696.2,382.9 695.3,382.9 694.5,382.7 693.5,382.6 692.7,382.1 692.4,381.9 691.9,381.4 691.6,380.8 691.2,379.7 693.2,374.8 689.9,366.7 688.1,366.5 686.4,366.4 684.5,366 682.6,365.7 680.8,365.7 679.1,365.9 677.3,366.7 675.8,367.8 675,370.5 674,373.3 673.1,376.4 672.4,379.2 672.3,382.1 672.6,384.8 673.5,387.2 675.3,389.4 677.3,391.8 679.7,393.5 682.4,394.8 685.1,395.6 688.1,396.2 691.2,396.5 694,396.8 696.9,397.1z']
 ];
 
-export function Elefant({ str = 40, className, titel }: { str?: number; className?: string; titel?: string }): JSX.Element {
+export function Elefant({
+  str = 40, className, titel, x, y, style
+}: {
+  str?: number; className?: string; titel?: string;
+  /** Placering når han tegnes inde i et andet SVG. */
+  x?: number; y?: number;
+  style?: React.CSSProperties;
+}): JSX.Element {
   return (
     <svg
       className={className ? `elefant ${className}` : 'elefant'}
+      x={x}
+      y={y}
+      style={style}
       viewBox="0 0 1195.2 1125.44"
       width={str}
       height={Math.round(str * 1125.44 / 1195.2)}

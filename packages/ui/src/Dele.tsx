@@ -120,12 +120,12 @@ export function Terning({ vaerdi, str = 76, ruller = false }: { vaerdi: number |
       style={{ flex: `0 0 ${str}px`, transition: 'transform 260ms', transform: ruller ? 'rotate(-14deg)' : 'none' }}
       aria-label={vaerdi ? `Terningen viser ${vaerdi}` : 'Terningen er ikke slået'}
     >
-      <rect x="6" y="9" width="88" height="88" rx="17" fill="#0B100D" opacity="0.55" />
-      <rect x="4" y="4" width="88" height="88" rx="17" fill="#EFE6D4" stroke="#8E8878" strokeWidth="1.5" />
+      <rect x="8" y="10" width="86" height="86" rx="16" fill="#0F1821" />
+      <rect x="4" y="4" width="86" height="86" rx="16" fill="#FFFFFF" stroke="#1B2733" strokeWidth="4" />
       {pips
-        ? pips.map(([cx, cy]) => <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="7.5" fill="#1B241C" />)
+        ? pips.map(([cx, cy]) => <circle key={`${cx}-${cy}`} cx={cx - 3} cy={cy - 3} r="8" fill="#1B2733" />)
         : (
-          <text x="50" y="52" textAnchor="middle" dominantBaseline="central" fontSize="34" fill="#B3AB98" style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>
+          <text x="47" y="49" textAnchor="middle" dominantBaseline="central" fontSize="38" fill="#9FB1C3" style={{ fontFamily: 'var(--display)' }}>
             ?
           </text>
         )}
@@ -133,18 +133,21 @@ export function Terning({ vaerdi, str = 76, ruller = false }: { vaerdi: number |
   );
 }
 
-/** Lodret ølglas som måler. `andel` er 0–1. */
-export function Glas({ andel, bredde = 46, hoejde = 74 }: { andel: number; bredde?: number; hoejde?: number }): JSX.Element {
+/** Lodret ølglas som måler. `andel` er 0–1. Løber det over, bliver øllet mørkere ravgult. */
+export function Glas({
+  andel, bredde = 46, hoejde = 74, over = false
+}: { andel: number; bredde?: number; hoejde?: number; over?: boolean }): JSX.Element {
   const pct = Math.max(0, Math.min(1, andel)) * 100;
+  const lille = bredde < 30;
   return (
     <div
       style={{
         width: bredde,
         height: hoejde,
         flex: `0 0 ${bredde}px`,
-        border: '1.5px solid #9FB0A2',
-        borderRadius: 4,
-        background: '#0E1512',
+        border: `${lille ? 2 : 2.5}px solid #1B2733`,
+        borderRadius: lille ? '1px 1px 4px 4px' : '3px 3px 8px 8px',
+        background: '#E6ECF1',
         position: 'relative',
         overflow: 'hidden'
       }}
@@ -152,15 +155,15 @@ export function Glas({ andel, bredde = 46, hoejde = 74 }: { andel: number; bredd
       <div
         style={{
           position: 'absolute', left: 0, right: 0, bottom: 0, height: `${pct}%`,
-          background: 'linear-gradient(180deg, #F2C060, #C4761A)',
+          background: over ? 'var(--oel-over)' : 'var(--oel)',
           transition: 'height 160ms linear'
         }}
       />
       {pct > 1 && (
         <div
           style={{
-            position: 'absolute', left: 0, right: 0, bottom: `${pct}%`, height: 7,
-            background: '#F6EBD4', transition: 'bottom 160ms linear'
+            position: 'absolute', left: 0, right: 0, bottom: `${pct}%`, height: lille ? 4 : 6,
+            background: 'var(--skum)', transition: 'bottom 160ms linear'
           }}
         />
       )}
@@ -231,9 +234,9 @@ export function HoldKnap({
         position: 'relative',
         height: hoejde,
         borderRadius: 3,
-        border: '1px solid #7E6413',
+        border: '2px solid #1B2733',
         overflow: 'hidden',
-        background: '#1D2118',
+        background: '#1B2733',
         cursor: deaktiveret ? 'not-allowed' : 'pointer',
         userSelect: 'none',
         touchAction: 'none',
@@ -247,34 +250,38 @@ export function HoldKnap({
         style={{
           position: 'absolute', left: 0, top: 0, bottom: 0,
           width: `${Math.max(0, Math.min(1, andel)) * 100}%`,
-          background: 'linear-gradient(180deg, #F2C060 0%, #C4761A 100%)',
+          background: 'var(--oel)',
           transition: 'width 140ms linear'
         }}
       />
       <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
         <div
           style={{
-            fontSize: 11.5, fontWeight: 700, letterSpacing: '0.16em',
-            textTransform: 'uppercase', color: holder ? '#14180C' : 'var(--ink)'
+            fontFamily: 'var(--display)', fontSize: 22, letterSpacing: '0.05em', lineHeight: 1.1,
+            textTransform: 'uppercase', color: holder ? '#0F1821' : '#CED8E2'
           }}
         >
           {tekst}
         </div>
-        <div style={{ fontSize: 11, color: holder ? '#14180C' : 'var(--ink-dim)' }}>{under}</div>
+        <div style={{ fontSize: 12, fontWeight: 600, color: holder ? '#0F1821' : '#BCC6D0' }}>{under}</div>
       </div>
     </div>
   );
 }
 
-export function Brik({ navn, farve, str = 34 }: { navn: string; farve: string; str?: number }): JSX.Element {
+/** Brikken: spillerens farve med blæk-kant og dybde. `paaTur` giver ringe og lampeglød. */
+export function Brik({
+  navn, farve, str = 34, paaTur = false
+}: { navn: string; farve: string; str?: number; paaTur?: boolean }): JSX.Element {
   return (
     <div
       style={{
         width: str, height: str, flex: `0 0 ${str}px`, borderRadius: '50%',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontFamily: 'var(--serif)', fontSize: str * 0.44, fontWeight: 700, color: '#14180C',
+        fontFamily: 'var(--display)', fontSize: str * 0.46, color: '#1B2733',
         background: farve,
-        boxShadow: 'inset 0 -2px 5px rgba(0,0,0,0.35), 0 1px 2px rgba(0,0,0,0.5)'
+        border: `${str < 24 ? 2 : 2.5}px solid #1B2733`,
+        boxShadow: paaTur ? 'var(--brik-tur)' : 'var(--brik-skygge)'
       }}
     >
       {navn.slice(0, 1).toUpperCase()}
@@ -282,13 +289,19 @@ export function Brik({ navn, farve, str = 34 }: { navn: string; farve: string; s
   );
 }
 
-export function Maerkat({ children, farve = 'var(--brass-lt)' }: { children: ReactNode; farve?: string }): JSX.Element {
+/**
+ * Mærkaten ved et navn. Fyldt blæk for status (BM, VÆRT), kun med kant for
+ * info (DIG, PIT, ALTID). Farverne følger fladen den står på.
+ */
+export function Maerkat({ children, fyldt = false }: { children: ReactNode; fyldt?: boolean }): JSX.Element {
   return (
     <span
       style={{
-        display: 'inline-flex', alignItems: 'center', height: 22, padding: '0 8px',
-        borderRadius: 2, fontSize: 10, fontWeight: 700, letterSpacing: '0.1em',
-        color: farve, border: `1px solid ${farve}55`, background: `${farve}1a`
+        display: 'inline-flex', alignItems: 'center', height: 20, padding: '0 6px',
+        borderRadius: 2, fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', whiteSpace: 'nowrap',
+        color: fyldt ? 'var(--ink-mod)' : 'var(--ink)',
+        border: '1.5px solid var(--ink)',
+        background: fyldt ? 'var(--ink)' : 'transparent'
       }}
     >
       {children}
@@ -311,7 +324,7 @@ export function Slurkemaaler({ tilbage, ialt, bredde = 12 }: { tilbage: number; 
           key={i}
           style={{
             width: bredde, height: 7, borderRadius: 1,
-            background: i < fyldte ? 'linear-gradient(180deg, #F2C060, #C4761A)' : '#2B382E'
+            background: i < fyldte ? 'var(--oel)' : 'rgba(27, 39, 51, 0.18)'
           }}
         />
       ))}
@@ -322,19 +335,19 @@ export function Slurkemaaler({ tilbage, ialt, bredde = 12 }: { tilbage: number; 
 export function Kortbillede({
   rang, tegn, roed, bredde = 108
 }: { rang: string; tegn: string; roed: boolean; bredde?: number }): JSX.Element {
-  const farve = roed ? '#9E3B33' : '#1B241C';
+  const farve = roed ? '#A8423A' : '#1B2733';
   return (
     <div
       style={{
-        width: bredde, height: bredde * 1.43, flex: `0 0 ${bredde}px`, borderRadius: 8,
-        padding: bredde * 0.083, background: 'linear-gradient(168deg, #F6F1E4 0%, #E4DCC8 100%)',
-        border: '1px solid #B9AE93', boxShadow: '0 14px 26px rgba(0,0,0,0.55)',
+        width: bredde, height: bredde * 1.43, flex: `0 0 ${bredde}px`, borderRadius: Math.round(bredde * 0.06),
+        padding: bredde * 0.083, background: '#CED8E2',
+        border: '3px solid #1B2733', boxShadow: `${Math.round(bredde * 0.04)}px ${Math.round(bredde * 0.05)}px 0 #0F1821`,
         display: 'flex', flexDirection: 'column', color: farve
       }}
     >
-      <div style={{ lineHeight: 0.95 }}>
-        <div style={{ fontFamily: 'var(--serif)', fontSize: bredde * 0.21, fontWeight: 700 }}>{rang}</div>
-        <div style={{ fontSize: bredde * 0.14 }}>{tegn}</div>
+      <div style={{ lineHeight: 0.95, fontFamily: 'var(--display)' }}>
+        <div style={{ fontSize: bredde * 0.22 }}>{rang}</div>
+        <div style={{ fontSize: bredde * 0.15 }}>{tegn}</div>
       </div>
       <div style={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: bredde * 0.46 }}>
         {tegn}

@@ -1,5 +1,5 @@
 import { useState, type JSX } from 'react';
-import { BRAET_STR, BraetDefs, BraetPlade, opretSpil, slaaOpSpil } from '@k69/ui';
+import { Elefant, opretSpil, slaaOpSpil } from '@k69/ui';
 import { API } from '../api.js';
 
 export function Forside({ onSpil }: { onSpil: (kode: string) => void }): JSX.Element {
@@ -34,42 +34,48 @@ export function Forside({ onSpil }: { onSpil: (kode: string) => void }): JSX.Ele
   };
 
   return (
-    <div className="skaerm">
-      <div className="hero">
-        <svg className="hero-art" viewBox={`0 0 ${BRAET_STR.w} ${BRAET_STR.h}`} aria-hidden="true">
-          <BraetDefs id="mf" />
-          <BraetPlade id="mf" brikker={[]} taarnAndel={0.4} />
-        </svg>
-        <div className="hero-slør" />
-        <div className="hero-tekst">
-          <div className="mark" style={{ fontSize: 64, lineHeight: 0.84 }}>K69</div>
-          <p className="hero-lead">Brættet fra Tinglev.<br />38 felter og ét tårn.</p>
+    <div className="skaerm grund">
+      <div className="vandmaerke forside-vandmaerke" aria-hidden="true">K69</div>
+      <Elefant className="plakat-elefant forside-elefant" str={380} titel="Krunk-elefanten" />
+
+      <header className="mobilbar" style={{ justifyContent: 'space-between', padding: '0 20px' }}>
+        <div className="mark">K69</div>
+        <span className="pille" style={{ fontSize: 11, padding: '6px 11px' }}>1–8 spillere</span>
+      </header>
+
+      <div className="forside-indhold">
+        <div className="forside-tekst">
+          <h1>Ét tårn.<br />En pit der gør ondt.</h1>
+          <p className="lead">Brættet fra Tinglev. Start et spil og del linket i gruppen.</p>
         </div>
-      </div>
 
-      <div className="ark-fast">
-        <button className="knap knap-primaer" style={{ minHeight: 58 }} disabled={travl} onClick={() => void start()}>
-          {travl ? 'Opretter…' : 'Start et spil'}
-        </button>
+        <section className="papir forside-panel">
+          <button className="knap knap-primaer" disabled={travl} onClick={() => void start()}>
+            {travl ? 'Opretter…' : 'Start et spil'}
+          </button>
 
-        <div className="skille"><span>eller join med en kode</span></div>
+          <div className="skille"><span>eller deltag med en kode</span></div>
 
-        <input
-          type="text"
-          value={kode}
-          maxLength={8}
-          placeholder="K7M2Q"
-          inputMode="text"
-          autoCapitalize="characters"
-          style={{ letterSpacing: '0.3em', textTransform: 'uppercase', fontFamily: 'var(--serif)', fontSize: 22, textAlign: 'center' }}
-          onChange={(e) => saetKode(e.target.value)}
-        />
-        <button className="knap" style={{ minHeight: 52 }} disabled={travl || !kode.trim()} onClick={() => void join()}>
-          Find spillet
-        </button>
+          <label className="eyebrow" htmlFor="kode-m" style={{ marginBottom: -4 }}>Spilkode</label>
+          <input
+            id="kode-m"
+            type="text"
+            className="kodefelt"
+            value={kode}
+            maxLength={8}
+            placeholder="FX K7M2Q"
+            inputMode="text"
+            autoCapitalize="characters"
+            style={{ textAlign: 'center', height: 56 }}
+            onChange={(e) => saetKode(e.target.value)}
+          />
+          <button className="knap" style={{ minHeight: 52 }} disabled={travl || !kode.trim()} onClick={() => void join()}>
+            Find spillet
+          </button>
 
-        {fejl && <div className="fejltekst">{fejl}</div>}
-        <div className="note">Ingen konto og ingen kode i mailen. Har du fået et link, så åbn det bare.</div>
+          {fejl && <div className="fejltekst">{fejl}</div>}
+          <div className="note">Ingen konto og ingen kode i mailen. Har du fået et link, så åbn det bare.</div>
+        </section>
       </div>
     </div>
   );

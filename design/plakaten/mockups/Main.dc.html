@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<title>K69 — forside</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;1,6..96,500&amp;family=Karla:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1b2733}a:hover{color:#0f1821}
+button{cursor:pointer}
+.korn{position:absolute;inset:0;background-image:url(../assets/korn.svg);opacity:0.12;mix-blend-mode:multiply;pointer-events:none}
+.fane{cursor:pointer}
+</style>
+</helmet>
+<div style="position: relative; width: 1440px; height: 900px; box-sizing: border-box; background: radial-gradient(90% 75% at 28% 18%, #7b96b1 0%, #5f7d9b 52%, #48627e 100%); color: #1b2733; font-family: Karla, 'Helvetica Neue', sans-serif; overflow: hidden">
+
+  <div aria-hidden="true" style="position: absolute; left: 56px; top: 20px; font-family: Anton, Impact, sans-serif; font-size: 560px; line-height: 0.9; letter-spacing: -0.01em; color: #6d8aa6">K69</div>
+
+  <img src="../assets/elefant.svg" alt="Krunk-elefanten" style="position: absolute; right: -90px; bottom: -120px; width: 900px; height: 848px">
+
+  <header style="position: absolute; left: 64px; right: 64px; top: 40px; display: flex; justify-content: space-between; align-items: center">
+    <div style="font-family: Anton, Impact, sans-serif; font-size: 28px; letter-spacing: 0.04em">K69</div>
+    <div style="display: flex; gap: 12px">
+      <span style="padding: 8px 14px; border: 1.5px solid #1b2733; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase">38 felter</span>
+      <span style="padding: 8px 14px; border: 1.5px solid #1b2733; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase">6 i pitten</span>
+      <span style="padding: 8px 14px; border: 1.5px solid #1b2733; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase">1–8 spillere</span>
+    </div>
+  </header>
+
+  <div style="position: absolute; left: 64px; top: 470px; width: 560px; display: flex; flex-direction: column; gap: 18px">
+    <h1 style="margin: 0; font-family: Anton, Impact, sans-serif; font-weight: 400; font-size: 64px; line-height: 1; text-transform: uppercase">Ét tårn. <br>En pit der gør ondt.</h1>
+    <p style="margin: 0; font-family: 'Bodoni Moda', Georgia, serif; font-style: italic; font-size: 23px; line-height: 1.4; color: #0f1821; max-width: 470px">Brættet fra Tinglev, nu i browseren. Start et spil, del linket i gruppen — resten drikker I selv.</p>
+  </div>
+
+  <div style="position: absolute; left: 64px; bottom: 56px; width: 560px; box-sizing: border-box; background: linear-gradient(180deg, #dce3ea 0%, #ced8e2 60%, #c6d1dc 100%); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 16px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 4px rgba(15, 24, 33, 0.18), 0 28px 60px rgba(15, 24, 33, 0.38)">
+    <div role="tablist" style="display: flex; gap: 20px; border-bottom: 1.5px solid #bcc6d0">
+      <button class="fane" role="tab" aria-selected="{{nyValgt}}" onClick="{{visNy}}" style="{{nyStil}}">Start nyt spil</button>
+      <button class="fane" role="tab" aria-selected="{{deltagValgt}}" onClick="{{visDeltag}}" style="{{deltagStil}}">Deltag med kode</button>
+    </div>
+    <sc-if value="{{nyValgt}}" hint-placeholder-val="{{ true }}">
+      <div style="display: flex; gap: 12px; align-items: stretch">
+        <p style="margin: 0; flex-grow: 1; font-size: 13.5px; line-height: 1.55; color: #33475b">Du får et link du kan dele. Navn, brik og drik — så er de med.</p>
+        <a href="Lobby.dc.html" style="flex-shrink: 0; height: 56px; padding: 0 26px; display: flex; align-items: center; border-radius: 3px; background: #1b2733; color: #ced8e2; font-family: Anton, Impact, sans-serif; font-size: 20px; letter-spacing: 0.06em; text-transform: uppercase">Opret spil</a>
+      </div>
+    </sc-if>
+    <sc-if value="{{deltagValgt}}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; gap: 12px; align-items: flex-end">
+        <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 6px">
+          <label for="kode" style="font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #3f566d">Spilkode</label>
+          <input id="kode" type="text" maxlength="8" placeholder="FX K7M2Q" style="height: 56px; box-sizing: border-box; padding: 0 16px; border: 1.5px solid #5f7d9b; border-radius: 3px; background: #e6ecf1; color: #1b2733; font-family: Anton, Impact, sans-serif; font-size: 24px; letter-spacing: 0.3em; text-transform: uppercase">
+        </div>
+        <a href="Tilmeld.dc.html" style="flex-shrink: 0; height: 56px; padding: 0 26px; display: flex; align-items: center; border-radius: 3px; background: #1b2733; color: #ced8e2; font-family: Anton, Impact, sans-serif; font-size: 20px; letter-spacing: 0.06em; text-transform: uppercase">Find spillet</a>
+      </div>
+    </sc-if>
+  </div>
+
+  <p style="position: absolute; right: 64px; bottom: 32px; margin: 0; max-width: 300px; text-align: right; font-size: 12.5px; line-height: 1.5">Alle skal have en øl eller et glas klar. 6 shotglas i pitten, tårnet midt på bordet.</p>
+  <div class="korn" aria-hidden="true"></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { fane: 'ny' }; }
+  renderVals() {
+    const paa = 'height: 44px; margin-bottom: -1.5px; padding: 0; border: 0; border-bottom: 3px solid #1b2733; background: transparent; color: #1b2733; font-family: Karla, sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase';
+    const af = 'height: 44px; margin-bottom: -1.5px; padding: 0; border: 0; border-bottom: 3px solid transparent; background: transparent; color: #4a6075; font-family: Karla, sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase';
+    const ny = this.state.fane === 'ny';
+    return {
+      nyValgt: ny, deltagValgt: !ny,
+      nyStil: ny ? paa : af, deltagStil: ny ? af : paa,
+      visNy: () => this.setState({ fane: 'ny' }),
+      visDeltag: () => this.setState({ fane: 'deltag' })
+    };
+  }
+}
+</script>
+</body>
+</html>

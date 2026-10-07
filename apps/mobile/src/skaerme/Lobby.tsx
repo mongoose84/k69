@@ -1,5 +1,5 @@
 import { useState, type JSX } from 'react';
-import { Brik, Maerkat } from '@k69/ui';
+import { Brik, Elefant, Maerkat } from '@k69/ui';
 import { formatProcent, type Handling, type Spil } from '@k69/rules';
 import { spilUrl } from '../api.js';
 
@@ -27,21 +27,19 @@ export function Lobby({
   };
 
   return (
-    <div className="skaerm">
+    <div className="skaerm grund">
+      <Elefant className="plakat-elefant mobil-elefant" str={150} />
+
       <header className="mobilbar">
-        <div className="mark" style={{ fontSize: 24 }}>K69</div>
-        <div className="kode-lille">{spil.kode}</div>
-        <div style={{ flexGrow: 1 }} />
-        <div className="note">{spil.spillere.length} af 8</div>
+        <div className="mark">K69</div>
+        <span className="pille" style={{ fontSize: 11, padding: '6px 11px' }}>Lobby</span>
+        <span className="eyebrow" style={{ marginLeft: 6 }}>{spil.spillere.length} af 8</span>
       </header>
 
       <div className="rul">
-        <div className="blok">
-          <div className="eyebrow">Inden I går i gang</div>
-          <h1 style={{ fontSize: 30, marginTop: 12 }}>Del linket i gruppen</h1>
-          <p className="note" style={{ marginTop: 10, fontSize: 13, lineHeight: 1.65 }}>
-            Alle der åbner linket skriver bare et navn og vælger en brik.
-          </p>
+        <div className="mobil-intro">
+          <h1>Del linket.<br />Hent glassene.</h1>
+          <p className="lead">Alle der åbner linket skriver bare et navn og vælger en brik.</p>
         </div>
 
         <div className="blok">
@@ -51,26 +49,32 @@ export function Lobby({
           <div className="linkboks-lille">{url}</div>
         </div>
 
+        <div className="blok" style={{ gap: 6 }}>
+          <span className="eyebrow">Eller skriv koden på forsiden</span>
+          <span className="kodetal">{spil.kode}</span>
+        </div>
+
         <div className="blok">
-          <div className="eyebrow" style={{ marginBottom: 12 }}>Ved bordet</div>
+          <div className="eyebrow" style={{ marginBottom: 10 }}>Ved bordet</div>
           <div className="liste">
             {spil.spillere.map((s) => (
               <div key={s.id} className="raekke">
                 <Brik navn={s.navn} farve={s.farve} str={34} />
                 <div style={{ flexGrow: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 14.5, fontWeight: 600 }}>{s.navn}</div>
+                  <div style={{ fontSize: 15, fontWeight: 700 }}>{s.navn}</div>
                   <div className="note">{s.drik.navn} · {s.drik.enhedCl} cl · {formatProcent(s.drik)}</div>
                 </div>
-                {s.id === spil.vaertId && <Maerkat>VÆRT</Maerkat>}
-                {s.id === migId && <Maerkat farve="var(--sage)">DIG</Maerkat>}
+                {s.id === spil.vaertId && <Maerkat fyldt>VÆRT</Maerkat>}
+                {s.id === migId && <Maerkat>DIG</Maerkat>}
               </div>
             ))}
           </div>
         </div>
 
-        <div className="blok">
-          <div className="eyebrow" style={{ marginBottom: 12 }}>Husregler</div>
-          <div className="valg-r" style={{ borderBottom: 'none' }}>
+        <section className="papir mobil-panel" style={{ gap: 0 }}>
+          <div className="eyebrow">Husregler</div>
+          <h2 style={{ fontSize: 28, margin: '6px 0 10px' }}>Sådan spiller I</h2>
+          <div className="valg-r">
             <div>
               <div className="valg-t">Hardcore</div>
               <div className="valg-d">Kun ud fra et blankt felt. Aftal det fra start.</div>
@@ -79,17 +83,18 @@ export function Lobby({
               className={spil.indstillinger.hardcore ? 'kontakt kontakt-paa' : 'kontakt'}
               disabled={!erVaert}
               aria-pressed={spil.indstillinger.hardcore}
+              aria-label="Hardcore"
               onClick={() => send({ type: 'saet-indstilling', hardcore: !spil.indstillinger.hardcore })}
             >
               <span />
             </button>
           </div>
-        </div>
+        </section>
       </div>
 
-      <div className="ark-fast">
+      <div className="ark-fast lys">
         {erVaert ? (
-          <button className="knap knap-primaer" style={{ minHeight: 56 }} onClick={() => send({ type: 'start' })}>
+          <button className="knap knap-primaer" style={{ minHeight: 60, fontSize: 24 }} onClick={() => send({ type: 'start' })}>
             Start spillet
           </button>
         ) : (
