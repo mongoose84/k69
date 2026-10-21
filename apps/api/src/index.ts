@@ -1,12 +1,18 @@
 import cors from '@fastify/cors';
 import websocket from '@fastify/websocket';
 import Fastify from 'fastify';
-import { migrer, pool, ventPaaDb } from './db.js';
-import { antalTilsluttede, tilslut } from './hub.js';
-import { hentSpil, opretSpil, skrivAlleNu, startOprydning } from './store.js';
+import { systemKlokke } from './app/klokke.js';
+import { SpilService } from './app/SpilService.js';
+import { migrer, pool, ventPaaDb } from './infra/db.js';
+import { PgSpilRepo } from './infra/PgSpilRepo.js';
+import { WsHub } from './transport/ws.js';
 
 const PORT = Number(process.env.PORT ?? 8080);
 const VAERT = process.env.HOST ?? '0.0.0.0';
+
+// Her sættes det sammen: Postgres bag repositoriet, websockets foran servicen.
+const service = new SpilService({ repo: new PgSpilRepo(pool), klokke: systemKlokke });
+const hub = new WsHub(service, systemKlokke);
 
 const app = Fastify({
   logger: { level: process.env.LOG_LEVEL ?? 'info' },
@@ -20,16 +26,16 @@ await app.register(websocket, { options: { maxPayload: 64 * 1024 } });
 
 app.get('/api/sundhed', async () => {
   await pool.query('select 1');
-  return { ok: true, tilsluttede: antalTilsluttede() };
+  return { ok: true, tilsluttede: hub.antalTilsluttede() };
 });
 
 app.post('/api/spil', async () => {
-  const spil = await opretSpil();
+  const spil = await service.opret();
   return { kode: spil.kode };
 });
 
 app.get<{ Params: { kode: string } }>('/api/spil/:kode', async (req, svar) => {
-  const spil = await hentSpil(req.params.kode);
+  const spil = await service.hent(req.params.kode);
   if (!spil) return svar.code(404).send({ fejl: 'Spillet findes ikke.' });
   return {
     kode: spil.kode,
@@ -40,20 +46,21 @@ app.get<{ Params: { kode: string } }>('/api/spil/:kode', async (req, svar) => {
 });
 
 app.register(async (instans) => {
-  instans.get('/ws', { websocket: true }, (sok) => tilslut(sok));
+  instans.get('/ws', { websocket: true }, (sok) => hub.tilslut(sok));
 });
 
 await ventPaaDb();
 const nye = await migrer();
 if (nye.length) app.log.info({ nye }, 'kørte migrationer');
 
-const oprydning = startOprydning();
+/** Ryd spil ud af hukommelsen når ingen har rørt dem i et halvt døgn. */
+const oprydning = setInterval(() => service.ryd(), 1000 * 60 * 10);
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.on(signal, () => {
     void (async () => {
       clearInterval(oprydning);
-      await skrivAlleNu();
+      await service.luk();
       await app.close();
       await pool.end();
       process.exit(0);

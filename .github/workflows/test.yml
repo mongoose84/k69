@@ -17,6 +17,26 @@ jobs:
   test:
     name: Tests og typer
     runs-on: ubuntu-latest
+
+    # En rigtig Postgres til apps/api/test/pg.test.ts (migrationer og versionsvagten).
+    services:
+      db:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: k69
+          POSTGRES_PASSWORD: k69
+          POSTGRES_DB: k69
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U k69 -d k69"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgres://k69:k69@localhost:5432/k69
+
     steps:
       - uses: actions/checkout@v4
 

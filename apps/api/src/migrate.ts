@@ -1,4 +1,4 @@
-import { migrer, pool, ventPaaDb } from './db.js';
+import { migrer, pool, ventPaaDb } from './infra/db.js';
 
 await ventPaaDb();
 const nye = await migrer();

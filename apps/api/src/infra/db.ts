@@ -35,7 +35,7 @@ export async function migrer(): Promise<string[]> {
     )
   `);
 
-  const mappe = join(HER, 'migrations');
+  const mappe = join(HER, '..', 'migrations');
   const filer = (await readdir(mappe)).filter((f) => f.endsWith('.sql')).sort();
   const koert = new Set(
     (await pool.query<{ navn: string }>('select navn from migrationer')).rows.map((r) => r.navn)

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { anvend, forSpiller, nytSpil, type Spil } from '@k69/rules';
-import { genkend, hashAf, medSession, nyToken } from '../src/session.js';
+import { genkend, hashAf, medSession, nyToken } from '../src/app/session.js';
 
 /* --------------------------------------------------------------- værktøj */
 

@@ -82,8 +82,8 @@ don't fix that.
       Applies in the lobby too, so someone can start. The hub schedules a
       `vaert-tjek` system event at the deadline (like the vote timer), so the
       hand-over happens even if the table is idle.
-- [ ] Both timer maps (`ure`, `vaertUre`) keep an entry for a game nobody
-      returns to. Tiny, but clear them with the cache eviction in Step 3.
+- [x] Both timer maps keep an entry for a game nobody returns to — now
+      cleared when the game is evicted from memory (Step 3, `SpilService.glem`).
 - [x] Tests: `apps/api/test/session.test.ts` (8): a known token gives its own
       player, a public id doesn't, one-time claim, hashes only, malformed tokens.
       Rules: `forSpiller` never sends `sessioner`. `npm test` now also runs
@@ -91,7 +91,7 @@ don't fix that.
 - [ ] Not verified end to end against Postgres + WebSocket (needs Step 3's
       testable hub, or a manual run with `docker compose up`).
 
-## Step 3 — API layering ⬜
+## Step 3 — API layering ✅ done
 
 **Problem:** `hub.ts` mixes protocol, rate limiting, room membership and the
 application flow. `store.ts` is repository + cache + write-batching on a
@@ -107,21 +107,43 @@ domain (@k69/rules)    pure
 infra/PgSpilRepo.ts    implements SpilRepository { hent, gem } with version check
 ```
 
-- [ ] Introduce `SpilRepository` interface + Postgres implementation; inject
-      it (no module-level `pool` imports outside infra).
-- [ ] Move the per-game queue (`iKoe`) into `SpilService`.
-- [ ] **Load race** (`store.ts` `hentSpil`): dedupe concurrent cache-miss loads
-      of the same game (in-flight `Map<kode, Promise>`).
-- [ ] **Out-of-order writes** (`store.ts` `skriv`): serialise writes per game
-      and/or add `where version < $new` so an older snapshot can never
-      overwrite a newer one. The `version` column exists but is unused.
-- [ ] **`hej` lifecycle** (`hub.ts`): if the socket closes before `hej`
-      resolves, don't add it to the room; a second `hej` on the same socket
-      replaces the first; reject/queue actions sent before `velkommen`.
-- [ ] Rate-limit `hej` too (each cache miss is a DB query).
-- [ ] Tests: `SpilService` with an in-memory repo (ordering, rate limit,
-      hej/close edge cases); one integration test against Postgres in CI
-      (service container) covering migrations and the version guard.
+Landed as (`hub.ts` and `store.ts` are gone):
+
+```
+index.ts               composition root: pool → PgSpilRepo → SpilService → WsHub
+transport/ws.ts        WsHub: envelope, tolkHandling, rate limit, rooms, hej lifecycle
+app/SpilService.ts     queue, load → apply → save → log → publish, vote + host timers
+app/Spillager.ts       cache, load dedupe, ordered + batched writes, eviction
+app/SpilRepository.ts  interface; app/klokke.ts injectable clock; app/session.ts
+infra/PgSpilRepo.ts    Postgres implementation; infra/db.ts pool + migrations
+```
+
+- [x] `SpilRepository` interface + `PgSpilRepo`, injected. `pool` is only
+      imported by `infra/` and the composition root (`index.ts`).
+- [x] Per-game queue (`iKoe`) and both timers live in `SpilService`. Time is
+      injected (`Klokke`), so the timers are tested without waiting.
+- [x] **Load race:** concurrent cache-miss loads of one game share one
+      in-flight promise (`Spillager.henter`).
+- [x] **Out-of-order writes:** each change bumps an in-memory version; writes
+      per game run in a chain that always writes the newest snapshot, and the
+      `UPDATE` has `where version < $new`. Event-log inserts go in the same
+      chain, so they land in order and after the state they describe.
+- [x] Eviction skips games with unwritten changes (was: tried once, then
+      dropped them from memory even if the write failed).
+- [x] **`hej` lifecycle:** a socket closed before `hej` resolves is not added;
+      a newer `hej` on the same socket supersedes the older one (only the
+      latest answer counts); actions before `velkommen` get an error back.
+- [x] Rate limit is per socket and covers `hej` too (`puls` is exempt).
+      Errors from `hej`/actions are caught — before, a DB error in `hej` was
+      an unhandled rejection that could crash the process.
+- [x] Tests (35 in `apps/api`): `Spillager` (dedupe, batching, ordering under a
+      slow write, retry, eviction, log order), `SpilService` (concurrency,
+      token binding, both timers incl. the no-loop case), `WsHub` (hej
+      lifecycle, rate limit, broadcast, two tabs). Each fix was checked by
+      removing it and watching its test fail.
+- [x] `test/pg.test.ts` against real Postgres: migrations (idempotent),
+      code collision, the SQL version guard, log order. Runs in the PR
+      workflow (Postgres service container); skipped when `DATABASE_URL` is unset.
 
 ## Step 4 — Domain events instead of prose ⬜
 
