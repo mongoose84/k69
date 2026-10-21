@@ -17,7 +17,7 @@
     "dev:api": "npm run dev -w @k69/api",
     "dev:web": "npm run dev -w @k69/web",
     "dev:mobile": "npm run dev -w @k69/mobile",
-    "test": "npm run test -w @k69/rules",
+    "test": "npm run test -w @k69/rules && npm run test -w @k69/api",
     "typecheck": "tsc -b packages/rules packages/ui apps/api",
     "db:migrate": "npm run migrate -w @k69/api",
     "docker:up": "docker compose up --build",

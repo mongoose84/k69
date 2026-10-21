@@ -287,6 +287,11 @@ export interface Spil {
   afventer: Afventer | null;
   /** Den seneste afstemning om at springe over eller smide ud. Mangler i gamle gemte spil. */
   afstemning?: Afstemning | null;
+  /**
+   * Hvem der er hvem: sha256 af en hemmelig sessionsnøgle → spillerId. Ejes af
+   * serveren — `forSpiller` fjerner den. Mangler i gamle gemte spil.
+   */
+  sessioner?: Record<string, string>;
   log: Haendelse[];
   /** Spillere der skal i pitten når det aktuelle felt er kvitteret. */
   afventerPit: string[];

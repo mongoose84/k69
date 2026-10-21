@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { WebSocket } from '@fastify/websocket';
 import { RegelFejl, anvend, forSpiller, tolkHandling, type KlientHandling, type Spil } from '@k69/rules';
+import { genkend, medSession } from './session.js';
 import { gem, hentSpil, logHaendelse } from './store.js';
 
 interface Forbindelse {
@@ -8,6 +9,8 @@ interface Forbindelse {
   spilId: string;
   kode: string;
   spillerId: string;
+  /** Bindes til spilleren når han joiner. */
+  tokenHash: string;
   /** Simpel spand mod klienter der sender for hurtigt. */
   poletter: number;
   sidstFyldt: number;
@@ -31,9 +34,9 @@ const VIGTIGE = new Set<KlientHandling['type']>([
  */
 const koeer = new Map<string, Promise<void>>();
 
-function iKoe(spilId: string, opgave: () => Promise<void>): Promise<void> {
+function iKoe<T>(spilId: string, opgave: () => Promise<T>): Promise<T> {
   const naeste = (koeer.get(spilId) ?? Promise.resolve()).then(opgave);
-  const hale = naeste.catch(() => {});
+  const hale = naeste.then(() => {}, () => {});
   koeer.set(spilId, hale);
   void hale.then(() => {
     if (koeer.get(spilId) === hale) koeer.delete(spilId);
@@ -124,7 +127,7 @@ export function tilslut(sok: WebSocket): void {
   let f: Forbindelse | null = null;
 
   sok.on('message', (raa: Buffer) => {
-    let besked: { t?: string; kode?: string; spillerId?: string; handling?: unknown };
+    let besked: { t?: string; kode?: unknown; token?: unknown; spillerId?: unknown; handling?: unknown };
     try {
       besked = JSON.parse(raa.toString());
     } catch {
@@ -133,7 +136,14 @@ export function tilslut(sok: WebSocket): void {
     }
 
     if (besked.t === 'hej') {
-      void hej(sok, besked.kode ?? '', besked.spillerId).then((ny) => {
+      // Klienter fra før sessionsnøglerne sender ingen `token` og ville miste
+      // deres plads ved næste genforbindelse. De skal hente den nye udgave.
+      if (!('token' in besked)) {
+        send(sok, { t: 'fejl', besked: 'K69 er blevet opdateret — genindlæs siden.', fatal: true });
+        return;
+      }
+      const kode = typeof besked.kode === 'string' ? besked.kode : '';
+      void hej(sok, kode, besked.token, besked.spillerId).then((ny) => {
         f = ny;
       });
       return;
@@ -159,31 +169,47 @@ export function tilslut(sok: WebSocket): void {
   });
 }
 
-async function hej(sok: WebSocket, kode: string, spillerId?: string): Promise<Forbindelse | null> {
-  const spil = await hentSpil(kode);
-  if (!spil) {
+async function hej(sok: WebSocket, kode: string, token: unknown, gammeltId: unknown): Promise<Forbindelse | null> {
+  const fundet = await hentSpil(kode);
+  if (!fundet) {
     send(sok, { t: 'fejl', besked: 'Det spil findes ikke — tjek koden i linket.', fatal: true });
     return null;
   }
 
-  const id = spillerId && /^[0-9a-f-]{8,40}$/i.test(spillerId) ? spillerId : randomUUID();
-  const f: Forbindelse = {
-    sok,
-    spilId: spil.id,
-    kode: spil.kode,
-    spillerId: id,
-    poletter: MAX_POLETTER,
-    sidstFyldt: Date.now()
-  };
+  // I køen, fordi et krav på en gammel plads ændrer spillet.
+  const f = await iKoe(fundet.id, async () => {
+    const spil = await hentSpil(kode);
+    if (!spil) return null;
+    const ident = genkend(spil, token, gammeltId, randomUUID);
+    if (ident.bundet) gem(ident.bundet, true);
 
-  let flok = rum.get(spil.id);
-  if (!flok) {
-    flok = new Set();
-    rum.set(spil.id, flok);
-  }
-  flok.add(f);
+    const ny: Forbindelse = {
+      sok,
+      spilId: spil.id,
+      kode: spil.kode,
+      spillerId: ident.spillerId,
+      tokenHash: ident.tokenHash,
+      poletter: MAX_POLETTER,
+      sidstFyldt: Date.now()
+    };
 
-  send(sok, { t: 'velkommen', spillerId: id, spil: forSpiller(spil, id) });
+    let flok = rum.get(spil.id);
+    if (!flok) {
+      flok = new Set();
+      rum.set(spil.id, flok);
+    }
+    flok.add(ny);
+
+    send(sok, {
+      t: 'velkommen',
+      spillerId: ident.spillerId,
+      token: ident.token,
+      spil: forSpiller(ident.bundet ?? spil, ident.spillerId)
+    });
+    return ny;
+  });
+  if (!f) return null;
+
   await saetForbundet(f, true);
   return f;
 }
@@ -229,7 +255,9 @@ async function anvendOgUdsend(f: Forbindelse, handling: KlientHandling): Promise
   const foerLog = spil.naesteHaendelseId;
 
   try {
-    const efter = anvend(spil, handling, ktx(f.spillerId));
+    let efter = anvend(spil, handling, ktx(f.spillerId));
+    // Nøglen bindes først når man faktisk sætter sig ved bordet.
+    if (handling.type === 'join') efter = medSession(efter, f.tokenHash, f.spillerId);
     gem(efter, VIGTIGE.has(handling.type));
     udsend(efter);
     logNye(efter, foerLog);

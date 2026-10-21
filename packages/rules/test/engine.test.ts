@@ -632,6 +632,14 @@ test('taber man på en Meyer, drikker man dobbelt', () => {
   assert.equal(find(spil, 'p1')!.slurkeIAlt, MEIER_SLURKE * 2);
 });
 
+test('sessionsnøglerne sendes aldrig til en klient', async () => {
+  const { forSpiller } = await import('../src/engine.js');
+  const spil = { ...opsat(['A', 'B']), sessioner: { hash: 'p0' } };
+  assert.equal('sessioner' in forSpiller(spil, 'p0'), false);
+  assert.equal(JSON.stringify(forSpiller(spil, 'p1')).includes('hash'), false);
+  assert.deepEqual(spil.sessioner, { hash: 'p0' });
+});
+
 test('kun den der selv slog, må se slaget', async () => {
   const { forSpiller } = await import('../src/engine.js');
   let spil = opsat(['A', 'B']);

@@ -39,7 +39,7 @@ lack of layering in `apps/api`.
       surfaced with Step 3's async repository. Now queued, skips votes that
       were settled or replaced ahead of it, and only clears its own timer.
 
-## Step 2 — Session tokens (impersonation) ⬜
+## Step 2 — Session tokens (impersonation) 🟨 tokens done, voting rule open
 
 **Problem:** `spillerId` is the only credential, and every client receives all
 players' ids (`spillere[].id`, `vaertId`) via `forSpiller`. Anyone can
@@ -52,16 +52,32 @@ anyone may `join` mid-game with a fresh id (up to the cap of 8), so one person
 with several tabs can outvote the table and kick a real player — tokens alone
 don't fix that.
 
-- [ ] Server issues a secret `sessionToken` on first `hej`; store
-      `token → spillerId` server-side (in the game state or a separate table).
-- [ ] Client stores only the token in `localStorage`; `spillerId` stays public.
-- [ ] `hej` with an unknown token → new player; never accept a raw `spillerId`.
-- [ ] Migration path for existing clients holding a `spillerId` in
-      `localStorage` (one-time claim, or accept loss of seat).
-- [ ] Decide who may vote: e.g. freeze `vaelgere` to players who joined
-      before the vote started, and/or require host approval for mid-game joins.
-- [ ] Tests: cannot act or vote as another player; cannot see another
-      player's Meier roll.
+- [x] Secret session token per game; the game state stores only
+      `sha256(token) → spillerId` (`Spil.sessioner`), and `forSpiller` strips
+      it. Logic in `apps/api/src/session.ts` (`genkend`, `medSession`).
+      Deviation: the client generates the token (32 random bytes, format
+      checked by the server) instead of the server issuing it, so two tabs or
+      a double React mount share one token from the start. The server still
+      decides which player a token belongs to; a malformed token is replaced.
+- [x] Client stores the token per game (`k69:token:<KODE>`); `spillerId`
+      stays public and is no longer stored.
+- [x] `hej` with an unknown token → new player id; a raw `spillerId` is never
+      enough. A token is bound on `join`, so spectators don't add entries.
+- [x] Migration: one-time claim. A `spillerId` from the old `k69:spillerId`
+      key gets its seat back only if that player exists and no token is bound
+      to it yet. Trade-off: until the real owner reconnects, anyone can
+      claim that seat with the public id. Old open tabs (no `token` in `hej`)
+      get a fatal "reload" error, so they can't spend the claim and then lose
+      the seat. Remove the claim and the old key once old games have expired.
+- [ ] Decide who may vote. `vaelgere` is already frozen when a vote starts,
+      but nothing stops someone from joining extra players beforehand. Options:
+      host approval for mid-game joins, or only players present at `start` vote.
+- [x] Tests: `apps/api/test/session.test.ts` (8): a known token gives its own
+      player, a public id doesn't, one-time claim, hashes only, malformed tokens.
+      Rules: `forSpiller` never sends `sessioner`. `npm test` now also runs
+      the API tests.
+- [ ] Not verified end to end against Postgres + WebSocket (needs Step 3's
+      testable hub, or a manual run with `docker compose up`).
 
 ## Step 3 — API layering ⬜
 

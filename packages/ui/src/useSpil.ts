@@ -3,18 +3,50 @@ import type { KlientHandling, Spil } from '@k69/rules';
 
 export type SpilUdsyn = Spil & { bunkeTilbage: number };
 
-const NOEGLE = 'k69:spillerId';
+/** Fra før sessionsnøglerne: id'et alene. Bruges kun til at gøre krav på en gammel plads. */
+const GAMMELT_ID = 'k69:spillerId';
 
-/** Samme id på tværs af spil, så man kommer tilbage til sin egen brik. */
-export function mitId(): string {
+const tokenNoegle = (kode: string): string => `k69:token:${kode.toUpperCase()}`;
+
+/** Ens på tværs af faner af samme spil — den er det der beviser hvem man er. */
+const tilFaneLiv = new Map<string, string>();
+
+function nyToken(): string {
+  const b = crypto.getRandomValues(new Uint8Array(32));
+  return btoa(String.fromCharCode(...b)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function minToken(kode: string): string {
   try {
-    const gemt = localStorage.getItem(NOEGLE);
+    const gemt = localStorage.getItem(tokenNoegle(kode));
     if (gemt) return gemt;
-    const ny = crypto.randomUUID();
-    localStorage.setItem(NOEGLE, ny);
+    const ny = nyToken();
+    localStorage.setItem(tokenNoegle(kode), ny);
     return ny;
   } catch {
-    return crypto.randomUUID();
+    // Privat browsing: nøglen holder kun så længe siden er åben.
+    let ny = tilFaneLiv.get(kode);
+    if (!ny) {
+      ny = nyToken();
+      tilFaneLiv.set(kode, ny);
+    }
+    return ny;
+  }
+}
+
+function gemToken(kode: string, token: string): void {
+  try {
+    localStorage.setItem(tokenNoegle(kode), token);
+  } catch {
+    tilFaneLiv.set(kode, token);
+  }
+}
+
+function gammeltId(): string | null {
+  try {
+    return localStorage.getItem(GAMMELT_ID);
+  } catch {
+    return null;
   }
 }
 
@@ -37,7 +69,8 @@ export function useSpil(kode: string | null, apiBase: string): Forbindelse {
   const [forbundet, saetForbundet] = useState(false);
   const [fejl, saetFejl] = useState<string | null>(null);
   const [fatal, saetFatal] = useState(false);
-  const [spillerId, saetSpillerId] = useState<string>(() => mitId());
+  /** Tom indtil serveren har sagt velkommen — det er den der afgør hvem man er. */
+  const [spillerId, saetSpillerId] = useState('');
 
   const sok = useRef<WebSocket | null>(null);
   const koe = useRef<KlientHandling[]>([]);
@@ -62,24 +95,20 @@ export function useSpil(kode: string | null, apiBase: string): Forbindelse {
       s.onopen = () => {
         forsoeg.current = 0;
         saetForbundet(true);
-        s.send(JSON.stringify({ t: 'hej', kode, spillerId: mitId() }));
+        s.send(JSON.stringify({ t: 'hej', kode, token: minToken(kode), spillerId: gammeltId() }));
         puls = setInterval(() => s.readyState === 1 && s.send(JSON.stringify({ t: 'puls' })), 25000);
       };
 
       s.onmessage = (e: MessageEvent<string>) => {
-        let b: { t: string; spil?: SpilUdsyn; spillerId?: string; besked?: string; fatal?: boolean };
+        let b: { t: string; spil?: SpilUdsyn; spillerId?: string; token?: string; besked?: string; fatal?: boolean };
         try {
           b = JSON.parse(e.data);
         } catch {
           return;
         }
         if (b.t === 'velkommen') {
-          if (b.spillerId) {
-            saetSpillerId(b.spillerId);
-            try {
-              localStorage.setItem(NOEGLE, b.spillerId);
-            } catch { /* privat browsing */ }
-          }
+          if (b.spillerId) saetSpillerId(b.spillerId);
+          if (b.token) gemToken(kode, b.token);
           if (b.spil) saetSpil(b.spil);
           saetFejl(null);
           for (const h of koe.current.splice(0)) s.send(JSON.stringify({ t: 'handling', handling: h }));

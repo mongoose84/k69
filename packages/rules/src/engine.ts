@@ -1380,8 +1380,8 @@ function slipOpgave(spil: Spil, s: Spiller, art: 'spring' | 'smid', ctx: Konteks
 /* -------------------------------------------------- hvad den enkelte må se */
 
 /**
- * Fjerner det den pågældende spiller ikke må vide: bunkens rækkefølge og
- * Meier-slaget, som kun holderen af bægeret kender.
+ * Fjerner det den pågældende spiller ikke må vide: bunkens rækkefølge,
+ * Meier-slaget, som kun holderen af bægeret kender, og sessionsnøglerne.
  */
 export function forSpiller(spil: Spil, spillerId: string): Spil & { bunkeTilbage: number } {
   const kopi: Spil & { bunkeTilbage: number } = {
@@ -1395,6 +1395,8 @@ export function forSpiller(spil: Spil, spillerId: string): Spil & { bunkeTilbage
       }
       : null
   };
+  // Sessionsnøglerne er adgangskoder — dem får ingen klient at se.
+  delete kopi.sessioner;
   return kopi;
 }
 
