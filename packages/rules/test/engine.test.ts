@@ -813,11 +813,15 @@ test('et gemt spil der venter på et regelkort, sidder ikke fast', () => {
   assert.equal('husregler' in spil, false);
 });
 
-test('har man linket, kan man hoppe med mens spillet kører', () => {
+test('har man linket, kan man hoppe med mens spillet kører — når værten lukker ind', () => {
   let spil = opsat(['A', 'B']);
   placer(spil, 'p0', 2);
   spil = gør(spil, 'p0', { type: 'slaa' }, [2]);
   spil = gør(spil, 'p9', { type: 'join', navn: 'Sent', farve: '#B189A6', drik: 'ol', kortHold: 'dame' });
+  assert.equal(find(spil, 'p9'), undefined);
+  assert.equal(spil.anmodninger?.[0]?.spillerId, 'p9');
+  spil = gør(spil, 'p0', { type: 'godkend-join', spillerId: 'p9', ja: true });
+  assert.deepEqual(spil.anmodninger, []);
   const ny = find(spil, 'p9')!;
   assert.equal(ny.tilstand, 'aktiv');
   assert.equal(feltType(ny.felt), 'fri');
@@ -833,6 +837,82 @@ test('har man linket, kan man hoppe med mens spillet kører', () => {
     () => gør(spil, 'p8', { type: 'join', navn: 'Forsent', farve: '#B189A6', drik: 'ol', kortHold: 'dame' }),
     /slut/
   );
+});
+
+const SENT = { type: 'join', navn: 'Sent', farve: '#B189A6', drik: 'ol', kortHold: 'dame' } as const;
+
+test('kun værten kan lukke ind, og en anmodning giver ingen stemme', () => {
+  let spil = opsat(['A', 'B', 'C']);
+  spil = gør(spil, 'p9', SENT);
+  assert.throws(() => gør(spil, 'p1', { type: 'godkend-join', spillerId: 'p9', ja: true }), /Kun værten/);
+  // Den der venter, er ikke ved bordet og kan hverken spille eller stemme.
+  assert.throws(() => gør(spil, 'p9', { type: 'afstemning-start', art: 'smid', spillerId: 'p1' }), /ikke med/);
+  spil = gør(spil, 'p1', { type: 'afstemning-start', art: 'smid', spillerId: 'p2' });
+  assert.equal(spil.afstemning?.vaelgere.includes('p9'), false);
+});
+
+test('siger værten nej, er anmodningen væk', () => {
+  let spil = opsat(['A', 'B']);
+  spil = gør(spil, 'p9', SENT);
+  spil = gør(spil, 'p0', { type: 'godkend-join', spillerId: 'p9', ja: false });
+  assert.equal(find(spil, 'p9'), undefined);
+  assert.deepEqual(spil.anmodninger, []);
+  assert.throws(() => gør(spil, 'p0', { type: 'godkend-join', spillerId: 'p9', ja: true }), /ikke længere/);
+});
+
+test('anmodninger tæller med i de otte pladser og i navnene', () => {
+  let spil = opsat(['A', 'B', 'C', 'D', 'E', 'F', 'G']);
+  spil = gør(spil, 'p9', SENT);
+  // Spørger man igen, erstatter det den første — det fylder ikke en plads mere.
+  spil = gør(spil, 'p9', { ...SENT, navn: 'Senere' });
+  assert.equal(spil.anmodninger?.length, 1);
+  assert.throws(() => gør(spil, 'p8', { ...SENT, navn: 'Otte' }), /otte ved bordet/);
+  assert.throws(() => gør(opsat(['A']), 'p8', { ...SENT, navn: 'a' }), /det navn/);
+  const medEn = gør(opsat(['A']), 'p8', SENT);
+  assert.throws(() => gør(medEn, 'p9', SENT), /det navn/);
+});
+
+test('går værten offline, går hvervet videre med uret til en der er der', () => {
+  let spil = opsat(['A', 'B', 'C']);
+  spil = gør(spil, 'p9', SENT);
+  find(spil, 'p1')!.tilsluttet = false;
+  spil = gør(spil, 'p0', { type: 'forbindelse', tilsluttet: false });
+  // B er heller ikke der, så det springer til C.
+  assert.equal(spil.vaertId, 'p2');
+  assert.match(spil.log[0]!.tekst, /C er ny vært/);
+  // Den nye vært tager over der hvor den gamle slap — også anmodningen.
+  spil = gør(spil, 'p2', { type: 'godkend-join', spillerId: 'p9', ja: true });
+  assert.ok(find(spil, 'p9'));
+  // Kommer A tilbage, er C stadig vært.
+  spil = gør(spil, 'p0', { type: 'forbindelse', tilsluttet: true });
+  assert.equal(spil.vaertId, 'p2');
+});
+
+test('er ingen andre der, bliver værten hos ham — og går videre når nogen kommer', () => {
+  let spil = opsat(['A', 'B']);
+  find(spil, 'p1')!.tilsluttet = false;
+  spil = gør(spil, 'p0', { type: 'forbindelse', tilsluttet: false });
+  assert.equal(spil.vaertId, 'p0');
+  spil = gør(spil, 'p1', { type: 'forbindelse', tilsluttet: true });
+  assert.equal(spil.vaertId, 'p1');
+});
+
+test('også i lobbyen går værten videre, så nogen kan starte', () => {
+  let spil = nytSpil('spil', 'TEST', 'nu');
+  spil = gør(spil, 'p0', { ...SENT, navn: 'A' });
+  spil = gør(spil, 'p1', { ...SENT, navn: 'B' });
+  spil = gør(spil, 'p0', { type: 'forbindelse', tilsluttet: false });
+  assert.equal(spil.vaertId, 'p1');
+  spil = gør(spil, 'p1', { type: 'start' });
+  assert.equal(spil.fase, 'spiller');
+});
+
+test('smides værten ud, går hvervet videre', () => {
+  let spil = opsat(['A', 'B', 'C']);
+  spil = gør(spil, 'p1', { type: 'afstemning-start', art: 'smid', spillerId: 'p0' });
+  spil = gør(spil, 'p2', { type: 'afstemning-stem', id: spil.afstemning!.id, ja: true });
+  assert.equal(find(spil, 'p0')!.tilstand, 'ude');
+  assert.equal(spil.vaertId, 'p1');
 });
 
 test('der er højst otte ved bordet', () => {

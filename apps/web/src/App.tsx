@@ -57,6 +57,16 @@ function Spilrute({ kode, onForlad }: { kode: string; onForlad: () => void }): J
 
   const jeg = spil.spillere.find((s) => s.id === spillerId);
 
+  if (!jeg && spil.anmodninger?.some((a) => a.spillerId === spillerId)) {
+    const vaert = spil.spillere.find((s) => s.id === spil.vaertId)?.navn ?? 'værten';
+    return (
+      <div className="tomskaerm grund">
+        <div className="mark" style={{ fontSize: 96 }}>K69</div>
+        <p className="lead" style={{ fontSize: 21 }}>Venter på at {vaert} lukker dig ind…</p>
+      </div>
+    );
+  }
+
   if (!jeg) {
     return <Tilmeld spil={spil} send={send} fejl={fejl} ryd={ryd} />;
   }

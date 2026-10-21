@@ -213,6 +213,19 @@ export interface Finger {
 }
 
 /**
+ * En der vil med midt i spillet. Værten lukker ind — ellers kunne man fylde
+ * bordet med sine egne faner og stemme de andre ud.
+ */
+export interface Anmodning {
+  spillerId: string;
+  navn: string;
+  farve: string;
+  drik: DrikValg;
+  kortHold: KortHold;
+  tidspunkt: string;
+}
+
+/**
  * Bordet stemmer om at springe en spiller over eller smide ham ud. Startes med
  * et højreklik på spilleren; alle der er online ved start stemmer — undtagen
  * ham det handler om. Den der startede den, tæller som ja.
@@ -287,6 +300,8 @@ export interface Spil {
   afventer: Afventer | null;
   /** Den seneste afstemning om at springe over eller smide ud. Mangler i gamle gemte spil. */
   afstemning?: Afstemning | null;
+  /** Dem der venter på at værten lukker dem ind. Mangler i gamle gemte spil. */
+  anmodninger?: Anmodning[];
   /**
    * Hvem der er hvem: sha256 af en hemmelig sessionsnøgle → spillerId. Ejes af
    * serveren — `forSpiller` fjerner den. Mangler i gamle gemte spil.
@@ -332,7 +347,8 @@ export type KlientHandling =
   | { type: 'meld-afgang' }
   | { type: 'terning-paa-gulvet' }
   | { type: 'afstemning-start'; art: 'spring' | 'smid'; spillerId: string }
-  | { type: 'afstemning-stem'; id: number; ja: boolean };
+  | { type: 'afstemning-stem'; id: number; ja: boolean }
+  | { type: 'godkend-join'; spillerId: string; ja: boolean };
 
 /** Det serveren selv fortæller motoren. Kan aldrig komme fra en klient. */
 export type SystemHandling =

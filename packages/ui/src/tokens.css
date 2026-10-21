@@ -1447,3 +1447,26 @@ input[type='text']:focus {
 @media (prefers-reduced-motion: reduce) {
   .afstemning-bag { animation: none; }
 }
+
+.anmodning-kort {
+  --ink: #1b2733;
+  --ink-dim: #33475b;
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 90;
+  width: 340px;
+  max-width: calc(100vw - 32px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 3px solid #1b2733;
+  border-radius: 10px;
+  background: var(--papir);
+  color: var(--ink);
+  box-shadow: 6px 8px 0 #0f1821;
+}
+.anmodning-linje { display: flex; align-items: center; gap: 8px; }
+.anmodning-navn { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+.anmodning-linje .knap { min-height: 40px; padding: 0 12px; font-size: 15px; }

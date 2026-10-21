@@ -49,7 +49,7 @@ export function Tilmeld({
           </h1>
           <p className="lead">
             {iGang
-              ? 'Spillet kører allerede — men du kan hoppe med. Du får et frifelt og kommer med i turen bagest i rækken.'
+              ? 'Spillet kører allerede — men du kan spørge om du må hoppe med. Lukker værten dig ind, får du et frifelt og kommer med bagest i rækken.'
               : 'Skriv et navn, vælg en brik og hvad du drikker — så er du med.'}
           </p>
         </div>
@@ -133,7 +133,7 @@ export function Tilmeld({
           onClick={() => hold && drikValg && send({ type: 'join', navn, farve, drik: drikValg, kortHold: hold })}
         >
           <span style={{ width: 26, height: 26, borderRadius: '50%', background: farve, border: '2px solid #ced8e2' }} />
-          {!kanJoine ? 'Spillet er slut' : iGang ? 'Hop med i spillet' : 'Kom med i spillet'}
+          {!kanJoine ? 'Spillet er slut' : iGang ? 'Spørg om du må være med' : 'Kom med i spillet'}
         </button>
       </div>
     </div>

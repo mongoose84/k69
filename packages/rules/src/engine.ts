@@ -557,6 +557,12 @@ export function anvend(foer: Spil, handling: Handling, ctx: Kontekst): Spil {
   // aldrig nåede at sige til (genstart).
   afstemningUdloebet(spil, ctx);
 
+  const efter = udfoer(spil, handling, ctx);
+  sikrVaert(efter);
+  return efter;
+}
+
+function udfoer(spil: Spil, handling: Handling, ctx: Kontekst): Spil {
   switch (handling.type) {
     case 'afstemning-afgoer': return spil;
     case 'join': return join(spil, handling, ctx);
@@ -601,7 +607,29 @@ export function anvend(foer: Spil, handling: Handling, ctx: Kontekst): Spil {
     case 'terning-paa-gulvet': return terningPaaGulvet(spil, s, ctx);
     case 'afstemning-start': return afstemningStart(spil, s, handling.art, handling.spillerId, ctx);
     case 'afstemning-stem': return afstemningStem(spil, s, handling.id, handling.ja, ctx);
+    case 'godkend-join': return godkendJoin(spil, s, handling.spillerId, handling.ja);
     default: fejl('Ukendt handling.');
+  }
+}
+
+/**
+ * Værten skal være ved bordet — er han gået offline eller ude af spillet,
+ * går hvervet videre til den næste der er, med uret. Er der ingen, bliver det
+ * hos ham. Kommer han tilbage, får han det ikke igen.
+ */
+function sikrVaert(spil: Spil): void {
+  const i = spil.spillere.findIndex((o) => o.id === spil.vaertId);
+  if (i < 0) return;
+  const vaert = spil.spillere[i]!;
+  if (vaert.tilstand === 'aktiv' && vaert.tilsluttet) return;
+  const n = spil.spillere.length;
+  for (let k = 1; k < n; k++) {
+    const o = spil.spillere[(i + k) % n]!;
+    if (o.tilstand === 'aktiv' && o.tilsluttet) {
+      spil.vaertId = o.id;
+      skriv(spil, 'vaert', `${navn(o)} er ny vært.`, o);
+      return;
+    }
   }
 }
 
@@ -618,7 +646,7 @@ function join(spil: Spil, h: Extract<Handling, { type: 'join' }>, ctx: Kontekst)
   const navnet = h.navn.trim().slice(0, 24);
   if (!navnet) fejl('Skriv et navn.');
   if (!KORT_HOLD.includes(h.kortHold)) fejl('Vælg om du drikker med damerne eller herrerne.');
-  const drikken = tilDrik(h.drik);
+  tilDrik(h.drik); // kaster ved en drik der ikke giver mening — også før en anmodning gemmes
 
   if (findes) {
     findes.navn = navnet;
@@ -629,23 +657,62 @@ function join(spil: Spil, h: Extract<Handling, { type: 'join' }>, ctx: Kontekst)
   }
 
   if (spil.fase === 'slut') fejl('Spillet er slut.');
-  if (spil.spillere.length >= 8) fejl('Der er otte ved bordet — der er ikke plads til flere.');
-  if (spil.spillere.some((o) => o.navn.toLowerCase() === navnet.toLowerCase())) {
-    fejl('Der er allerede en med det navn ved bordet.');
+  // Spørger man igen, erstatter det den gamle anmodning.
+  const andre = (spil.anmodninger ?? []).filter((a) => a.spillerId !== ctx.spillerId);
+  if (spil.spillere.length + andre.length >= 8) fejl('Der er otte ved bordet — der er ikke plads til flere.');
+  const navne = [...spil.spillere, ...andre].map((o) => o.navn.toLowerCase());
+  if (navne.includes(navnet.toLowerCase())) fejl('Der er allerede en med det navn ved bordet.');
+
+  // Midt i spillet lukker værten ind — ellers kunne man stemme bordet ud med sine egne faner.
+  if (spil.fase === 'spiller') {
+    spil.anmodninger = [...andre, {
+      spillerId: ctx.spillerId, navn: navnet, farve: h.farve, drik: h.drik, kortHold: h.kortHold, tidspunkt: ctx.naa()
+    }];
+    skriv(spil, 'anmodning', `${navnet} vil gerne med — venter på at værten lukker ind.`);
+    return spil;
   }
 
+  const spiller = nySpiller(spil, ctx.spillerId, navnet, h.farve, h.drik, h.kortHold);
+  spil.spillere.push(spiller);
+  if (!spil.vaertId) spil.vaertId = spiller.id;
+  skriv(spil, 'join', `${navnet} kom med til bordet.`, spiller);
+  return spil;
+}
+
+function godkendJoin(spil: Spil, s: Spiller, id: string, ja: boolean): Spil {
+  if (spil.vaertId !== s.id) fejl('Kun værten kan lukke nye ind.');
+  const a = (spil.anmodninger ?? []).find((o) => o.spillerId === id);
+  if (!a) fejl('Den anmodning er der ikke længere.');
+  spil.anmodninger = (spil.anmodninger ?? []).filter((o) => o !== a);
+
+  if (!ja) {
+    skriv(spil, 'anmodning', `${navn(s)} lukkede ikke ${a.navn} ind.`, s);
+    return spil;
+  }
+  if (spil.spillere.length >= 8) fejl('Der er otte ved bordet — der er ikke plads til flere.');
+
+  // Man stiller sig på et ledigt frifelt og kommer med i turen bagest i rækken.
+  const spiller = nySpiller(spil, a.spillerId, a.navn, a.farve, a.drik, a.kortHold);
+  spiller.felt = ledigtStartfelt(spil);
+  spil.spillere.push(spiller);
+  skriv(spil, 'join', `${navn(s)} lukkede ${a.navn} ind. ${a.navn} står på felt ${spiller.felt}.`, spiller);
+  return spil;
+}
+
+function nySpiller(spil: Spil, id: string, navnet: string, oensket: string, drik: DrikValg, kortHold: KortHold): Spiller {
+  const drikken = tilDrik(drik);
   const taget = new Set(spil.spillere.map((o) => o.farve));
   // Kun brikfarverne — er den valgte taget eller ukendt, får man den første ledige.
-  const farve = BRIKFARVER.includes(h.farve) && !taget.has(h.farve)
-    ? h.farve
+  const farve = BRIKFARVER.includes(oensket) && !taget.has(oensket)
+    ? oensket
     : (BRIKFARVER.find((f) => !taget.has(f)) ?? BRIKFARVER[0]!);
 
-  const spiller: Spiller = {
-    id: ctx.spillerId,
+  return {
+    id,
     navn: navnet,
     farve,
     drik: drikken,
-    kortHold: h.kortHold,
+    kortHold,
     felt: 0,
     pitPlads: 0,
     slurkeTilbage: slurkePrEnhed(drikken),
@@ -655,19 +722,6 @@ function join(spil: Spil, h: Extract<Handling, { type: 'join' }>, ctx: Kontekst)
     varslerAfgang: false,
     tilsluttet: true
   };
-  spil.spillere.push(spiller);
-  if (!spil.vaertId) spil.vaertId = spiller.id;
-
-  // Har man linket, kan man altid hoppe med: man stiller sig på et ledigt
-  // frifelt og kommer med i turen bagest i rækken.
-  if (spil.fase === 'spiller') {
-    spiller.felt = ledigtStartfelt(spil);
-    skriv(spil, 'join', `${navnet} kom med til bordet midt i spillet og står på felt ${spiller.felt}.`, spiller);
-    return spil;
-  }
-
-  skriv(spil, 'join', `${navnet} kom med til bordet.`, spiller);
-  return spil;
 }
 
 function saetDrik(spil: Spil, valg: DrikValg, ctx: Kontekst): Spil {

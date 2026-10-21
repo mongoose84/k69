@@ -39,7 +39,7 @@ lack of layering in `apps/api`.
       surfaced with Step 3's async repository. Now queued, skips votes that
       were settled or replaced ahead of it, and only clears its own timer.
 
-## Step 2 — Session tokens (impersonation) 🟨 tokens done, voting rule open
+## Step 2 — Session tokens (impersonation) ✅ done (not yet run end to end)
 
 **Problem:** `spillerId` is the only credential, and every client receives all
 players' ids (`spillere[].id`, `vaertId`) via `forSpiller`. Anyone can
@@ -69,9 +69,17 @@ don't fix that.
       claim that seat with the public id. Old open tabs (no `token` in `hej`)
       get a fatal "reload" error, so they can't spend the claim and then lose
       the seat. Remove the claim and the old key once old games have expired.
-- [ ] Decide who may vote. `vaelgere` is already frozen when a vote starts,
-      but nothing stops someone from joining extra players beforehand. Options:
-      host approval for mid-game joins, or only players present at `start` vote.
+- [x] Who may vote. `vaelgere` is frozen when a vote starts, and mid-game
+      joins now need the host's approval: `join` while playing creates an
+      `Anmodning` (`Spil.anmodninger`), the host answers with `godkend-join`.
+      Pending requests count towards the 8 seats and taken names, and give no
+      vote. Lobby joins are unchanged — everyone is visible before `start`.
+- [x] Host hand-over (`sikrVaert`, runs after every `anvend`): if the host is
+      offline or out, the role passes clockwise to the next active, connected
+      player and stays there when the old host returns. With no one else
+      online it stays put. Applies in the lobby too, so someone can start.
+      Trade-off: a host whose phone briefly locks loses the role at once; add a
+      grace period (timer in the hub, like the vote timer) if that annoys.
 - [x] Tests: `apps/api/test/session.test.ts` (8): a known token gives its own
       player, a public id doesn't, one-time claim, hashes only, malformed tokens.
       Rules: `forSpiller` never sends `sessioner`. `npm test` now also runs

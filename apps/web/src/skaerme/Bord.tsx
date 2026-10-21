@@ -1,6 +1,6 @@
 import type { JSX } from 'react';
 import {
-  AfstemningKort, Brik, Elefant, FejringKort, Glas, Handlingskort, KroneKort, Maerkat, MeierKort, Plade, SenesteTure, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
+  AfstemningKort, AnmodningKort, Brik, Elefant, FejringKort, Glas, Handlingskort, KroneKort, Maerkat, MeierKort, Plade, SenesteTure, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
   kortPaaBordet, LydKnap, opgave, spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, useLyde, UdraabKort, type SpilUdsyn, Maerke, useSpillerMenu
 } from '@k69/ui';
 import { formatCl, slurkePrEnhed, formatSlurke, taarnCl, taarnLoeberOver, type DrikInfo, type KlientHandling } from '@k69/rules';
@@ -206,6 +206,7 @@ export function Bord({
         </aside>
       </div>
       {spillerMenu.menu}
+      <AnmodningKort spil={live} migId={migId} send={send} />
       <AfstemningKort spil={live} migId={migId} send={send} />
     </div>
   );

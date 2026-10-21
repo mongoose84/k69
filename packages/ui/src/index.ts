@@ -14,3 +14,4 @@ export * from './Seneste.js';
 export * from './Lyd.js';
 export * from './Elefant.js';
 export * from './Afstemning.js';
+export * from './Anmodninger.js';
