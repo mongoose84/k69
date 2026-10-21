@@ -73,22 +73,26 @@ function planlaegAfstemning(spil: Spil): void {
   if (ur?.id === a.id) return;
   if (ur) clearTimeout(ur.ur);
   const om = Math.max(0, Date.parse(a.udloeber) - Date.now()) + 150;
-  ure.set(spil.id, { id: a.id, ur: setTimeout(() => void afgoerPaaTid(spil.kode, a.id), om) });
+  ure.set(spil.id, { id: a.id, ur: setTimeout(() => void afgoerPaaTid(spil.id, spil.kode, a.id), om) });
 }
 
-async function afgoerPaaTid(kode: string, id: number): Promise<void> {
-  const spil = await hentSpil(kode);
-  if (!spil) return;
-  ure.delete(spil.id);
-  const foerLog = spil.naesteHaendelseId;
-  try {
-    const efter = anvend(spil, { type: 'afstemning-afgoer', id }, ktx('system'));
-    gem(efter, true);
-    udsend(efter);
-    logNye(efter, foerLog);
-  } catch (e) {
-    console.error('afstemningen kunne ikke afgøres', e);
-  }
+/** Går gennem køen som enhver anden handling — ellers kan uret skrive en spillers træk ud. */
+function afgoerPaaTid(spilId: string, kode: string, id: number): Promise<void> {
+  return iKoe(spilId, async () => {
+    if (ure.get(spilId)?.id === id) ure.delete(spilId);
+    const spil = await hentSpil(kode);
+    // En handling foran i køen kan have afgjort den, eller startet en ny.
+    if (!spil || spil.afstemning?.id !== id || spil.afstemning.udfald) return;
+    const foerLog = spil.naesteHaendelseId;
+    try {
+      const efter = anvend(spil, { type: 'afstemning-afgoer', id }, ktx('system'));
+      gem(efter, true);
+      udsend(efter);
+      logNye(efter, foerLog);
+    } catch (e) {
+      console.error('afstemningen kunne ikke afgøres', e);
+    }
+  });
 }
 
 /** Nye linjer til hændelsestabellen, ældste først. */
