@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import type { WebSocket } from '@fastify/websocket';
-import { RegelFejl, anvend, forSpiller, tolkHandling, type KlientHandling, type Spil } from '@k69/rules';
+import {
+  RegelFejl, anvend, forSpiller, tolkHandling, vaertFrist, type KlientHandling, type Spil, type SystemHandling
+} from '@k69/rules';
 import { genkend, medSession } from './session.js';
 import { gem, hentSpil, logHaendelse } from './store.js';
 
@@ -52,6 +54,7 @@ function send(sok: WebSocket, besked: unknown): void {
 /** Hver klient får sin egen udgave — Meier-slaget må kun holderen se. */
 function udsend(spil: Spil): void {
   planlaegAfstemning(spil);
+  planlaegVaertskifte(spil);
   const flok = rum.get(spil.id);
   if (!flok) return;
   for (const f of flok) send(f.sok, { t: 'spil', spil: forSpiller(spil, f.spillerId) });
@@ -86,16 +89,55 @@ function afgoerPaaTid(spilId: string, kode: string, id: number): Promise<void> {
     const spil = await hentSpil(kode);
     // En handling foran i køen kan have afgjort den, eller startet en ny.
     if (!spil || spil.afstemning?.id !== id || spil.afstemning.udfald) return;
-    const foerLog = spil.naesteHaendelseId;
-    try {
-      const efter = anvend(spil, { type: 'afstemning-afgoer', id }, ktx('system'));
-      gem(efter, true);
-      udsend(efter);
-      logNye(efter, foerLog);
-    } catch (e) {
-      console.error('afstemningen kunne ikke afgøres', e);
-    }
+    anvendSystem(spil, { type: 'afstemning-afgoer', id });
   });
+}
+
+/**
+ * Værtens frist. Går han offline, får han `VAERT_FRIST_SEKUNDER` til at komme
+ * tilbage — så siger uret til, og motoren giver hvervet videre. Ét ur pr. spil,
+ * kendt på værten og hvornår han røg.
+ */
+const vaertUre = new Map<string, { noegle: string; ur: NodeJS.Timeout }>();
+
+function planlaegVaertskifte(spil: Spil): void {
+  const frist = vaertFrist(spil);
+  const noegle = frist ? `${spil.vaertId}@${frist}` : null;
+  const ur = vaertUre.get(spil.id);
+  if (ur?.noegle === noegle) return;
+  if (ur) {
+    clearTimeout(ur.ur);
+    vaertUre.delete(spil.id);
+  }
+  if (!frist || !noegle) return;
+  const om = Math.max(0, Date.parse(frist) - Date.now()) + 150;
+  vaertUre.set(spil.id, { noegle, ur: setTimeout(() => void vaertPaaTid(spil.id, spil.kode, noegle), om) });
+}
+
+function vaertPaaTid(spilId: string, kode: string, noegle: string): Promise<void> {
+  return iKoe(spilId, async () => {
+    // Uret bliver stående i mappen: er der ingen at give hvervet til, er
+    // fristen stadig overskredet, og et nyt ur ville gå i ring hvert 150. ms.
+    // Det ryddes når værten kommer tilbage eller en anden overtager.
+    const spil = await hentSpil(kode);
+    // Er værten kommet tilbage, eller har en anden overtaget, er der intet at gøre.
+    const frist = spil ? vaertFrist(spil) : null;
+    if (!spil || !frist || `${spil.vaertId}@${frist}` !== noegle) return;
+    anvendSystem(spil, { type: 'vaert-tjek' });
+  });
+}
+
+/** En handling fra serverens eget ur. Kaldes inde i køen. */
+function anvendSystem(spil: Spil, handling: SystemHandling): void {
+  const foerLog = spil.naesteHaendelseId;
+  try {
+    const efter = anvend(spil, handling, ktx('system'));
+    gem(efter, true);
+    udsend(efter);
+    logNye(efter, foerLog);
+  } catch (e) {
+    console.error('systemhandlingen fejlede', handling.type, e);
+  }
 }
 
 /** Nye linjer til hændelsestabellen, ældste først. */
@@ -218,10 +260,13 @@ function saetForbundet(f: Forbindelse, tilsluttet: boolean): Promise<void> {
   return iKoe(f.spilId, async () => {
     const spil = await hentSpil(f.kode);
     if (!spil) return;
+    const foerLog = spil.naesteHaendelseId;
     try {
       const efter = anvend(spil, { type: 'forbindelse', tilsluttet }, ktx(f.spillerId));
       gem(efter);
       udsend(efter);
+      // Kan give en ny vært — den linje skal også i loggen.
+      logNye(efter, foerLog);
     } catch {
       // Er man ikke med i spillet endnu, er der ikke noget at markere.
     }

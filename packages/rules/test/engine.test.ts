@@ -7,7 +7,9 @@ import {
 import { HOEJERE_LAVERE_SLURKE, nyBunke, virkning } from '../src/cards.js';
 import { DRIKKE, clPrSlurk, iCl, slurkePrEnhed, taarnCl, tilDrik } from '../src/drinks.js';
 import { STIGE, kode, trin, trinNavn } from '../src/meier.js';
-import { BRIKFARVER, MEIER_SLURKE, afventerSpiller, anvend, find, nytSpil, opgraderGemt, taarnLoeberOver } from '../src/engine.js';
+import {
+  BRIKFARVER, MEIER_SLURKE, VAERT_FRIST_SEKUNDER, afventerSpiller, anvend, find, nytSpil, opgraderGemt, taarnLoeberOver, vaertFrist
+} from '../src/engine.js';
 import { RegelFejl, type FeltType, type Handling, type Kort, type Kontekst, type Spil } from '../src/types.js';
 
 /* --------------------------------------------------------------- værktøj */
@@ -872,13 +874,26 @@ test('anmodninger tæller med i de otte pladser og i navnene', () => {
   assert.throws(() => gør(medEn, 'p9', SENT), /det navn/);
 });
 
-test('går værten offline, går hvervet videre med uret til en der er der', () => {
+/** En handling sekunder efter starten — til det der afhænger af uret. */
+function gørEfter(sekunder: number, spil: Spil, spillerId: string, h: Handling): Spil {
+  const naa = new Date(Date.parse('2026-01-01T00:00:00.000Z') + sekunder * 1000).toISOString();
+  return anvend(spil, h, { ...ktx(spillerId), naa: () => naa });
+}
+
+test('går værten offline, går hvervet videre med uret når fristen er gået', () => {
   let spil = opsat(['A', 'B', 'C']);
   spil = gør(spil, 'p9', SENT);
   find(spil, 'p1')!.tilsluttet = false;
   spil = gør(spil, 'p0', { type: 'forbindelse', tilsluttet: false });
+  // Fristen er ikke gået — A er stadig vært.
+  assert.equal(spil.vaertId, 'p0');
+  assert.equal(vaertFrist(spil), new Date(Date.parse('2026-01-01T00:00:00.000Z') + VAERT_FRIST_SEKUNDER * 1000).toISOString());
+  spil = gørEfter(VAERT_FRIST_SEKUNDER - 1, spil, 'system', { type: 'vaert-tjek' });
+  assert.equal(spil.vaertId, 'p0');
+  spil = gørEfter(VAERT_FRIST_SEKUNDER, spil, 'system', { type: 'vaert-tjek' });
   // B er heller ikke der, så det springer til C.
   assert.equal(spil.vaertId, 'p2');
+  assert.equal(vaertFrist(spil), null);
   assert.match(spil.log[0]!.tekst, /C er ny vært/);
   // Den nye vært tager over der hvor den gamle slap — også anmodningen.
   spil = gør(spil, 'p2', { type: 'godkend-join', spillerId: 'p9', ja: true });
@@ -888,12 +903,22 @@ test('går værten offline, går hvervet videre med uret til en der er der', () 
   assert.equal(spil.vaertId, 'p2');
 });
 
+test('kommer værten tilbage inden fristen, beholder han hvervet', () => {
+  let spil = opsat(['A', 'B']);
+  spil = gør(spil, 'p0', { type: 'forbindelse', tilsluttet: false });
+  spil = gørEfter(10, spil, 'p0', { type: 'forbindelse', tilsluttet: true });
+  spil = gørEfter(VAERT_FRIST_SEKUNDER * 2, spil, 'system', { type: 'vaert-tjek' });
+  assert.equal(spil.vaertId, 'p0');
+  assert.equal(find(spil, 'p0')!.afbrudt, null);
+});
+
 test('er ingen andre der, bliver værten hos ham — og går videre når nogen kommer', () => {
   let spil = opsat(['A', 'B']);
   find(spil, 'p1')!.tilsluttet = false;
   spil = gør(spil, 'p0', { type: 'forbindelse', tilsluttet: false });
+  spil = gørEfter(VAERT_FRIST_SEKUNDER, spil, 'system', { type: 'vaert-tjek' });
   assert.equal(spil.vaertId, 'p0');
-  spil = gør(spil, 'p1', { type: 'forbindelse', tilsluttet: true });
+  spil = gørEfter(VAERT_FRIST_SEKUNDER + 5, spil, 'p1', { type: 'forbindelse', tilsluttet: true });
   assert.equal(spil.vaertId, 'p1');
 });
 
@@ -902,12 +927,14 @@ test('også i lobbyen går værten videre, så nogen kan starte', () => {
   spil = gør(spil, 'p0', { ...SENT, navn: 'A' });
   spil = gør(spil, 'p1', { ...SENT, navn: 'B' });
   spil = gør(spil, 'p0', { type: 'forbindelse', tilsluttet: false });
+  assert.equal(spil.vaertId, 'p0');
+  spil = gørEfter(VAERT_FRIST_SEKUNDER, spil, 'system', { type: 'vaert-tjek' });
   assert.equal(spil.vaertId, 'p1');
   spil = gør(spil, 'p1', { type: 'start' });
   assert.equal(spil.fase, 'spiller');
 });
 
-test('smides værten ud, går hvervet videre', () => {
+test('smides værten ud, går hvervet videre med det samme — uden frist', () => {
   let spil = opsat(['A', 'B', 'C']);
   spil = gør(spil, 'p1', { type: 'afstemning-start', art: 'smid', spillerId: 'p0' });
   spil = gør(spil, 'p2', { type: 'afstemning-stem', id: spil.afstemning!.id, ja: true });

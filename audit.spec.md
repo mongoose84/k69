@@ -75,11 +75,15 @@ don't fix that.
       Pending requests count towards the 8 seats and taken names, and give no
       vote. Lobby joins are unchanged — everyone is visible before `start`.
 - [x] Host hand-over (`sikrVaert`, runs after every `anvend`): if the host is
-      offline or out, the role passes clockwise to the next active, connected
-      player and stays there when the old host returns. With no one else
-      online it stays put. Applies in the lobby too, so someone can start.
-      Trade-off: a host whose phone briefly locks loses the role at once; add a
-      grace period (timer in the hub, like the vote timer) if that annoys.
+      out (left or kicked) the role passes at once; if offline, after
+      `VAERT_FRIST_SEKUNDER` (30 s, from `Spiller.afbrudt`). It goes clockwise
+      to the next active, connected player and stays there when the old host
+      returns. With no one else online it stays put until someone connects.
+      Applies in the lobby too, so someone can start. The hub schedules a
+      `vaert-tjek` system event at the deadline (like the vote timer), so the
+      hand-over happens even if the table is idle.
+- [ ] Both timer maps (`ure`, `vaertUre`) keep an entry for a game nobody
+      returns to. Tiny, but clear them with the cache eviction in Step 3.
 - [x] Tests: `apps/api/test/session.test.ts` (8): a known token gives its own
       player, a public id doesn't, one-time claim, hashes only, malformed tokens.
       Rules: `forSpiller` never sends `sessioner`. `npm test` now also runs

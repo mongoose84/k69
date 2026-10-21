@@ -63,6 +63,8 @@ export interface Spiller {
   /** Sat når man har meldt afgang før sit sidste slag. */
   varslerAfgang: boolean;
   tilsluttet: boolean;
+  /** Hvornår forbindelsen røg — værten får lidt tid før hvervet går videre. Mangler i gamle gemte spil. */
+  afbrudt?: string | null;
 }
 
 /**
@@ -354,7 +356,9 @@ export type KlientHandling =
 export type SystemHandling =
   | { type: 'forbindelse'; tilsluttet: boolean }
   /** Sendes af serverens ur når tiden er gået — motoren tjekker selv at den er det. */
-  | { type: 'afstemning-afgoer'; id: number };
+  | { type: 'afstemning-afgoer'; id: number }
+  /** Sendes af serverens ur når værtens frist er gået — motoren tjekker selv at den er det. */
+  | { type: 'vaert-tjek' };
 
 export type Handling = KlientHandling | SystemHandling;
 

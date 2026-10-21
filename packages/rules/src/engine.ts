@@ -564,14 +564,18 @@ export function anvend(foer: Spil, handling: Handling, ctx: Kontekst): Spil {
 
 function udfoer(spil: Spil, handling: Handling, ctx: Kontekst): Spil {
   switch (handling.type) {
-    case 'afstemning-afgoer': return spil;
+    case 'afstemning-afgoer':
+    case 'vaert-tjek': return spil;
     case 'join': return join(spil, handling, ctx);
     case 'saet-drik': return saetDrik(spil, handling.drik, ctx);
     case 'saet-indstilling': return saetIndstilling(spil, handling, ctx);
     case 'start': return start(spil, ctx);
     case 'forbindelse': {
       const s = find(spil, ctx.spillerId);
-      if (s) s.tilsluttet = handling.tilsluttet;
+      if (s) {
+        s.tilsluttet = handling.tilsluttet;
+        s.afbrudt = handling.tilsluttet ? null : spil.opdateret;
+      }
       return spil;
     }
     default: break;
@@ -612,16 +616,29 @@ function udfoer(spil: Spil, handling: Handling, ctx: Kontekst): Spil {
   }
 }
 
+/** Så længe må værten være væk — en skærm der låser, en genindlæsning — før hvervet går videre. */
+export const VAERT_FRIST_SEKUNDER = 30;
+
+/** Hvornår værtens frist løber ud, hvis han er offline og stadig med. Ellers null. */
+export function vaertFrist(spil: Spil): string | null {
+  const vaert = find(spil, spil.vaertId);
+  if (!vaert || vaert.tilstand !== 'aktiv' || vaert.tilsluttet || !vaert.afbrudt) return null;
+  return new Date(Date.parse(vaert.afbrudt) + VAERT_FRIST_SEKUNDER * 1000).toISOString();
+}
+
 /**
- * Værten skal være ved bordet — er han gået offline eller ude af spillet,
- * går hvervet videre til den næste der er, med uret. Er der ingen, bliver det
- * hos ham. Kommer han tilbage, får han det ikke igen.
+ * Værten skal være ved bordet. Er han ude af spillet — gået selv eller smidt
+ * ud — går hvervet videre med det samme; er han offline, når fristen er gået.
+ * Det går med uret til den næste der er der. Er der ingen, bliver det hos
+ * ham. Kommer han tilbage bagefter, får han det ikke igen.
  */
 function sikrVaert(spil: Spil): void {
   const i = spil.spillere.findIndex((o) => o.id === spil.vaertId);
   if (i < 0) return;
   const vaert = spil.spillere[i]!;
   if (vaert.tilstand === 'aktiv' && vaert.tilsluttet) return;
+  const frist = vaertFrist(spil);
+  if (frist && Date.parse(spil.opdateret) < Date.parse(frist)) return;
   const n = spil.spillere.length;
   for (let k = 1; k < n; k++) {
     const o = spil.spillere[(i + k) % n]!;
