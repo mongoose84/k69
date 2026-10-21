@@ -31,7 +31,13 @@ lack of layering in `apps/api`.
 - [x] **Client fatal-error reconnect loop.** `useSpil` read a stale `fatal`
       from the effect closure; now uses a ref.
 - [x] Tests: 13 new (atomicity, ranges, colour fallback, `tolkHandling`
-      accept/reject/strip). 73 total.
+      accept/reject/strip). 73 total at the time; 80 after the voting merge.
+- [x] **Vote timer through the queue** (`5212ec3`). `afgoerPaaTid` (added
+      with voting in `8cf2181`, after this audit started) loaded, applied
+      and saved outside `iKoe`, so a timer firing mid-action could overwrite
+      a player's move. Masked while `hentSpil` hits the cache; would have
+      surfaced with Step 3's async repository. Now queued, skips votes that
+      were settled or replaced ahead of it, and only clears its own timer.
 
 ## Step 2 — Session tokens (impersonation) ⬜
 
@@ -40,13 +46,22 @@ players' ids (`spillere[].id`, `vaertId`) via `forSpiller`. Anyone can
 reconnect with another player's id (`hub.ts` `hej`) and see their hidden Meier
 dice, act on their turn, or start the game as host.
 
+Voting (`8cf2181`) raises the stakes: a stolen id can also vote, and `smid`
+votes remove players. Separately, only connected players count as voters and
+anyone may `join` mid-game with a fresh id (up to the cap of 8), so one person
+with several tabs can outvote the table and kick a real player — tokens alone
+don't fix that.
+
 - [ ] Server issues a secret `sessionToken` on first `hej`; store
       `token → spillerId` server-side (in the game state or a separate table).
 - [ ] Client stores only the token in `localStorage`; `spillerId` stays public.
 - [ ] `hej` with an unknown token → new player; never accept a raw `spillerId`.
 - [ ] Migration path for existing clients holding a `spillerId` in
       `localStorage` (one-time claim, or accept loss of seat).
-- [ ] Tests: cannot act as another player; cannot see another player's Meier roll.
+- [ ] Decide who may vote: e.g. freeze `vaelgere` to players who joined
+      before the vote started, and/or require host approval for mid-game joins.
+- [ ] Tests: cannot act or vote as another player; cannot see another
+      player's Meier roll.
 
 ## Step 3 — API layering ⬜
 
@@ -83,7 +98,8 @@ infra/PgSpilRepo.ts    implements SpilRepository { hent, gem } with version chec
 ## Step 4 — Domain events instead of prose ⬜
 
 **Problem:** the engine produces Danish UI text (`skriv`, `raab`, `fejr`), and
-"last moment" UI projections (`fejring`, `udraab`, `meierResultat`) live on the
+"last moment" UI projections (`fejring`, `udraab`, `meierResultat`, and the
+settled `afstemning`) live on the
 aggregate. `haendelser.data jsonb` is never written, so a game cannot be
 rebuilt from the log despite the migration comment promising it.
 
@@ -99,10 +115,10 @@ rebuilt from the log despite the migration comment promising it.
 
 ## Step 5 — Split `engine.ts` by subdomain ⬜
 
-`engine.ts` is ~1,200 lines. Split once events give each module a clear output:
+`engine.ts` is ~1,400 lines (voting added ~200). Split once events give each module a clear output:
 
 - [ ] `tur/` (turn order, afgang), `pit/`, `taarn/`, `kort/` (deck, 7'er,
-      finger, 10'er), `meier/`, `regnskab` (the `drik` sip ledger).
+      finger, 10'er), `meier/`, `afstemning/`, `regnskab` (the `drik` sip ledger).
 - [ ] Each module exports its command handlers; `anvend` becomes a handler
       table lookup (Command pattern) instead of two switch statements.
 
@@ -124,6 +140,8 @@ rebuilt from the log despite the migration comment promising it.
       shared module.
 
 **Tests**
+- [ ] Run tests on pull requests — today `npm test` only runs on push to
+      `main` (`docker-publish.yml`), i.e. after merge.
 - [ ] Coverage in CI (`node --test --experimental-test-coverage`).
 - [ ] Rules gaps: deck exhaustion/reshuffle, game end when last player
       leaves, `forSpiller` after a blind Meier roll, wrap-around past field 38,
