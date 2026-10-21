@@ -37,16 +37,19 @@ test('PgSpilRepo mod Postgres', { skip: url ? false : 'DATABASE_URL er ikke sat'
     assert.equal(gemt?.spil.runde, 5);
   });
 
-  await t.test('loglinjer får id i den rækkefølge de kom', async () => {
+  await t.test('loglinjer gemmes med data, i den rækkefølge de kom', async () => {
     await repo.log(spil.id, [
-      { id: 1, tid: 'nu', slags: 'a', tekst: 'første', spillerId: 'p0' },
-      { id: 2, tid: 'nu', slags: 'b', tekst: 'anden' }
+      { id: 1, tid: 'nu', spillerId: 'p0', data: { type: 'slag', spillerId: 'p0', slag: 4 } },
+      { id: 2, tid: 'nu', data: { type: 'gammel', slags: 'join', tekst: 'fra før' } }
     ]);
-    const r = await pool.query<{ tekst: string; spiller_id: string | null }>(
-      'select tekst, spiller_id from haendelser where spil_id = $1 order by id',
+    const r = await pool.query<{ slags: string; tekst: string | null; spiller_id: string | null; data: unknown }>(
+      'select slags, tekst, spiller_id, data from haendelser where spil_id = $1 order by id',
       [spil.id]
     );
-    assert.deepEqual(r.rows, [{ tekst: 'første', spiller_id: 'p0' }, { tekst: 'anden', spiller_id: null }]);
+    assert.deepEqual(r.rows, [
+      { slags: 'slag', tekst: null, spiller_id: 'p0', data: { type: 'slag', spillerId: 'p0', slag: 4 } },
+      { slags: 'gammel', tekst: 'fra før', spiller_id: null, data: { type: 'gammel', slags: 'join', tekst: 'fra før' } }
+    ]);
   });
 
   await pool.query('delete from spil where id = $1', [spil.id]);

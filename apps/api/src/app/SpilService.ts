@@ -37,6 +37,7 @@ export class SpilService {
   readonly lager: Spillager;
   private readonly klokke: Klokke;
   private readonly terning: () => number;
+  private readonly tilfaeldig: () => number;
   private readonly nytId: () => string;
 
   private readonly lyttere = new Set<(spil: Spil) => void>();
@@ -44,9 +45,12 @@ export class SpilService {
   private readonly afstemningsUre = new Map<string, { id: number; ur: Ur }>();
   private readonly vaertUre = new Map<string, { noegle: string; ur: Ur }>();
 
-  constructor(deps: { repo: SpilRepository; klokke: Klokke; terning?: () => number; nytId?: () => string }) {
+  constructor(deps: {
+    repo: SpilRepository; klokke: Klokke; terning?: () => number; tilfaeldig?: () => number; nytId?: () => string;
+  }) {
     this.klokke = deps.klokke;
     this.terning = deps.terning ?? terning;
+    this.tilfaeldig = deps.tilfaeldig ?? Math.random;
     this.nytId = deps.nytId ?? randomUUID;
     this.lager = new Spillager(deps.repo, deps.klokke, (id) => this.glem(id));
   }
@@ -137,7 +141,7 @@ export class SpilService {
   }
 
   private ktx(spillerId: string): Kontekst {
-    return { spillerId, terning: this.terning, naa: () => this.iso() };
+    return { spillerId, terning: this.terning, tilfaeldig: this.tilfaeldig, naa: () => this.iso() };
   }
 
   private iso(): string {

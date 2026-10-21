@@ -9,7 +9,7 @@ import { genkend, hashAf, medSession, nyToken } from '../src/app/session.js';
 const naa = '2026-01-01T00:00:00.000Z';
 
 function ktx(spillerId: string) {
-  return { spillerId, terning: () => 1, naa: () => naa };
+  return { spillerId, terning: () => 1, tilfaeldig: () => 0.5, naa: () => naa };
 }
 
 let naeste = 0;

@@ -1,6 +1,6 @@
 import {
-  FELT_INFO, KULOER_TEGN, afventerSpiller, feltType, formatCl, formatSlurke, kortNavn, kortTekst,
-  type Afventer, type DrikInfo, type Kort, type Spil, type Spiller
+  FELT_INFO, KULOER_TEGN, afventerSpiller, feltType, formatCl, formatSlurke, kortNavn, kortTekst, taarnCl, trinNavn,
+  type Afventer, type DrikInfo, type Haendelse, type Kort, type Spil, type Spiller
 } from '@k69/rules';
 
 /** "din pilsner", "din Classic" — de faste drikke skrives med lille, ens egen som man skrev den. */
@@ -171,4 +171,139 @@ export function spillerStatus(s: Spiller): string {
   if (s.tilstand === 'ude') return 'Hoppet ud';
   if (s.pitPlads > 0) return `Pitten · plads ${s.pitPlads}`;
   return `Felt ${s.felt} · ${feltNavn(s.felt)}`;
+}
+
+/* ------------------------------------------------------------------ loggen */
+
+/** Farven på en loglinje — brikfarven på den linjen handler om. */
+export function haendelseFarve(spil: Spil, h: Haendelse): string | undefined {
+  return h.spillerId ? spil.spillere.find((s) => s.id === h.spillerId)?.farve : undefined;
+}
+
+/**
+ * En hændelse som den står i loggen. Motoren siger kun hvad der skete; det er
+ * her det bliver til dansk. Navne slås op i spillet, så de følger med hvis
+ * nogen skifter navn.
+ */
+export function haendelseTekst(spil: Spil, h: Haendelse): string {
+  const n = (id: string | null | undefined): string =>
+    (id && spil.spillere.find((s) => s.id === id)?.navn) || 'Nogen';
+  const d = h.data;
+
+  switch (d.type) {
+    case 'join': return `${n(d.spillerId)} kom med til bordet.`;
+    case 'anmodning': return `${d.navn} vil gerne med — venter på at værten lukker ind.`;
+    case 'anmodning-afvist': return `${n(d.vaertId)} lukkede ikke ${d.navn} ind.`;
+    case 'lukket-ind': return `${n(d.vaertId)} lukkede ${n(d.spillerId)} ind. ${n(d.spillerId)} står på felt ${d.felt}.`;
+    case 'ny-vaert': return `${n(d.spillerId)} er ny vært.`;
+    case 'start': return `Spillet er i gang. ${d.antal} ved bordet — turen går med uret.`;
+    case 'afgang-meldt': return `${n(d.spillerId)} melder afgang efter dette slag.`;
+    case 'afgang': return `${n(d.spillerId)} er hoppet ud af spillet.`;
+    case 'slut': return 'Spillet er slut — der er ingen tilbage ved bordet.';
+
+    case 'slag': return `${n(d.spillerId)} slog ${d.slag}.`;
+    case 'landing': return `${n(d.spillerId)} landede på ${feltNavn(d.felt)} (felt ${d.felt}).`;
+    case 'straf': return `${n(d.spillerId)} sendte terningen ud over bordkanten og drikker en straf-slurk.`;
+    case 'skaal': return 'SKÅL! Alle ved bordet tager en fællesskål.';
+    case 'bier-meister': return `${n(d.spillerId)} er den nye Bier Meister. Find noget grimt til hovedet.`;
+    case 'go-bier-meister':
+      return d.harBm
+        ? `Go! Bier Meister — ${n(d.drikker)} drikker 3 slurke.`
+        : `Go! Bier Meister — der er ingen Bier Meister, så ${n(d.landetAf)} drikker selv 3 slurke.`;
+    case 'oel-i-taarnet': return `ØL I TÅRNET! ${n(d.drikkesAf)} må stille tårnet fra sig med det samme.`;
+    case 'slurke-givet':
+      return `${n(d.spillerId)} delte ${d.antal} slurke ud: ${d.fordeling.map((f) => `${n(f.spillerId)} ${f.antal}`).join(', ')}.`;
+
+    case 'pit-plads':
+      return d.skubbet
+        ? `${n(d.spillerId)} blev skubbet videre i pitten og slog sig til plads ${d.plads}.`
+        : `${n(d.spillerId)} slog ${d.plads}: plads ${d.plads} i pitten og ${d.plads} ${d.plads === 1 ? 'shot' : 'shots'}.`;
+    case 'pit-slaaes-for': return `Terningen bliver slået for ${n(d.spillerId)}.`;
+    case 'pit-ude': return `${n(d.spillerId)} slog ${d.slag} og er ude af pitten.`;
+    case 'pit-ned': return `${n(d.spillerId)} slog ${d.slag}, rykkede ned på plads ${d.plads} og drikker ${d.plads} shots.`;
+
+    case 'taarn-fyldt':
+      return `${n(d.spillerId)} hældte i tårnet — der står nu ${formatSlurke(d.slurke)} (${taarnCl(d.slurke)} cl).`;
+    case 'taarn-givet': {
+      const hvorfor = d.grund === 'drik'
+        ? `DRIK! ${n(d.spillerId)} skal bunde tårnet — ${formatSlurke(d.slurke)}.`
+        : d.grund === 'overloeb'
+          ? `Tårnet løb over ${d.kapacitetCl} cl — ${n(d.spillerId)} bunder det selv.`
+          : `${n(d.udpegetAf)} udpegede ${n(d.spillerId)} til at bunde tårnet — ${formatSlurke(d.slurke)}.`;
+      if (d.udfald === 'tomt') return `${hvorfor} Men tårnet er tomt — der er ikke noget at drikke.`;
+      if (d.udfald === 'optaget') {
+        return `${hvorfor} Men ${n(d.drikkesAf)} er i gang med at drikke tårnet — det bliver hos ${n(d.drikkesAf)}.`;
+      }
+      return hvorfor;
+    }
+    case 'taarn-bundet': return `${n(d.spillerId)} bundede tårnet — ${formatSlurke(d.slurke)}.`;
+    case 'taarn-frit': return `Tårnet står frit igen — ${n(d.spillerId)} nåede ikke at bunde det.`;
+    case 'krone':
+      switch (d.udfald) {
+        case 'forbi': return `${n(d.spillerId)} ramte ved siden af med 2-kronen.`;
+        case 'tomt-taarn': return `${n(d.spillerId)} ramte i — men tårnet er tomt, så der er ingen at udpege.`;
+        case 'taarn-optaget':
+          return `${n(d.spillerId)} ramte i — men ${n(d.drikkesAf)} er i gang med at drikke tårnet, så det kan ikke gives videre.`;
+        case 'ramt': return `${n(d.spillerId)} fik 2-kronen i tårnet og må udpege en.`;
+      }
+      break;
+
+    case 'bunke-blandet': return 'Bunken var brugt op — der er blandet et nyt spil kort.';
+    case 'kort-trukket': return `${n(d.spillerId)} trak ${kortNavn(d.kort)} — ${kortTekst(d.kort).titel}.`;
+    case 'sidemand':
+      return d.drikker
+        ? `${n(d.drikker)} sidder til ${d.side === 'venstre' ? 'venstre' : 'højre'} og drikker ${d.slurke} slurk.`
+        : `Der er ingen ved siden af ${n(d.spillerId)} — ingen drikker.`;
+    case 'hold-drikker': {
+      const hold = d.hold === 'dame' ? 'Damerne' : 'Herrerne';
+      return d.ramte.length
+        ? `${hold} drikker ${d.slurke} slurke: ${d.ramte.map(n).join(', ')}.`
+        : `${hold} drikker — men ingen ved bordet er med på det hold.`;
+    }
+    case 'syver-tabt':
+      return `${n(d.spillerId)} nåede ikke at lægge fingeren før næste 7'er — han drikker en slurk, og ${n(d.nyHolder)} tager over.`;
+    case 'kaploeb-sidst': return `${n(d.spillerId)} var sidste mand og drikker en slurk.`;
+    case 'hoejere-lavere': {
+      const ord = d.gaet === 'hoejere' ? 'højere' : 'lavere';
+      return d.rigtigt
+        ? `${n(d.spillerId)} gættede ${ord} og fik ${kortNavn(d.kort)} — rigtigt. ${n(d.naeste)} gætter videre.`
+        : `${n(d.spillerId)} gættede ${ord}, men det blev ${kortNavn(d.kort)} — ${n(d.spillerId)} drikker ${d.slurke} slurke.`;
+    }
+    case 'finger':
+      return d.sidste
+        ? `${n(d.lagtAf)} lagde fingeren på bordkanten. ${n(d.sidste)} så den aldrig — sidste mand drikker en slurk.`
+        : `${n(d.lagtAf)} lagde fingeren på bordkanten — og alle nåede det.`;
+    case 'gik-i-staa': return `${n(d.spillerId)} gik i stå og drikker en slurk.`;
+
+    case 'meier-ingen-modstander': return 'Meier kræver en modstander — der er ingen at udfordre.';
+    case 'meier-udfordret': return `${n(d.spillerId)} udfordrede ${n(d.modstanderId)} til en runde Meier.`;
+    case 'meier-meldt': return `${n(d.spillerId)} melder ${trinNavn(d.melding)}.`;
+    case 'meier-blindt': return `${n(d.spillerId)} slog uden at kigge og sagde "det samme eller derover".`;
+    case 'meier-loeftet':
+      return `${n(d.loefterId)} løftede bægeret: ${trinNavn(d.faktisk)} mod meldingen ${trinNavn(d.meldt)}. `
+        + `${d.taberId ? n(d.taberId) : 'Ingen'} drikker ${d.slurke} slurke${d.dobbelt ? ' — dobbelt, det var en Meyer' : ''}.`;
+    case 'meier-aflyst': return 'Meier-duellen er aflyst.';
+
+    case 'afstemning-startet':
+      return `${n(d.spillerId)} vil ${d.art === 'spring' ? `springe ${n(d.maalId)} over` : `smide ${n(d.maalId)} ud`} — bordet stemmer.`;
+    case 'afstemning-afgjort': {
+      const st = `${d.ja}–${d.nej}`;
+      switch (d.udfald) {
+        case 'nej':
+          return `Bordet stemte nej (${st}) — ${n(d.maalId)} ${d.art === 'spring' ? 'bliver ikke sprunget over' : 'bliver ved bordet'}.`;
+        case 'for-sent': return `Bordet stemte ja (${st}), men ${n(d.maalId)} nåede selv at komme til.`;
+        case 'sprunget-over': return `Bordet stemte ja (${st}) — ${n(d.maalId)} bliver sprunget over.`;
+        case 'smidt-ud': return `Bordet stemte ja (${st}) — ${n(d.maalId)} er smidt ud af spillet.`;
+      }
+      break;
+    }
+
+    case 'gammel': return d.tekst;
+  }
+  return ingenTekst(d);
+}
+
+/** Får hændelserne en ny slags uden en tekst her, fejler typetjekket på kaldet. */
+function ingenTekst(d: never): string {
+  return String((d as { type?: unknown }).type ?? '');
 }

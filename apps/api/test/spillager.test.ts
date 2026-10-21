@@ -152,11 +152,11 @@ test('loglinjer skrives i rækkefølge, efter spillet', async () => {
   const vent = port();
   repo.foerGem = () => vent.aaben;
   lager.gem(med(spil, 1), true);
-  lager.log(spil.id, [{ id: 1, tid: 'nu', slags: 'a', tekst: 'første' }]);
-  lager.log(spil.id, [{ id: 2, tid: 'nu', slags: 'b', tekst: 'anden' }]);
+  lager.log(spil.id, [{ id: 1, tid: 'nu', data: { type: 'slut' } }]);
+  lager.log(spil.id, [{ id: 2, tid: 'nu', data: { type: 'meier-aflyst' } }]);
   await roligt();
   assert.equal(repo.logget.length, 0, 'loggen venter på spillet');
   vent.luk_op();
   await roligt();
-  assert.deepEqual(repo.logget.map((l) => l.tekst), ['første', 'anden']);
+  assert.deepEqual(repo.logget.map((l) => l.id), [1, 2]);
 });

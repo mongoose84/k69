@@ -145,7 +145,7 @@ infra/PgSpilRepo.ts    Postgres implementation; infra/db.ts pool + migrations
       code collision, the SQL version guard, log order. Runs in the PR
       workflow (Postgres service container); skipped when `DATABASE_URL` is unset.
 
-## Step 4 — Domain events instead of prose ⬜
+## Step 4 — Domain events instead of prose 🟨 4a done (log), 4b open (moments)
 
 **Problem:** the engine produces Danish UI text (`skriv`, `raab`, `fejr`), and
 "last moment" UI projections (`fejring`, `udraab`, `meierResultat`, and the
@@ -153,15 +153,44 @@ settled `afstemning`) live on the
 aggregate. `haendelser.data jsonb` is never written, so a game cannot be
 rebuilt from the log despite the migration comment promising it.
 
-- [ ] `anvend` returns `{ spil, haendelser: DomaeneHaendelse[] }` with
-      structured events (`Landet`, `SlurkeGivet`, `MeierLoeftet`, …).
-- [ ] Render text in `packages/ui/tekst.ts`; derive celebrations/shouts from
-      events on the client.
-- [ ] Persist events in `haendelser.data`; text column becomes optional.
-- [ ] Inject shuffling too (`ctx.tilfaeldig`) — `start` and `tagFraBunken`
-      still call `Math.random` directly — so games are fully replayable.
-- [ ] Add `skemaVersion` to saved state with an upgrade chain, replacing the
-      ad-hoc `opgraderGemt` and the "missing in old saved games" optional fields.
+**4a — the log (done):**
+
+- [x] Structured events: `DomaeneHaendelse` (`packages/rules/src/haendelser.ts`,
+      45 kinds). Every `skriv` in the engine writes one; `Haendelse` is now
+      `{ id, tid, spillerId?, tur?, turAf?, data }` — no `slags`/`tekst`/`farve`.
+      Deviation: `anvend` still returns `Spil`. The new events are the log
+      entries with id ≥ the old `naesteHaendelseId`, which is what the service
+      already uses; a second return channel would duplicate that.
+- [x] Text is rendered in `packages/ui/tekst.ts` (`haendelseTekst`,
+      `haendelseFarve`), with an exhaustiveness check so a new event kind
+      without a text fails the type check. Names are looked up at render
+      time, so a rename follows through the log.
+- [x] Same words as before: random games played on the old engine (HEAD) and
+      the new one side by side — 12,335 actions, 13,867 log lines over 39
+      event kinds, identical text and identical state after every action. The
+      kinds a random game rarely hits are pinned in `packages/ui/test/tekst.test.ts`
+      (the first UI tests; `npm test` runs them).
+- [x] `haendelser.data` is written (the event as JSON); `slags` = event type;
+      `tekst` is nullable (`002_haendelser_data.sql`) and only set for old lines.
+- [x] Shuffling injected (`Kontekst.tilfaeldig`); no `Math.random` left in the
+      engine. Same dice + same shuffle → same game (tested).
+- [x] `skemaVersion` + `OPGRADERINGER` chain in `opgraderGemt` (0 → 1: the old
+      ad-hoc fixes and defaults; 1 → 2: text log lines become
+      `{ type: 'gammel', tekst }`). `turNr`, `udraab`, `afstemning`,
+      `anmodninger` and `Spiller.afbrudt` are no longer optional. A game saved
+      by a newer version is refused rather than mangled. Verified live on a game
+      saved before this change.
+- Note: the log records *outcomes*, not the commands that caused them, so a
+  game still cannot be rebuilt from `haendelser` alone. Replay would need the
+  commands plus the dice/shuffle values persisted — now possible, not done.
+
+**4b — the "moments" (open):**
+
+- [ ] `raab` (`spil.udraab`), `fejr` (`spil.fejring`), `meierResultat` and
+      `meier.historik[].tekst` still carry Danish prose on the aggregate.
+      Derive them on the client from the events (the ids already line up:
+      `udraab.id`/`fejring.id` point into the log). Touches the timing, sound
+      and animation code in `Udraab.tsx`, `Fejring.tsx`, `Meier.tsx`, `Lyd.tsx`.
 
 ## Step 5 — Split `engine.ts` by subdomain ⬜
 

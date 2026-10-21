@@ -41,12 +41,16 @@ export class PgSpilRepo implements SpilRepository {
     if (linjer.length === 0) return;
     // Én indsættelse, så linjerne får id'er i den rækkefølge de kom.
     const vaerdier: unknown[] = [];
+    // Hændelsen selv ligger i data; slags er dens type, så loggen kan søges uden
+    // at pakke JSON ud. Kun linjer fra før strukturen har en tekst.
     const raekker = linjer.map((h, i) => {
-      vaerdier.push(spilId, h.spillerId ?? null, h.slags, h.tekst);
-      return `($${i * 4 + 1}, $${i * 4 + 2}, $${i * 4 + 3}, $${i * 4 + 4})`;
+      const tekst = h.data.type === 'gammel' ? h.data.tekst : null;
+      vaerdier.push(spilId, h.spillerId ?? null, h.data.type, tekst, JSON.stringify(h.data));
+      const p = i * 5;
+      return `($${p + 1}, $${p + 2}, $${p + 3}, $${p + 4}, $${p + 5})`;
     });
     await this.pool.query(
-      `insert into haendelser (spil_id, spiller_id, slags, tekst) values ${raekker.join(', ')}`,
+      `insert into haendelser (spil_id, spiller_id, slags, tekst, data) values ${raekker.join(', ')}`,
       vaerdier
     );
   }

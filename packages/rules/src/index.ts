@@ -5,3 +5,4 @@ export * from './drinks.js';
 export * from './meier.js';
 export * from './engine.js';
 export * from './handling.js';
+export * from './haendelser.js';

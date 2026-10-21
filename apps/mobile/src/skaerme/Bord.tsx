@@ -1,6 +1,6 @@
 import { useState, type JSX } from 'react';
 import {
-  AfstemningKort, AnmodningKort, Brik, FejringKort, Glas, Handlingskort, KroneKort, Maerkat, MeierKort, Plade, SenesteTure, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
+  AfstemningKort, AnmodningKort, Brik, haendelseFarve, haendelseTekst, FejringKort, Glas, Handlingskort, KroneKort, Maerkat, MeierKort, Plade, SenesteTure, Slurkemaaler, SyverKort, drikNavn, fingerPaaBordet, kortHos,
   kortPaaBordet, LydKnap, opgave, spillerStatus, taarnAndel, taarnFor, terningPaaBordet, useForsinketSpil, useLyde, UdraabKort, type SpilUdsyn, Maerke, useSpillerMenu
 } from '@k69/ui';
 import { formatSlurke, slurkePrEnhed, taarnCl, taarnLoeberOver, type KlientHandling } from '@k69/rules';
@@ -173,8 +173,8 @@ export function Bord({
               <div className="log">
                 {spil.log.slice(0, 40).map((h) => (
                   <div key={h.id} className="log-linje">
-                    <span className="log-prik" style={{ background: h.farve ?? 'var(--line-2)' }} />
-                    <span>{h.tekst}</span>
+                    <span className="log-prik" style={{ background: haendelseFarve(spil, h) ?? 'var(--line-2)' }} />
+                    <span>{haendelseTekst(spil, h)}</span>
                   </div>
                 ))}
               </div>

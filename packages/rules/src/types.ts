@@ -1,3 +1,5 @@
+import type { DomaeneHaendelse } from './haendelser.js';
+
 /** Feltets art. Rækkefølgen på pladen ligger i board.ts. */
 export type FeltType =
   | 'fri'
@@ -63,8 +65,8 @@ export interface Spiller {
   /** Sat når man har meldt afgang før sit sidste slag. */
   varslerAfgang: boolean;
   tilsluttet: boolean;
-  /** Hvornår forbindelsen røg — værten får lidt tid før hvervet går videre. Mangler i gamle gemte spil. */
-  afbrudt?: string | null;
+  /** Hvornår forbindelsen røg — værten får lidt tid før hvervet går videre. */
+  afbrudt: string | null;
 }
 
 /**
@@ -248,16 +250,16 @@ export interface Afstemning {
   udfald: 'ja' | 'nej' | null;
 }
 
+/** En linje i loggen. Hvad der skete, står i `data` — teksten laves af klienten. */
 export interface Haendelse {
   id: number;
   tid: string;
-  slags: string;
-  tekst: string;
+  /** Hvem linjen handler om — giver farven i loggen. */
   spillerId?: string;
-  farve?: string;
-  /** Hvilken tur det skete i, og hvis tur det var. Mangler før første tur og i gamle gemte spil. */
+  /** Hvilken tur det skete i, og hvis tur det var. Mangler før første tur. */
   tur?: number;
   turAf?: string;
+  data: DomaeneHaendelse;
 }
 
 export interface Indstillinger {
@@ -267,6 +269,8 @@ export interface Indstillinger {
 }
 
 export interface Spil {
+  /** Hvilken udgave af formen spillet er gemt i — se `opgraderGemt`. */
+  skemaVersion: number;
   id: string;
   kode: string;
   fase: 'lobby' | 'spiller' | 'slut';
@@ -275,8 +279,8 @@ export interface Spil {
   spillere: Spiller[];
   /** Indeks i spillere[] — turen går med uret. */
   turIdx: number;
-  /** Tæller op hver gang turen skifter hænder. Mangler i gamle gemte spil. */
-  turNr?: number;
+  /** Tæller op hver gang turen skifter hænder. */
+  turNr: number;
   runde: number;
   terning: number | null;
   /** Hvem der slog det viste slag. */
@@ -293,20 +297,20 @@ export interface Spil {
   meierResultat: MeierResultat | null;
   /** Sidste øjeblik der skal fejres. Bliver stående indtil det næste. */
   fejring: Fejring | null;
-  /** Sidste råb over pladen — et landingsfelt eller en uddeling. Mangler i gamle gemte spil. */
-  udraab?: Udraab | null;
+  /** Sidste råb over pladen — et landingsfelt eller en uddeling. */
+  udraab: Udraab | null;
   /** 7'eren nogen har på hånden. */
   syver: Syver | null;
   /** Fingeren der ligger på bordkanten lige nu. */
   finger: Finger | null;
   afventer: Afventer | null;
-  /** Den seneste afstemning om at springe over eller smide ud. Mangler i gamle gemte spil. */
-  afstemning?: Afstemning | null;
-  /** Dem der venter på at værten lukker dem ind. Mangler i gamle gemte spil. */
-  anmodninger?: Anmodning[];
+  /** Den seneste afstemning om at springe over eller smide ud. */
+  afstemning: Afstemning | null;
+  /** Dem der venter på at værten lukker dem ind. */
+  anmodninger: Anmodning[];
   /**
    * Hvem der er hvem: sha256 af en hemmelig sessionsnøgle → spillerId. Ejes af
-   * serveren — `forSpiller` fjerner den. Mangler i gamle gemte spil.
+   * serveren — `forSpiller` fjerner den, derfor valgfri.
    */
   sessioner?: Record<string, string>;
   log: Haendelse[];
@@ -367,6 +371,8 @@ export interface Kontekst {
   spillerId: string;
   /** Terningkast — injiceres så motoren kan testes og serveren ejer tilfældet. */
   terning: () => number;
+  /** Tal i [0, 1) til at blande kortene — injiceres af samme grund, så et spil kan spilles igen. */
+  tilfaeldig: () => number;
   naa: () => string;
 }
 

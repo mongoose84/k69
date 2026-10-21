@@ -8,7 +8,8 @@ import { HOEJERE_LAVERE_SLURKE, nyBunke, virkning } from '../src/cards.js';
 import { DRIKKE, clPrSlurk, iCl, slurkePrEnhed, taarnCl, tilDrik } from '../src/drinks.js';
 import { STIGE, kode, trin, trinNavn } from '../src/meier.js';
 import {
-  BRIKFARVER, MEIER_SLURKE, VAERT_FRIST_SEKUNDER, afventerSpiller, anvend, find, nytSpil, opgraderGemt, taarnLoeberOver, vaertFrist
+  BRIKFARVER, MEIER_SLURKE, SKEMA_VERSION, VAERT_FRIST_SEKUNDER, afventerSpiller, anvend, find, nytSpil, opgraderGemt,
+  taarnLoeberOver, vaertFrist
 } from '../src/engine.js';
 import { RegelFejl, type FeltType, type Handling, type Kort, type Kontekst, type Spil } from '../src/types.js';
 
@@ -20,6 +21,7 @@ function ktx(spillerId: string, slag: number[] = []): Kontekst {
   return {
     spillerId,
     terning: () => slag[i++] ?? 1,
+    tilfaeldig: () => 0.5,
     naa: () => '2026-01-01T00:00:00.000Z'
   };
 }
@@ -453,7 +455,7 @@ test('lander man på "Øl i tårnet" mens en anden bunder det, råbes der', () =
   spil.taarn.toemmesAfId = 'p1';
   placer(spil, 'p0', foersteFeltAf('taarn') - 1);
   spil = gør(spil, 'p0', { type: 'slaa' }, [1]);
-  assert.ok(spil.log.some((h) => h.slags === 'raab'));
+  assert.ok(spil.log.some((h) => h.data.type === 'oel-i-taarnet'));
   assert.equal(spil.afventer?.slags, 'fyld-taarn');
 });
 
@@ -804,15 +806,62 @@ test('Bonde: sidemanden springer over dem der er hoppet ud', () => {
   assert.equal(find(spil, 'p2')!.slurkeIAlt, 1);
 });
 
+/** Et spil som det lå i databasen før versionerne: tekst i loggen, og uden de felter der kom til siden. */
+function somGammelt(spil: Spil): Record<string, unknown> {
+  const g = structuredClone(spil) as unknown as Record<string, unknown> & { spillere: Array<Record<string, unknown>> };
+  delete g.skemaVersion;
+  for (const felt of ['turNr', 'udraab', 'afstemning', 'anmodninger']) delete g[felt];
+  for (const s of g.spillere) delete s.afbrudt;
+  g.log = spil.log.map((h) => ({ id: h.id, tid: h.tid, slags: 'join', tekst: `linje ${h.id}`, farve: '#D8A93F' }));
+  return g;
+}
+
 test('et gemt spil der venter på et regelkort, sidder ikke fast', () => {
-  const spil = opsat(['A', 'B']);
+  const g = somGammelt(opsat(['A', 'B']));
   const kort = { rang: 'B', kuloer: 'spar' } as const;
-  spil.sidsteKort = kort;
-  (spil as unknown as { afventer: unknown }).afventer = { slags: 'ny-regel', spillerId: 'p0' };
-  (spil as unknown as { husregler: string[] }).husregler = ['kun tysk'];
-  opgraderGemt(spil);
+  g.sidsteKort = kort;
+  g.afventer = { slags: 'ny-regel', spillerId: 'p0' };
+  g.husregler = ['kun tysk'];
+  const spil = opgraderGemt(g);
   assert.deepEqual(spil.afventer, { slags: 'kort-udfald', spillerId: 'p0', kort });
   assert.equal('husregler' in spil, false);
+});
+
+test('et spil fra før versionerne løftes hele vejen op — og kan spilles videre', () => {
+  const foer = opsat(['A', 'B']);
+  const spil = opgraderGemt(somGammelt(foer));
+  assert.equal(spil.skemaVersion, SKEMA_VERSION);
+  assert.equal(spil.turNr, 0);
+  assert.equal(spil.udraab, null);
+  assert.equal(spil.afstemning, null);
+  assert.deepEqual(spil.anmodninger, []);
+  assert.equal(spil.spillere[0]!.afbrudt, null);
+  // Den gamle tekst bliver stående som den var.
+  assert.deepEqual(spil.log[0]!.data, { type: 'gammel', slags: 'join', tekst: `linje ${foer.log[0]!.id}` });
+  assert.equal('farve' in spil.log[0]!, false);
+
+  const efter = gør(spil, 'p0', { type: 'slaa' }, [2]);
+  assert.equal(efter.log[0]!.data.type, 'landing');
+});
+
+test('et spil i den nuværende form røres ikke, og en ukendt nyere form afvises', () => {
+  const spil = opsat(['A', 'B']);
+  const foer = structuredClone(spil);
+  assert.deepEqual(opgraderGemt(spil), foer);
+  assert.throws(() => opgraderGemt({ ...spil, skemaVersion: SKEMA_VERSION + 1 }), /nyere udgave/);
+});
+
+test('samme terninger og samme blanding giver det samme spil — det kan spilles igen', () => {
+  const spil = (tilfaeldig: () => number): Spil => {
+    let s = nytSpil('spil', 'TEST', '2026-01-01T00:00:00.000Z');
+    for (const [id, navn] of [['p0', 'A'], ['p1', 'B']] as const) {
+      s = anvend(s, { type: 'join', navn, farve: '#D8A93F', drik: 'ol', kortHold: 'konge' }, { ...ktx(id), tilfaeldig });
+    }
+    return anvend(s, { type: 'start' }, { ...ktx('p0'), tilfaeldig });
+  };
+  const fra = (frø: number) => () => { frø = (frø * 16807) % 2147483647; return frø / 2147483647; };
+  assert.deepEqual(spil(fra(7)).bunke, spil(fra(7)).bunke);
+  assert.notDeepEqual(spil(fra(7)).bunke, spil(fra(8)).bunke);
 });
 
 test('har man linket, kan man hoppe med mens spillet kører — når værten lukker ind', () => {
@@ -894,7 +943,7 @@ test('går værten offline, går hvervet videre med uret når fristen er gået',
   // B er heller ikke der, så det springer til C.
   assert.equal(spil.vaertId, 'p2');
   assert.equal(vaertFrist(spil), null);
-  assert.match(spil.log[0]!.tekst, /C er ny vært/);
+  assert.deepEqual(spil.log[0]!.data, { type: 'ny-vaert', spillerId: 'p2' });
   // Den nye vært tager over der hvor den gamle slap — også anmodningen.
   spil = gør(spil, 'p2', { type: 'godkend-join', spillerId: 'p9', ja: true });
   assert.ok(find(spil, 'p9'));
@@ -1020,7 +1069,7 @@ test('kun holderen kan lægge fingeren, og den spærrer ikke turen', () => {
   assert.deepEqual(spil.finger, { lagtAf: 'p0', kort: { rang: '7', kuloer: 'klor' }, ramte: ['p0'] });
   assert.equal(spil.syver, null);
   assert.equal(spil.afventer?.slags, 'slag', 'p1 kan stadig slå imens');
-  assert.equal(spil.log[0]?.slags, 'kort', 'ingen log-linje om fingeren');
+  assert.equal(spil.log[0]?.data.type, 'kort-trukket', 'ingen log-linje om fingeren');
   spil = gør(spil, 'p1', { type: 'slaa' }, [2]);
   assert.ok(spil.finger, 'fingeren ligger der stadig efter slaget');
 });
