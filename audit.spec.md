@@ -168,8 +168,9 @@ rebuilt from the log despite the migration comment promising it.
       shared module.
 
 **Tests**
-- [ ] Run tests on pull requests — today `npm test` only runs on push to
-      `main` (`docker-publish.yml`), i.e. after merge.
+- [x] Run tests on pull requests (`.github/workflows/test.yml`). `typecheck`
+      now also covers `apps/web` and `apps/mobile`, which `vite build` never
+      type-checked.
 - [ ] Coverage in CI (`node --test --experimental-test-coverage`).
 - [ ] Rules gaps: deck exhaustion/reshuffle, game end when last player
       leaves, `forSpiller` after a blind Meier roll, wrap-around past field 38,
